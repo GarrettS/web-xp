@@ -306,7 +306,7 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
 - All colors via CSS custom properties. Never hardcode hex or rgb in rules. Define custom properties on `:root` in the CSS file that owns the concept. If a dark mode override is needed, define it in `@media (prefers-color-scheme: dark)` in the same file.
 - System font stacks by default. No CDN fonts unless the project spec requires a brand typeface — and if it does, self-host; do not load from third-party CDNs at runtime. Scalable font sizes using `clamp()` — define a font scale as custom properties on `:root` and use those for all `font-size` declarations. No fixed `px` or bare `rem` font sizes in rules.
 - Mobile-first. Base styles target small screens; widen with `min-width` media queries. Images: `max-width: 100%; height: auto`. Overlay positioning uses percentages. No layout element should require horizontal scrolling at the project's minimum target viewport width (typically 320px).
-- Light/dark theme via `prefers-color-scheme` when the project supports theming. Define light as `:root` default, dark in the media query. No manual toggle unless the project spec requires one.
+- Light/dark theme via `prefers-color-scheme`. Unless otherwise stated by the user, provide both. Define the primary palette on `:root`, the alternate in the media query. No manual toggle unless the project spec requires one.
 
 ### JavaScript
 
