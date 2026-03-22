@@ -201,6 +201,10 @@ check "Banner/landmark comments in CSS" \
   '[═─━]{3,}|[*]{4,}' \
   '*.css'
 
+check "Leading zero on decimal  [use .5 not 0.5]" \
+  '[ ,:;(]0\.[0-9]' \
+  '*.css'
+
 # ---- Summary ----
 
 echo ""
