@@ -12,7 +12,7 @@ Named patterns applied through continuous refactoring, small commits, each one l
 
 This is not the mainstream approach. Most AI-assisted development leans heavily on frameworks, TypeScript, and build tooling. Most developers use AI to generate code fast, not to refine it iteratively. This approach is different on every axis:
 
-- **No framework, no framework debt.** There is no abstraction layer to learn, no version to upgrade, no deprecation cycle to chase. The patterns used here — Active Object, Shared Key, event delegation, dispatch tables — are rooted in how the DOM actually works. They will work the same in ten years.
+- **No framework, no framework debt.** There is no abstraction layer to learn, no version to upgrade, no deprecation cycle to chase. The patterns used here — Active Object, Shared Key, event delegation, dispatch tables — are rooted in how the web platform works. They will work the same in ten years. See §Libraries, Frameworks, and TypeScript for the full reasoning.
 - **A living code-guidelines document as a contract.** It keeps every contributor — human or AI — honest across sessions. It is not a suggestion file. It governs.
 - **Pattern literacy over code generation.** Changes are justified by named refactoring patterns from the software engineering canon: Compose Method, Extract Shared Logic, Decompose Conditional. The question is never "does it work" — it is "is this the right abstraction?"
 - **The AI is a pair programmer, not a code generator.** Its output is reviewed, challenged, and corrected. "Caught you slipping" is the expected dynamic, not an exception.
@@ -20,6 +20,79 @@ This is not the mainstream approach. Most AI-assisted development leans heavily 
 ## What This Produces
 
 Code that is future-proof, tuneable, maintainable, robust, clear, and fast. Vanilla JS starts at the performance ceiling — there is no framework overhead to optimize away. The guidelines compound: each refactoring encodes a principle that applies to the next, across projects. The codebase gets more consistent over time instead of accumulating layers of different authors' styles and framework idioms.
+
+## Libraries, Frameworks, and TypeScript
+
+This doctrine is not anti-library. It is anti-unnecessary indirection. The question is what a dependency buys you relative to its cost in abstraction, bytes, learning surface, and maintenance.
+
+Specialized libraries such as D3, Anime.js, Three.js, and Chart.js are useful when they solve problems that are genuinely hard to address natively: data-driven SVG binding, physics-based animation, WebGL rendering, charting, and similar specialized work. They do not take over the architecture around them. Shared Key, Event Delegation, Fail-Safe, and module ownership still apply. Even here, use the smallest tool that solves the specific problem. A library built for generality often ships abstractions you do not need, and AI can now produce many narrower alternatives such as SVG path helpers, easing functions, animation loops, and data transforms as lightweight, purpose-built code.
+
+General-purpose frameworks such as React, Vue, Angular, and Svelte were valuable responses to earlier platform constraints: weaker language ergonomics, slower DOM work, and teams that struggled to keep UI code disciplined at scale. Much of that rationale has weakened. Browsers improved, JavaScript improved, and AI-assisted development with enforced code guidelines now provides much of the speed and consistency frameworks once supplied. Frameworks are not forbidden here, but they are often redundant. Their cost is version churn, build complexity, opaque error stacks, abstraction over native DOM ownership, and less visibility into performance and memory behavior. The patterns in this doctrine are rooted in how the web platform works, so they age more slowly than framework conventions designed around older limitations.
+
+Many framework patterns presented as essential are solutions to problems the framework itself imposed. When the framework's most celebrated patterns exist to solve the framework's own constraints, the framework is the complexity — not the solution to it.
+
+### What React replaces — and what it replaced it with
+
+<!-- Routing example deferred: pending navigation-tabs.js
+     refactoring to eliminate TAB_MAP/SUBTAB_MAP. -->
+
+**Routing.** The web platform provides `location.hash`, `hashchange`, `history.pushState`, and `popstate`. Routing is URL parsing plus a navigation event. The rest is application dispatch, not router machinery. No route objects, router context, or navigation engine are required to keep tab state in sync with the URL. React Router wraps these platform APIs in components (`<Route>`, `<Link>`), hooks (`useNavigate`, `useParams`), and a matching engine — a dependency tree for capabilities the URL already provides. Deep-links work because the URL *is* the state. *(Code example pending refactoring.)*
+
+**State management.** React's `useState` exists because functional components discard their scope on every render. The hook lets them remember values across re-renders. But the amnesia is React's design choice — not a platform constraint. A module-scoped variable persists naturally:
+
+```javascript
+// Module state — persists for the lifetime of the page.
+const decoderState = { side: 'Left', region: 'IP',
+  dir: 'ER' };
+
+function updateDecoder() {
+  const { side, region, dir } = decoderState;
+  const equiv = getAllEquivalent(region, dir);
+  updatePelvisSVG(equiv);
+  renderEquivChain(side, region, dir, equiv);
+}
+```
+
+No hook, no re-render, no stale closure. The state is a plain object. The update function reads it directly and writes to the DOM. For view toggling, one class on the ancestor and CSS does the rest — no state variable needed at all:
+
+```javascript
+let activeScreenClass = 'screen-config';
+function showScreen(cls) {
+  document.getElementById('tab-masterquiz')
+    .classList.replace(activeScreenClass, cls);
+  activeScreenClass = cls;
+}
+```
+```css
+#tab-masterquiz.screen-config #mq-config,
+#tab-masterquiz.screen-quiz #mq-quiz,
+#tab-masterquiz.screen-results #mq-results {
+  display: block;
+}
+```
+
+**Data fetching.** React's `useEffect` with an empty dependency array runs on mount — a workaround for the fact that functional components have no lifecycle. An init function called once does the same thing without the hook machinery, dependency arrays, or cleanup functions:
+
+```javascript
+export async function initDecoder() {
+  try {
+    const resp = await fetch('data/regions.json');
+    if (!resp.ok) {
+      showFetchError(container, 'decoder regions');
+      return;
+    }
+    REGIONS = await resp.json();
+  } catch (fetchErr) {
+    showFetchError(container, 'decoder regions');
+    return;
+  }
+  // Set up controls, render initial state.
+}
+```
+
+No `useEffect`. No dependency array. No cleanup return. The function runs once, fetches data, handles errors visibly, and sets up the module. The lazy-loading system calls it the first time the user visits the tab.
+
+TypeScript is a separate tradeoff, not the same discussion as frameworks. Its value is real: it catches a class of bugs before runtime. Its cost is also real: a build step, more surface area, and type machinery that can obscure intent or drift from runtime behavior at the edges. AI review now catches many of the same failures TypeScript was adopted to catch: bad signatures, null hazards, naming drift, and type confusion. The doctrine's naming rules and Fail-Safe principle address them through disciplined design and review. That makes TypeScript increasingly optional rather than foundational. Projects written in TypeScript still benefit from this doctrine fully. The doctrine does not depend on TypeScript. Treat it as a project-level overlay decision, not a prerequisite for code quality.
 
 ## The Market Reality
 
