@@ -1,6 +1,6 @@
 # Code Guidelines
 
-Standards for web application development. Vanilla JavaScript, no frameworks, no build tools.
+Standards for web application development. Vanilla JavaScript. No frameworks or build tools required. See `code-philosophy.md` for how and why this works.
 
 Baseline authorities for formatting: [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html), [Google HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html), and [Code Guidelines for Rich Internet Application Development](https://web.archive.org/web/20240805191807/http://jibbering.com/faq/notes/code-guidelines/) by Garrett Smith et al. The Formatting section below overrides and extends those guides. Where both this document and the Formatting section are silent, defer to the baseline authorities.
 
