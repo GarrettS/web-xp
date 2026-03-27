@@ -1,0 +1,13 @@
+{
+  "name": "code-guidelines",
+  "description": "Canonical coding doctrine for vanilla JavaScript — patterns, principles, and automated audits",
+  "author": "GarrettS",
+  "version": "1.0.0",
+  "skills": [
+    "doctrine",
+    "doctrine-init",
+    "doctrine-check",
+    "doctrine-apply",
+    "doctrine-review"
+  ]
+}
