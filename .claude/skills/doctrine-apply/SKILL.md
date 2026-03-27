@@ -5,7 +5,7 @@ description: "Interactive refactoring — walks through doctrine-check findings 
 
 # Doctrine Apply — Interactive Guided Fixes
 
-Walk through doctrine-check findings and apply them one at a time with human approval.
+Walk through doctrine-check findings and apply them with human approval, grouping repeated similar edits when they form one coherent change.
 
 ## Procedure
 
@@ -13,10 +13,22 @@ Walk through doctrine-check findings and apply them one at a time with human app
 
 If a doctrine-check was already run in this conversation, use those findings. Otherwise, run `/doctrine-check` first to generate the finding list.
 
-### 2. Present each finding individually
+### 2. Present one coherent change at a time
 
-For each finding, present:
-- The file and line number
+Default to one finding at a time, but group findings when they are the same kind of edit in the same file or tightly related scope.
+
+Examples that should be grouped into one approval:
+- Repeated camelCase-to-kebab-case or prefix renames in one file
+- Repeated class/ID renames caused by one naming correction
+- Repeated mechanical replacements of the same anti-pattern in one module
+
+Examples that should stay separate:
+- Distinct structural refactors in different files
+- Changes that affect different doctrine patterns
+- Any edit where grouping would make the proposal harder to review
+
+For each proposed change set, present:
+- The file and line number(s)
 - The pattern name and whether it is a violation or opportunity
 - The current code (quote the relevant lines)
 - The proposed change (show the replacement code)
@@ -28,7 +40,8 @@ Then ask: "Apply this change? (yes / no / skip)"
 
 - On **yes**: make the edit using the Edit tool. Verify the edit was applied correctly.
 - On **no** or **skip**: move to the next finding without editing.
-- Never batch-apply multiple findings at once.
+- Group repeated similar edits into one approval when they form a coherent review unit.
+- Do not batch unrelated or structurally distinct edits together.
 - Never edit without explicit approval for that specific change.
 
 ### 4. After all findings
