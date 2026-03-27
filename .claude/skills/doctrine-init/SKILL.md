@@ -11,7 +11,7 @@ Set up a project to use the web-app-code-standards skill.
 
 ### 1. Copy pre-commit script
 
-If `bin/pre-commit-check.sh` does not exist in the project, copy it from [pre-commit-check.sh](../pre-commit-check.sh) using `cp ${CLAUDE_SKILL_DIR}/../pre-commit-check.sh bin/pre-commit-check.sh`. Create `bin/` if needed.
+If `bin/pre-commit-check.sh` does not exist in the project, copy it using `cp ${CLAUDE_SKILL_DIR}/../pre-commit-check.sh bin/pre-commit-check.sh`. Create `bin/` if needed.
 
 If it already exists, report: "Pre-commit script already exists — skipping."
 

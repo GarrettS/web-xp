@@ -9,11 +9,11 @@ Audit the current diff against the code standards. Report findings. Do not edit 
 
 ## Step 1 — Mechanical checks
 
-Run the pre-commit script at [pre-commit-check.sh](../pre-commit-check.sh) via `bash ${CLAUDE_SKILL_DIR}/../pre-commit-check.sh` if no project-local `bin/pre-commit-check.sh` exists. If it reports violations, list them and stop — mechanical issues must be fixed before structural review.
+Run the pre-commit script via `bash ${CLAUDE_SKILL_DIR}/../pre-commit-check.sh` if no project-local `bin/pre-commit-check.sh` exists. If it reports violations, list them and stop — mechanical issues must be fixed before structural review.
 
 ## Step 2 — Structural review
 
-Read the **Patterns** and **Fail-Safe** sections of [code-guidelines.md](../code-guidelines.md).
+Read the **Patterns** and **Fail-Safe** sections of `${CLAUDE_SKILL_DIR}/../code-guidelines.md`.
 
 Get the diff to review: use `git diff --cached` if it has output, otherwise fall back to `git diff`. If both are empty, report "No staged or unstaged changes to review" and stop.
 

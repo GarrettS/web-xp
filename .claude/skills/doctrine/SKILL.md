@@ -11,9 +11,9 @@ Load the doctrine into the current session with the correct split between govern
 
 ### 1. Locate and read doctrine files
 
-Read [code-guidelines.md](../code-guidelines.md) — governing standards: principles, patterns, language rules, formatting.
+Read `${CLAUDE_SKILL_DIR}/../code-guidelines.md` — governing standards: principles, patterns, language rules, formatting.
 
-Read [code-philosophy.md](../code-philosophy.md) — explanatory context: how and why the doctrine works, historical framing, and supporting examples.
+Read `${CLAUDE_SKILL_DIR}/../code-philosophy.md` — explanatory context: how and why the doctrine works, historical framing, and supporting examples.
 
 ### 2. Summarize active constraints
 

@@ -11,7 +11,7 @@ Review code the user provides — pasted snippets, file paths, or URLs — again
 
 ### 1. Load the doctrine
 
-Read [code-guidelines.md](../code-guidelines.md). For explanatory context, read [code-philosophy.md](../code-philosophy.md).
+Read `${CLAUDE_SKILL_DIR}/../code-guidelines.md`. For explanatory context, read `${CLAUDE_SKILL_DIR}/../code-philosophy.md`.
 
 ### 2. Receive code to review
 
