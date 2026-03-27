@@ -3,8 +3,8 @@
 Canonical vanilla-JS RIA doctrine for AI tools and human programmers. No frameworks, no build tools. Maximum readability and performance.
 ## What's Here
 
-- **`code-guidelines.md`** — Operational rules, patterns, defaults, and constraints. What the code must look like.
-- **`code-philosophy.md`** — Rationale, tradeoffs, and reasoning framework. Why the doctrine exists and how to think under it.
+- **`code-guidelines.md`** — Governing standards: principles, patterns, language rules, formatting.
+- **`code-philosophy.md`** — Explanatory context: how and why the doctrine works, historical framing, and supporting examples.
 
 ## How to Use
 
