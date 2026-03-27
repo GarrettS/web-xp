@@ -4,34 +4,16 @@ Code standards, refactoring patterns, and review skills for JavaScript web app d
 
 ## Installation
 
-### Claude Code Plugin (Recommended)
+```bash
+git clone https://github.com/GarrettS/code-guidelines.git /tmp/code-guidelines
+cp -r /tmp/code-guidelines/.claude/skills/* ~/.claude/skills/
+```
+
+Then in Claude Code:
 
 ```
-/plugin marketplace add GarrettS/code-guidelines
-/plugin install web-app-code-standards@code-guidelines
 /reload-plugins
 ```
-
-### Submodule
-
-For projects that reference the standards files directly (e.g. from `CLAUDE.md` or a PRD):
-
-```bash
-git submodule add https://github.com/GarrettS/code-guidelines.git .doctrine
-```
-
-The standards live in `.doctrine/` and the parent repo pins a specific commit. To update:
-
-```bash
-cd .doctrine && git pull origin main && cd ..
-git add .doctrine && git commit -m "Update doctrine"
-```
-
-## What's Included
-
-- **`code-guidelines.md`** — Governing standards: principles, 10 named patterns, language rules, formatting.
-- **`code-philosophy.md`** — Explanatory context: how and why the standards work, historical framing, and supporting examples.
-- **`bin/pre-commit-check.sh`** — Mechanical checks: inline event handlers, hardcoded colors, loose equality, long lines, etc.
 
 ## Skills
 
@@ -44,6 +26,14 @@ Five slash commands for auditing and refactoring:
 | `/doctrine-check` | Read-only audit of the current diff against all 10 patterns |
 | `/doctrine-apply` | Interactive refactoring — walks through findings one at a time with approval |
 | `/doctrine-review` | Evaluate any code (pasted snippets, file paths, framework code) against the standards |
+
+## What's Included
+
+Each skill has access to these bundled files:
+
+- **`code-guidelines.md`** — Governing standards: principles, 10 named patterns, language rules, formatting.
+- **`code-philosophy.md`** — Explanatory context: how and why the standards work, historical framing, and supporting examples.
+- **`pre-commit-check.sh`** — Mechanical checks: inline event handlers, hardcoded colors, loose equality, long lines, etc.
 
 ## Patterns
 
