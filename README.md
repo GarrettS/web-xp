@@ -8,11 +8,15 @@ Canonical vanilla-JS RIA doctrine for AI tools and human programmers. No framewo
 
 ## How to Use
 
-Add this repo as a git submodule:
+Two paths, depending on how far you want to go.
+
+**Use the skill** to load the doctrine into an AI coding session. No files added to your project. The AI follows the guidelines for the duration of the conversation. Nothing persists between sessions. Good for trying the doctrine out, or for repos you don't own.
+
+**Use the submodule** to adopt the doctrine in a project. The files live in your repo, versioned and pinned. Skills, pre-commit script, and both doctrine documents come bundled. The AI reads the actual files — rules are enforceable across sessions and contributors.
 
     git submodule add https://github.com/GarrettS/code-guidelines.git .doctrine
 
-The authoritative doctrine lives only in `.doctrine/`. Do not copy the files into the project root — a second editable copy drifts. The parent repo records which doctrine commit it is pinned to via the submodule ref. Any standalone clone of this repo (e.g. for reading or contributing) pulls from the same remote.
+The authoritative doctrine lives only in `.doctrine/`. Do not copy the files into the project root — a second editable copy drifts. The parent repo records which doctrine commit it is pinned to via the submodule ref.
 
 Reference the doctrine from your project's workflow contract (e.g. `CLAUDE.md`):
 
@@ -29,11 +33,11 @@ Hone the guidelines iteratively. When the AI produces an anti-pattern — a sile
 
 ## Authoring and Sync
 
-Edit doctrine files in the project's `.doctrine/` submodule working tree. Commit and push from that submodule to publish changes to the canonical code-guidelines repository.
+Changing the doctrine and updating a project to use that change are separate steps.
 
-Other clones of the canonical repo, such as a standalone checkout in `~/Documents/code-guidelines/`, are just additional working copies of the same remote. Pull there to receive updates.
+**Doctrine side.** A doctrine maintainer edits files in the `.doctrine/` working tree (or any clone of the canonical repo), commits, and pushes to the code-guidelines repository. Other clones of the canonical repo — standalone checkouts, other projects' submodules — pull to receive updates.
 
-When a project uses the doctrine as a submodule, the parent repository pins a specific doctrine commit. After updating the submodule, run `git add .doctrine` in the parent repo to record the new pinned commit.
+**Project side.** A project that includes the doctrine as a submodule records a specific doctrine commit. To adopt a new doctrine revision, pull inside `.doctrine/`, then run `git add .doctrine` in the parent repo and commit. Whether that parent commit requires review is a team and process decision — the doctrine does not prescribe it.
 
 ## Upstream / Downstream
 
