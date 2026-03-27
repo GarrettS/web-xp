@@ -77,6 +77,8 @@ git submodule add https://github.com/GarrettS/code-guidelines.git .doctrine
 
 The doctrine files and skills live in `.doctrine/`. The hosting project records a specific doctrine commit.
 
+A submodule makes the doctrine local, and local copies drift. To stay current and avoid divergence, every consuming project should state its doctrine sync policy in its own contract or overlay file and back it with workflow or automation.
+
 To update a consuming project:
 
 ```bash
