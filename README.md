@@ -37,24 +37,27 @@ If you want the argument and examples first, start with `code-philosophy.md`. If
 
 ## Claude Code Skill
 
-Clone this repository somewhere convenient, then copy the skills into Claude Code's skills directory:
+First-time setup:
 
 ```bash
 git clone https://github.com/GarrettS/code-guidelines.git ~/.claude/web-xp
 mkdir -p ~/.claude/skills
-ln -sfn ~/.claude/web-xp/.claude/skills/doctrine ~/.claude/skills/doctrine
-ln -sfn ~/.claude/web-xp/.claude/skills/doctrine-init ~/.claude/skills/doctrine-init
-ln -sfn ~/.claude/web-xp/.claude/skills/doctrine-check ~/.claude/skills/doctrine-check
-ln -sfn ~/.claude/web-xp/.claude/skills/doctrine-apply ~/.claude/skills/doctrine-apply
-ln -sfn ~/.claude/web-xp/.claude/skills/doctrine-review ~/.claude/skills/doctrine-review
+rm -rf ~/.claude/skills/doctrine ~/.claude/skills/doctrine-init \
+  ~/.claude/skills/doctrine-check ~/.claude/skills/doctrine-apply \
+  ~/.claude/skills/doctrine-review ~/.claude/skills/code-guidelines.md \
+  ~/.claude/skills/code-philosophy.md ~/.claude/skills/pre-commit-check.sh
+cp -r ~/.claude/web-xp/.claude/skills/* ~/.claude/skills/
 ```
-
-The skills read the doctrine files from the cloned repository, so keep the repo in a permanent location.
 
 To update later:
 
 ```bash
 cd ~/.claude/web-xp && git pull
+rm -rf ~/.claude/skills/doctrine ~/.claude/skills/doctrine-init \
+  ~/.claude/skills/doctrine-check ~/.claude/skills/doctrine-apply \
+  ~/.claude/skills/doctrine-review ~/.claude/skills/code-guidelines.md \
+  ~/.claude/skills/code-philosophy.md ~/.claude/skills/pre-commit-check.sh
+cp -r ~/.claude/web-xp/.claude/skills/* ~/.claude/skills/
 ```
 
 Then in Claude Code:
