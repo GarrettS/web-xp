@@ -10,7 +10,7 @@ Vanilla JavaScript. No frameworks or build tools required. The constraint produc
 
 Named patterns applied through continuous refactoring, small commits, each one leaving the code cleaner than the last. Every rule in this doctrine was extracted from production code, not adapted from textbook examples. The examples are drawn from real applications; the failures they address were observed, debugged, and fixed before the rule was written.
 
-This is not the mainstream approach. Most AI-assisted development leans heavily on frameworks, TypeScript, and build tooling. Most developers use AI to generate code fast, not to refine it iteratively. This approach is different on every axis:
+This approach asks for more discipline up front than the default AI-assisted workflow. The goal is not to generate code faster at any cost, but to produce code that remains clear, stable, and maintainable as the project grows. Quality is not free, but low-quality acceleration is more expensive: the time saved by loose generation is usually paid back with interest in debugging, inconsistency, and maintenance.
 
 - **No framework, no framework debt.** There is no abstraction layer to learn, no version to upgrade, no deprecation cycle to chase. The patterns used here — Active Object, Shared Key, event delegation, dispatch tables — are rooted in how the web platform works. They will work the same in ten years. See §Libraries, Frameworks, and TypeScript for the full reasoning.
 - **A living code-guidelines document as a contract.** It keeps every contributor — human or AI — honest across sessions. It is not a suggestion file. It governs.

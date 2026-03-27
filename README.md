@@ -8,7 +8,16 @@ Canonical vanilla-JS RIA doctrine for AI tools and human programmers. No framewo
 
 ## How to Use
 
-Copy `code-guidelines.md` and `code-philosophy.md` into your project root. Keep them as checked-in files — they are living documents that the project's contributors (human and AI) read on every task.
+Add this repo as a git submodule:
+
+    git submodule add https://github.com/GarrettS/code-guidelines.git .doctrine
+
+The authoritative doctrine lives only in `.doctrine/`. Do not copy the files into the project root — a second editable copy drifts. The parent repo records which doctrine commit it is pinned to via the submodule ref. Any standalone clone of this repo (e.g. for reading or contributing) pulls from the same remote.
+
+Reference the doctrine from your project's workflow contract (e.g. `CLAUDE.md`):
+
+    - **`.doctrine/code-guidelines.md`** — governing standards
+    - **`.doctrine/code-philosophy.md`** — explanatory context
 
 Project-specific decisions — directory structure, asset strategy, content authority, breakpoints, theming — belong in a **project overlay** file (e.g. `project.md`, `CLAUDE.md`, or a PRD), not in a fork of the doctrine. When an overlay overrides a doctrine default, it must state which rule is overridden and why.
 
@@ -18,6 +27,14 @@ These guidelines are designed for AI-assisted development where a human drives a
 
 Hone the guidelines iteratively. When the AI produces an anti-pattern — a silent failure, a magic number, a speculative DOM cache — do not just correct the code. Tighten the rule so the pattern does not recur. Each rule in the doctrine traces back to a specific failure observed during development.
 
+## Authoring and Sync
+
+Edit doctrine files in the project's `.doctrine/` submodule working tree. Commit and push from that submodule to publish changes to the canonical code-guidelines repository.
+
+Other clones of the canonical repo, such as a standalone checkout in `~/Documents/code-guidelines/`, are just additional working copies of the same remote. Pull there to receive updates.
+
+When a project uses the doctrine as a submodule, the parent repository pins a specific doctrine commit. After updating the submodule, run `git add .doctrine` in the parent repo to record the new pinned commit.
+
 ## Upstream / Downstream
 
 - **Generalized improvements** to principles, patterns, or rules should be upstreamed back to this repo so all projects benefit.
@@ -25,12 +42,15 @@ Hone the guidelines iteratively. When the AI produces an anti-pattern — a sile
 
 ## Claude Code Skills
 
-Two skills in `.claude/skills/` for structural doctrine review:
+Five skills in `.claude/skills/`:
 
-- **`/doctrine-check`** — Read-only audit. Runs mechanical pre-commit checks (if available), then reviews the current diff against doctrine patterns (Event Delegation, Active Object, Shared Key, Ancestor Class, Fail-Safe, etc.). Reports violations and opportunities without editing files.
+- **`/doctrine-init`** — Project setup. Copies doctrine files, creates pre-commit script and starter CLAUDE.md.
+- **`/doctrine`** — Inline reference. Loads the CG as governing constraints for the current session. Uses CP for explanatory context, not as a second rules file.
+- **`/doctrine-check`** — Read-only audit. Runs mechanical pre-commit checks, then reviews the current diff against doctrine patterns. Reports violations and opportunities without editing.
 - **`/doctrine-apply`** — Interactive refactoring. Walks through doctrine-check findings one at a time, presenting each proposed change for approval before editing.
+- **`/doctrine-review`** — Evaluate any code against the doctrine. Works on pasted snippets, file paths, or framework code. Shows vanilla equivalents side by side.
 
-Projects with the `.doctrine` submodule get these automatically. Projects without it can copy the `.claude/skills/` directory.
+Projects with the `.doctrine` submodule get these automatically.
 
 ## Pre-commit Checks
 
