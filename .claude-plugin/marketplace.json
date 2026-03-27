@@ -1,13 +1,31 @@
 {
   "name": "code-guidelines",
-  "description": "Canonical coding doctrine for vanilla JavaScript — patterns, principles, and automated audits",
-  "author": "GarrettS",
-  "version": "1.0.0",
-  "skills": [
-    "doctrine",
-    "doctrine-init",
-    "doctrine-check",
-    "doctrine-apply",
-    "doctrine-review"
+  "id": "code-guidelines",
+  "owner": {
+    "name": "GarrettS"
+  },
+  "metadata": {
+    "description": "Canonical coding doctrine for vanilla JavaScript — patterns, principles, and automated audits",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "code-guidelines",
+      "source": "./",
+      "description": "Vanilla JS coding doctrine with 10 named patterns, fail-safe rules, and 5 audit/refactor skills",
+      "version": "1.0.0",
+      "author": {
+        "name": "GarrettS"
+      },
+      "keywords": [
+        "javascript",
+        "vanilla-js",
+        "code-quality",
+        "patterns",
+        "audit",
+        "refactoring"
+      ],
+      "category": "development"
+    }
   ]
 }

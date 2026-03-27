@@ -1,0 +1,24 @@
+{
+  "name": "code-guidelines",
+  "description": "Canonical coding doctrine for vanilla JavaScript — 10 named patterns, fail-safe error handling, and automated audit/refactor skills",
+  "version": "1.0.0",
+  "author": {
+    "name": "GarrettS"
+  },
+  "license": "MIT",
+  "keywords": [
+    "javascript",
+    "vanilla-js",
+    "code-quality",
+    "patterns",
+    "audit",
+    "refactoring"
+  ],
+  "skills": [
+    "./.claude/skills/doctrine",
+    "./.claude/skills/doctrine-init",
+    "./.claude/skills/doctrine-check",
+    "./.claude/skills/doctrine-apply",
+    "./.claude/skills/doctrine-review"
+  ]
+}
