@@ -1,8 +1,8 @@
 # Web XP
 
-### A Foundry for AI-Assisted Web Platform Engineering
+### AI-Assisted XP for Lean, Transparent Web Front-End
 
-**Web XP** is for developers who want AI to accelerate delivery without degrading architecture. It provides governing rules, named refactoring patterns, and review skills for building applications directly on the web platform so the code stays legible, stable, and maintainable as it grows.
+Governing rules, named refactoring patterns, and review skills for building applications directly on the web platform. The code stays legible, stable, and maintainable as it grows.
 
 Web XP takes the XP habits of tight feedback, simple design, and continuous refactoring and turns the dials up with AI-assisted review. The goal is not more generated code for its own sake. The goal is better code, produced faster, under active human judgment.
 
