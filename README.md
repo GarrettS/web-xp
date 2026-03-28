@@ -10,7 +10,7 @@ Kent Beck once asked, "What if we took all the good practices and turned the dia
 
 ## Why It Exists
 
-AI increases output rate. Without a real standard, it also increases inconsistency, hidden complexity, and maintenance debt.
+AI writes code fast. Without constraints, it writes inconsistency and maintenance debt just as fast.
 
 Web XP exists to keep speed from dissolving into slop. It defines governing rules, reusable patterns, and review skills for applications built directly on the web platform, with an emphasis on code that remains clear, debuggable, and durable over time.
 
