@@ -1,6 +1,6 @@
 ---
 name: doctrine-apply
-description: "Interactive refactoring — walks through doctrine-check findings one at a time with human approval before each edit."
+description: "Fix doctrine violations interactively with approval. Activate when: 'fix these', 'apply suggestions', 'refactor against standards', 'walk me through fixes'."
 ---
 
 # Doctrine Apply — Interactive Guided Fixes

@@ -1,3 +1,6 @@
+<!-- DO NOT EDIT — canonical source is /code-guidelines.md at repo root.
+     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->
+
 # Code Guidelines
 
 Standards for web application development. Vanilla JavaScript. No frameworks or build tools required. See `code-philosophy.md` for how and why this works.

@@ -1,6 +1,6 @@
 ---
 name: doctrine-check
-description: "Read-only audit of the current git diff against all 10 code standard patterns. Reports violations and opportunities without editing files."
+description: "Audit git diff against code standard patterns. Activate when: about to commit, 'check my code', 'audit', 'pre-commit', 'review the diff', verifying quality."
 ---
 
 # Doctrine Check — Read-Only Audit

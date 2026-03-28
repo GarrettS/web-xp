@@ -1,4 +1,10 @@
 #!/bin/bash
+# DO NOT EDIT — canonical source is /bin/pre-commit-check.sh at repo root.
+# This copy is auto-synced by the pre-commit hook. Edits here will be overwritten.
+#
+# Distributed to consuming projects by /doctrine-init.
+# Canonical copy — also synced to .claude/skills/ by check-doctrine-sync.sh.
+#
 # pre-commit-check.sh
 # Catches mechanical code-guideline violations that are greppable.
 # This is a tripwire, not a review. Structural rules (Active Object pattern,

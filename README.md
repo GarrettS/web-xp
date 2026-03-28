@@ -35,7 +35,7 @@ Web XP is not just style guidance. Its concrete examples live in `code-philosoph
 
 If you want the argument and examples first, start with `code-philosophy.md`. If you want the operational rules and named patterns first, start with `code-guidelines.md`.
 
-## Claude Code Skill
+## Claude Code Skills
 
 First-time setup:
 
@@ -58,6 +58,11 @@ Then in Claude Code:
 - `/doctrine-review` — review code against the doctrine
 - `/doctrine-check` — audit the current diff
 - `/doctrine-apply` — walk through fixes one at a time
+- `/doctrine-init` — set up a new project with CLAUDE.md and pre-commit script
+
+### Edit Tool Batching
+
+When using Claude Code's Edit tool to change multiple locations in a single file, do it in one Edit call — not parallel calls. The first Edit changes the file content, which invalidates the second Edit's `old_string` match, causing it to fail. Use an `old_string` span large enough to cover all change sites, and provide the full `new_string` with all changes applied. Reserve parallel Edit calls for changes across different files.
 
 ## Git Submodule
 
@@ -71,7 +76,7 @@ The doctrine files and skills live in `.doctrine/`. The hosting project records 
 
 A submodule gives your project a local snapshot of the doctrine, and snapshots drift. To avoid version drift, add a note to your project's `project.md` telling Claude to check whether `.doctrine` is behind the canonical `code-guidelines` repository before major work, at periodic commits, and when pulling upstream doctrine changes.
 
-A practical way to reinforce this is `bin/check-doctrine-sync.sh`, a lightweight pre-commit warning that checks at most once daily. Copy it into your project's `bin/` and call it from your pre-commit script:
+A practical way to reinforce this is `bin/check-doctrine-sync.sh`, a lightweight pre-commit check that runs at most once daily. Copy it into your project's `bin/` and call it from your pre-commit script:
 
 ```bash
 cp .doctrine/bin/check-doctrine-sync.sh bin/
@@ -95,16 +100,16 @@ If you want the project-local rule set first:
 - read `.doctrine/code-philosophy.md` for the examples and explanatory context
 - use `/doctrine-check` and `/doctrine-apply` inside the project workflow
 
-## Claude Commands
+## Slash Commands
 
 Five slash commands for loading, inspecting, auditing, and refactoring:
 
 | Skill | Description |
 |-------|-------------|
 | `/doctrine` | Load the governing rules into the current session |
-| `/doctrine-init` | Project setup - creates starter `CLAUDE.md` and pre-commit script |
+| `/doctrine-init` | Project setup — creates starter `CLAUDE.md` and pre-commit script |
 | `/doctrine-check` | Read-only audit of the current diff against doctrine patterns |
-| `/doctrine-apply` | Interactive refactoring - walks through findings one at a time with approval |
+| `/doctrine-apply` | Interactive refactoring — walks through findings one at a time with approval |
 | `/doctrine-review` | Inspect any code: pasted snippets, file paths, or framework code |
 
 ## Workflow Strategy

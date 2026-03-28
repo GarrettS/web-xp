@@ -1,4 +1,7 @@
 #!/bin/bash
+# Distributed to consuming projects by /doctrine-init.
+# Canonical copy — also synced to .claude/skills/ by check-doctrine-sync.sh.
+#
 # pre-commit-check.sh
 # Catches mechanical code-guideline violations that are greppable.
 # This is a tripwire, not a review. Structural rules (Active Object pattern,

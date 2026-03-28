@@ -1,30 +1,56 @@
 #!/usr/bin/env bash
-# Warn once daily if .doctrine is behind canonical code-guidelines.
+# Internal to the code-guidelines repo. Not distributed to consuming projects.
+# Syncs root doctrine files → .claude/skills/ copies with DO NOT EDIT headers.
+#
+# Direction: root → .claude/skills/, never the reverse.
+# Root copies are canonical. Edits to the .claude/skills/ copies
+# will be silently overwritten by this hook. If you want to change
+# a doctrine file, edit the root copy.
 
-STAMP_FILE=".git/.doctrine-last-check"
-NOW="$(date +%s)"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-if [ -f "$STAMP_FILE" ]; then
-  LAST="$(cat "$STAMP_FILE")"
-  AGE=$((NOW - LAST))
-  if [ "$AGE" -lt 86400 ]; then
-    exit 0
+# source:destination:comment-style
+# md = HTML comment, sh = shell comment
+PAIRS=(
+  "code-guidelines.md:.claude/skills/code-guidelines.md:md"
+  "code-philosophy.md:.claude/skills/code-philosophy.md:md"
+  "bin/pre-commit-check.sh:.claude/skills/pre-commit-check.sh:sh"
+)
+
+SYNCED=0
+
+inject_and_copy() {
+  local src="$1" dest="$2" style="$3" name
+  name="${src##*/}"
+
+  if [ "$style" = "md" ]; then
+    printf '<!-- DO NOT EDIT — canonical source is /%s at repo root.\n' "$name"
+    printf '     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->\n\n'
+    cat "$src"
+  else
+    # Preserve shebang on first line, inject comment after it
+    head -1 "$src"
+    printf '# DO NOT EDIT — canonical source is /%s at repo root.\n' "bin/$name"
+    printf '# This copy is auto-synced by the pre-commit hook. Edits here will be overwritten.\n#\n'
+    tail -n +2 "$src"
   fi
-fi
+}
 
-if [ ! -d ".doctrine/.git" ] && [ ! -f ".gitmodules" ]; then
-  exit 0
-fi
+for pair in "${PAIRS[@]}"; do
+  IFS=':' read -r REL_SRC REL_DEST STYLE <<< "$pair"
+  SRC="${REPO_ROOT}/${REL_SRC}"
+  DEST="${REPO_ROOT}/${REL_DEST}"
 
-git -C .doctrine fetch origin main --quiet 2>/dev/null || exit 0
+  INJECTED="$(inject_and_copy "$SRC" "$DEST" "$STYLE")"
+  if [ "$(cat "$DEST" 2>/dev/null)" != "$INJECTED" ]; then
+    printf '%s\n' "$INJECTED" > "$DEST"
+    git add "$DEST"
+    SYNCED=$((SYNCED + 1))
+  fi
+done
 
-LOCAL="$(git -C .doctrine rev-parse HEAD 2>/dev/null)" || exit 0
-REMOTE="$(git -C .doctrine rev-parse origin/main 2>/dev/null)" || exit 0
-
-echo "$NOW" > "$STAMP_FILE"
-
-if [ "$LOCAL" != "$REMOTE" ]; then
-  echo "Warning: .doctrine is behind canonical code-guidelines. Consider updating the submodule."
+if [ "$SYNCED" -gt 0 ]; then
+  echo "check-doctrine-sync: copied $SYNCED file(s) from root → .claude/skills/"
 fi
 
 exit 0
