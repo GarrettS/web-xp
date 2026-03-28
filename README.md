@@ -28,7 +28,7 @@ The point is not to recreate framework dependency in lighter clothing. Many fram
 Web XP is not just style guidance. Its concrete examples live in `code-philosophy.md`, especially around:
 
 - routing and URL-driven navigation
-- state ownership and lifetime
+- state management and scope
 - explicit initialization and data fetching
 - failure handling and graceful degradation
 - DOM ownership, dispatch, and CSS-driven state
