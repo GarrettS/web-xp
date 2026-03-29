@@ -72,13 +72,6 @@ See `adapters/claude/README.md` for full details.
 First-time setup:
 
 ```bash
-git clone https://github.com/GarrettS/web-xp.git .web-xp
-cp .web-xp/adapters/codex/AGENTS.example.md AGENTS.md
-```
-
-Or as a pinned submodule:
-
-```bash
 git submodule add https://github.com/GarrettS/web-xp.git .web-xp
 cp .web-xp/adapters/codex/AGENTS.example.md AGENTS.md
 ```

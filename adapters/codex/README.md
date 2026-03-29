@@ -34,19 +34,8 @@ The contract references all Web XP files from `.web-xp/` and defines `.web-xp/ad
 
 ## Install
 
-Both install modes place Web XP at `.web-xp/` in the project. The difference is mechanism, not layout.
-
-### Submodule (pinned, updatable via git)
-
 ```bash
 git submodule add https://github.com/GarrettS/web-xp.git .web-xp
-cp .web-xp/adapters/codex/AGENTS.example.md AGENTS.md
-```
-
-### Local clone (quick start)
-
-```bash
-git clone https://github.com/GarrettS/web-xp.git .web-xp
 cp .web-xp/adapters/codex/AGENTS.example.md AGENTS.md
 ```
 
