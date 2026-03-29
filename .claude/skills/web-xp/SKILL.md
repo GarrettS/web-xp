@@ -1,9 +1,9 @@
 ---
-name: doctrine
-description: "Load code-guidelines.md and code-philosophy.md as session constraints. Activate when: coding task begins, 'doctrine', 'code guidelines', 'standards', writing or reviewing JS/HTML/CSS."
+name: web-xp
+description: "Load code-guidelines.md and code-philosophy.md as session constraints. Activate when: coding task begins, 'web-xp', 'web xp', 'code guidelines', 'standards', writing or reviewing JS/HTML/CSS."
 ---
 
-# Doctrine — Session Constraints
+# Web XP — Session Constraints
 
 These constraints govern all code written or reviewed for the remainder of this conversation. The summary below is the working reference. For full pattern details, examples, and edge cases, read `${CLAUDE_SKILL_DIR}/../code-guidelines.md`. For the reasoning behind the rules, read `${CLAUDE_SKILL_DIR}/../code-philosophy.md`.
 
@@ -113,12 +113,12 @@ Line length: target 80, max 90. No self-closing slash on void elements.
 
 ---
 
-## Applying the Doctrine
+## Applying Web XP
 
 For the remainder of this conversation:
 - Evaluate all code written or reviewed against these constraints
 - Flag violations by pattern name
 - When proposing code, follow the patterns
 - Use `code-philosophy.md` to explain reasoning, not to invent rules
-- When the doctrine conflicts with a request, state the tension and ask
+- When the standards conflict with a request, state the tension and ask
 - On commit, remind to run pre-commit checks

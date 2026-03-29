@@ -1,17 +1,17 @@
 ---
-name: doctrine-apply
-description: "Fix doctrine violations interactively with approval. Activate when: 'fix these', 'apply suggestions', 'refactor against standards', 'walk me through fixes'."
+name: web-xp-apply
+description: "Fix Web XP violations interactively with approval. Activate when: 'fix these', 'apply suggestions', 'refactor against standards', 'walk me through fixes'."
 ---
 
-# Doctrine Apply — Interactive Guided Fixes
+# Web XP Apply — Interactive Guided Fixes
 
-Walk through doctrine-check findings and apply them with human approval, grouping repeated similar edits when they form one coherent change.
+Walk through web-xp-check findings and apply them with human approval, grouping repeated similar edits when they form one coherent change.
 
 ## Procedure
 
 ### 1. Get findings
 
-If a doctrine-check was already run in this conversation, use those findings. Otherwise, run `/doctrine-check` first to generate the finding list.
+If a web-xp-check was already run in this conversation, use those findings. Otherwise, run `/web-xp-check` first to generate the finding list.
 
 ### 2. Present one coherent change at a time
 
@@ -24,7 +24,7 @@ Examples that should be grouped into one approval:
 
 Examples that should stay separate:
 - Distinct structural refactors in different files
-- Changes that affect different doctrine patterns
+- Changes that affect different Web XP patterns
 - Any edit where grouping would make the proposal harder to review
 
 For each proposed change set, present:
@@ -32,7 +32,7 @@ For each proposed change set, present:
 - The pattern name and whether it is a violation or opportunity
 - The current code (quote the relevant lines)
 - The proposed change (show the replacement code)
-- A one-sentence doctrine rationale
+- A one-sentence Web XP rationale
 
 Then ask: "Apply this change? (yes / no / skip)"
 

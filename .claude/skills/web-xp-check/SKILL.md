@@ -1,11 +1,11 @@
 ---
-name: doctrine-check
-description: "Audit git diff against code standard patterns. Activate when: about to commit, 'check my code', 'audit', 'pre-commit', 'review the diff', verifying quality."
+name: web-xp-check
+description: "Audit git diff against Web XP standard patterns. Activate when: about to commit, 'check my code', 'audit', 'pre-commit', 'review the diff', verifying quality."
 ---
 
-# Doctrine Check — Read-Only Audit
+# Web XP Check — Read-Only Audit
 
-Audit the current diff against the code standards. Report findings. Do not edit any files.
+Audit the current diff against the Web XP standards. Report findings. Do not edit any files.
 
 ## Step 1 — Mechanical checks
 
@@ -30,7 +30,7 @@ A violation means the diff introduces code that contradicts a pattern the codeba
 
 ### Opportunities — code that would benefit from a pattern not yet applied
 
-An opportunity means the diff contains code that works but would be cleaner, faster, or more maintainable with a doctrine pattern. Be selective — only flag clear wins, not marginal cases.
+An opportunity means the diff contains code that works but would be cleaner, faster, or more maintainable with a Web XP pattern. Be selective — only flag clear wins, not marginal cases.
 
 **Pattern definitions for recognition:**
 
@@ -61,16 +61,16 @@ For each finding, report:
 - **Pattern name**
 - **Type**: Violation or Opportunity
 - **Current code**: brief description or quote of the problematic lines
-- **Doctrine-aligned alternative**: what the code should look like
+- **Web XP alternative**: what the code should look like
 
-Group findings by file. If no findings: report "Doctrine check passed."
+Group findings by file. If no findings: report "Web XP check passed."
 
 ### 4. Offer next steps
 
 After the report, prompt the user with actionable options based on what was found. Examples:
 
-- "Want me to walk through these one at a time and apply fixes? (`/doctrine-apply`)"
+- "Want me to walk through these one at a time and apply fixes? (`/web-xp-apply`)"
 - "Want me to fix the [specific pattern] violations first?"
-- "Want me to show the doctrine-aligned alternative for the [specific file] findings?"
+- "Want me to show the Web XP alternative for the [specific file] findings?"
 
 Tailor the prompts to the specific findings. Do not offer generic options — reference the actual violations and opportunities from the report. If no findings, skip this step.

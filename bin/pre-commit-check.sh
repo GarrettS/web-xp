@@ -1,12 +1,12 @@
 #!/bin/bash
-# Distributed to consuming projects by /doctrine-init.
-# Canonical copy — also synced to .claude/skills/ by check-doctrine-sync.sh.
+# Distributed to consuming projects by /web-xp-init.
+# Canonical copy — also synced to .claude/skills/ by check-web-xp-sync.sh.
 #
 # pre-commit-check.sh
 # Catches mechanical code-guideline violations that are greppable.
 # This is a tripwire, not a review. Structural rules (Active Object pattern,
 # event delegation, async .catch, fetch status checks) require manual
-# inspection or /doctrine-check.
+# inspection or /web-xp-check.
 #
 # Generalized checks only — project-specific checks (asset integrity,
 # service worker, PRD references) belong in the project's own script.
@@ -214,10 +214,10 @@ echo ""
 if [ $FAIL -ne 0 ]; then
   echo -e "${RED}Items flagged for review.${NC}"
   echo "Not all flags are violations — review each in context."
-  echo "Structural rules require manual inspection (see /doctrine-check)."
+  echo "Structural rules require manual inspection (see /web-xp-check)."
   exit 1
 else
   echo -e "${GREEN}All mechanical checks passed.${NC}"
-  echo "Structural rules require manual inspection (see /doctrine-check)."
+  echo "Structural rules require manual inspection (see /web-xp-check)."
   exit 0
 fi

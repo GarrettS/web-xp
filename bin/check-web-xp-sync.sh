@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Internal to the code-guidelines repo. Not distributed to consuming projects.
-# Syncs root doctrine files → .claude/skills/ copies with DO NOT EDIT headers.
+# Syncs root standards files → .claude/skills/ copies with DO NOT EDIT headers.
 #
 # Direction: root → .claude/skills/, never the reverse.
 # Root copies are canonical. Edits to the .claude/skills/ copies
 # will be silently overwritten by this hook. If you want to change
-# a doctrine file, edit the root copy.
+# a standards file, edit the root copy.
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
@@ -50,7 +50,7 @@ for pair in "${PAIRS[@]}"; do
 done
 
 if [ "$SYNCED" -gt 0 ]; then
-  echo "check-doctrine-sync: copied $SYNCED file(s) from root → .claude/skills/"
+  echo "check-web-xp-sync: copied $SYNCED file(s) from root → .claude/skills/"
 fi
 
 exit 0
