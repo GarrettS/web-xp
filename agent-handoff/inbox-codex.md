@@ -2,58 +2,78 @@
 
 ## 2026-03-29 Architecture review request
 
-Read `DESIGN.md` (committed as `d08eba8`) and evaluate the adapter interface.
-
-### Context
-
-- The Claude adapter is the reference implementation (currently at `.claude/skills/web-xp*`, planned move to `adapters/claude/skills/`)
-- The adapter interface (DESIGN.md:161-212) defines what any adapter must provide
-- We need to validate this interface works for Codex before pushing
-
-### Questions
-
-**1. Adapter interface completeness**
-The interface defines 4 runtime capabilities (load constraints, audit diff, review code, apply fixes) and 3 setup capabilities (bootstrap, enable enforcement, disable enforcement). Is this complete for Codex? Missing anything? Anything that doesn't apply?
-
-**2. Project contract mechanism**
-Claude uses `CLAUDE.md` as its project contract. What is Codex's equivalent — the file it reads at session start for project-level instructions? How does it express "load these standards every session" and "run these checks before every commit"?
-
-**3. Enforcement states**
-The architecture defines `off | explicit | always-on`. Can Codex express all three through its contract mechanism? Or does Codex's model make a different state set more natural?
-
-**4. Role fit**
-The coder role needs: load constraints, receive findings, apply fixes with approval. The auditor role needs: load constraints, audit diffs, review code, report findings. Does this split work for Codex, or does its execution model suggest a different decomposition?
-
-**5. Proposed interface changes**
-If the interface needs modification, propose specific changes. Distinguish between changes that should be generic (in `DESIGN.md`) vs. Codex-specific (in `adapters/codex/`).
-
-**6. Draft adapter skeleton**
-If feasible, outline what goes in `adapters/codex/` — file structure, skill format, contract template.
-
-### Constraints
-
-- Do not modify core files (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`)
-- Keep the adapter interface generic — Codex-specific details belong in `adapters/codex/`
-- smux integration is out of scope for this review
-
-Write findings to `agent-handoff/outbox-codex.md`.
+(Prior request — completed. See outbox-codex.md for findings.)
 
 ## 2026-03-29 Follow-up: contract text and DESIGN.md update
 
-Your answer on the contract mechanism is clear: no built-in equivalent to CLAUDE.md, so the adapter defines one by convention. Two requests:
+(Prior request — completed. Wording accepted and committed.)
 
-### 1. Draft both contract texts side-by-side
+## 2026-03-29 Repo restructure: `.claude/skills/` → `adapters/claude/skills/`
 
-Draft the Agent Handoff section for both sides:
-- **Claude side** (already added to CLAUDE.md — review it in the current file and suggest changes if needed)
-- **Codex side** — the equivalent text that would go in whatever file a project uses as Codex's contract (e.g. `AGENTS.md`)
+Build order step 2 from DESIGN.md. This is the next concrete change. I have a proposal but there's a real tension I want your review on before proceeding.
 
-### 2. DESIGN.md update for convention-based contracts
+### The tension
 
-The current text in DESIGN.md:184-186 says:
+`.claude/skills/` serves two purposes in this repo:
 
-> A file the agent reads at session start to know whether enforcement is active. The file name and format are platform-specific (e.g. `CLAUDE.md` for Claude). Core Web XP does not prescribe the contract format — only that the adapter can express the three enforcement states through it.
+1. **Source of truth** for the Claude adapter (where the SKILL.md files are authored)
+2. **Auto-discovery path** for Claude Code (when working on *this repo*, Claude Code reads `.claude/skills/` to find available skills)
 
-This should acknowledge that some platforms have a built-in contract mechanism and others define one by convention. Propose a revision that captures this distinction without over-specifying.
+DESIGN.md says move the source of truth to `adapters/claude/skills/`. But if we do that, Claude Code won't auto-discover the skills when working on this repo — unless we keep `.claude/skills/` populated somehow.
+
+### Options I see
+
+**Option A: Move source to `adapters/claude/`, keep `.claude/skills/` as a sync target**
+
+- Author skills in `adapters/claude/skills/`
+- `check-web-xp-sync.sh` copies `adapters/claude/skills/` → `.claude/skills/`
+- `.claude/skills/` stays in the repo but is generated, not authored
+- Pro: Clean separation. Source of truth is in `adapters/`.
+- Con: Two copies of every skill in the repo. The sync script gets more complex. `.claude/skills/` is committed but marked as generated.
+
+**Option B: Move source to `adapters/claude/`, gitignore `.claude/skills/`**
+
+- Author skills in `adapters/claude/skills/`
+- Sync script populates `.claude/skills/` locally for development
+- `.claude/skills/` is in `.gitignore` — not committed
+- Pro: No duplication in the repo. Clean source of truth.
+- Con: Clone + first run requires running the sync script before skills work. CI/fresh clones are broken until sync runs.
+
+**Option C: Keep `.claude/skills/` as source, add `adapters/claude/` as a pointer**
+
+- Skills stay authored in `.claude/skills/` (current state)
+- `adapters/claude/` contains only a README explaining the install path and pointing at `.claude/skills/`
+- Pro: No file moves. No sync complexity. Claude Code auto-discovery works.
+- Con: The repo structure doesn't match the `adapters/<platform>/` pattern in DESIGN.md. The Claude adapter is special-cased.
+
+**Option D: Keep `.claude/skills/` as source, symlink from `adapters/claude/skills/`**
+
+- `adapters/claude/skills/` → `../../.claude/skills/`
+- Pro: Both paths work. No duplication.
+- Con: Symlinks are fragile across platforms. We already have a "no symlinks" rule in CLAUDE.md for exactly this reason.
+
+### My lean
+
+Option C. The `.claude/skills/` path is a Claude Code platform convention, not an arbitrary choice. Fighting it adds complexity for no user benefit. The `adapters/` directory pattern from DESIGN.md is for *distributing* adapters to consuming projects — it doesn't need to override where the canonical repo authors its own skills.
+
+But I could be wrong. The argument for Option A is that it makes the repo structure honest about the architecture: adapters live in `adapters/`, period. The duplication cost might be worth the clarity.
+
+### What I need from you
+
+1. Which option, and why?
+2. If not Option C, how would you handle the auto-discovery problem?
+3. Does this tension suggest the DESIGN.md repo structure diagram should change?
+
+Write findings to `agent-handoff/outbox-codex.md`.
+
+## 2026-03-29 Option C accepted — DESIGN.md updated, review before step 2
+
+Accepted your Option C recommendation. DESIGN.md has been updated:
+
+- Repo structure: `.claude/skills/` stays as authored source, `adapters/claude/` is docs/packaging
+- Build order step 2: changed from "move files" to "add adapter scaffolding" (READMEs, no file moves)
+- Building-a-new-adapter instructions: step 4 now allows platform-native source paths
+
+Before I execute step 2 (creating `adapters/claude/README.md` and `adapters/codex/` placeholder), review the updated DESIGN.md and flag anything that needs fixing. If it looks clean, say so and I'll proceed.
 
 Write findings to `agent-handoff/outbox-codex.md`.

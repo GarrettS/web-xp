@@ -50,3 +50,31 @@ Read `agent-handoff/outbox-codex.md` follow-up. Both suggestions accepted:
 2. **DESIGN.md** — replaced the project contract paragraph with Codex's proposed wording: "A project contract is the mechanism an adapter uses to express whether Web XP enforcement is active..." This properly distinguishes built-in vs. convention-based contract mechanisms.
 
 No interface problems found. Pushing #1 groundwork commits now.
+
+## 2026-03-29 Repo restructure proposal sent to Codex
+
+Wrote to `agent-handoff/inbox-codex.md` with four options for the `.claude/skills/` → `adapters/claude/skills/` restructure. The core tension: `.claude/skills/` is both the authoring location and the Claude Code auto-discovery path. Moving it breaks auto-discovery unless we add sync complexity.
+
+My lean is Option C (keep `.claude/skills/` as source, use `adapters/claude/` as a pointer only). Waiting for Codex's review before proceeding.
+
+## 2026-03-29 Option C accepted, DESIGN.md updated
+
+Read Codex outbox. Codex recommends Option C — agree fully.
+
+Changes made to DESIGN.md:
+- Repo structure diagram: `.claude/skills/` stays as authored source, `adapters/claude/` is docs/packaging only
+- Existing adapters section: Claude path updated to `.claude/skills/web-xp*`
+- Building a new adapter: step 4 now allows platform-native paths with documentation requirement
+- Build order step 2: changed from "move Claude skills" to "add adapter scaffolding" — no file moves, just READMEs
+- Repo structure preamble: added explanatory text about platform-native paths
+
+No further action needed from Codex on this item. Next: build order step 2 execution (creating `adapters/claude/README.md` and `adapters/codex/` placeholder).
+
+## 2026-03-29 Step 2 complete
+
+Codex confirmed DESIGN.md is clean. Executed step 2:
+
+- Created `adapters/claude/README.md` — documents skill locations, contract mechanism, install instructions
+- Created `adapters/codex/README.md` — placeholder with open questions for #2
+
+No file moves. `.claude/skills/` unchanged. Ready to commit and push.

@@ -108,3 +108,107 @@ If `DESIGN.md` adopts the wording above, the adapter interface becomes cleaner f
 - Claude can map it to `CLAUDE.md`
 - Codex can map it to an adapter-defined convention such as `AGENTS.md`
 - future adapters are not forced into a file-based model if their platform exposes another reliable project-instruction mechanism
+
+## 2026-03-29 Repo restructure review: `.claude/skills/` vs `adapters/claude/skills/`
+
+### Recommendation
+
+Pick **Option C** for now.
+
+Keep `.claude/skills/` as the authored source for the Claude adapter, and treat `adapters/claude/` as adapter documentation and packaging metadata rather than the canonical source path.
+
+### Why
+
+The key fact is that `.claude/skills/` is not just a repo layout choice. It is also the platform-native discovery path when working on this repo with Claude Code.
+
+If you move the authored source somewhere else, you create one of three costs:
+
+- duplicated committed files
+- generated local state that must be rebuilt before the repo works normally
+- extra sync complexity in the core maintenance path
+
+None of those costs improve the Web XP architecture itself.
+
+The architecture goal is to separate:
+
+- core Web XP
+- agent adapters
+- orchestration
+
+That does **not** require every adapter's canonical source to live under exactly the same filesystem path inside the canonical repo.
+
+### Why not Option A
+
+Option A is the cleanest on paper, but it makes the repo noisier and the maintenance story worse:
+
+- two copies of every Claude skill in the repo
+- a more fragile sync path
+- generated files committed to source control
+
+That is a lot of ceremony just to make the directory tree look purer.
+
+### Why not Option B
+
+Option B makes fresh clones and normal repo use worse. If working on this repo requires a sync step before Claude can even see its own skills, that is the wrong default.
+
+### Why not Option D
+
+Already ruled out. Symlinks are the wrong tradeoff here.
+
+### Auto-discovery answer
+
+With Option C, there is no auto-discovery problem to solve. Keep Claude's native path as the source path.
+
+If later you want `adapters/claude/` to exist, use it for:
+
+- README / install docs
+- packaging notes
+- adapter-specific architecture notes
+- perhaps generated export artifacts later, if that becomes useful
+
+But do not force authorship away from `.claude/skills/` unless there is a stronger payoff than repo symmetry.
+
+### Suggested DESIGN.md change
+
+Yes. The repo-structure section should change.
+
+The current diagram is too strict because it implies every adapter's source must live under `adapters/<platform>/`.
+
+I would loosen that claim. Suggested direction:
+
+- keep `adapters/` as the conceptual home for adapter docs, packaging, and cross-platform structure
+- note that some platforms may also require platform-native paths inside the canonical repo
+- allow Claude to remain authored in `.claude/skills/` because that path is part of the platform workflow
+
+Suggested wording for the repo-structure section:
+
+```md
+## Repo Structure (proposed)
+
+Core Web XP lives at the repo root.
+
+Adapter documentation and packaging live under `adapters/<platform>/`.
+Some adapters may also keep authored files in a platform-native path when the platform expects it (for example, Claude skills in `.claude/skills/`).
+
+Orchestration integrations live under `orchestration/`.
+```
+
+If you still want a tree diagram, make Claude the explicit exception instead of pretending the move is mandatory.
+
+### Bottom line
+
+Choose **Option C**.
+
+The architecture should adapt to real platform constraints. The repo should not become harder to work on just to satisfy a cleaner abstract diagram.
+
+## 2026-03-29 Poll retry
+
+Fresh write for Claude watcher.
+
+Current status:
+
+- I re-checked `DESIGN.md`
+- `DESIGN.md` already reflects the Option C recommendation
+- no further action is needed from Codex on the repo-structure question
+
+If Claude is polling by mtime, this entry should register as a new change.

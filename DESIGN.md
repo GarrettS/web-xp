@@ -194,8 +194,8 @@ All adapters point at the same core files. They do not duplicate the standard �
 
 ### Existing adapters
 
-**Claude** (implemented — `adapters/claude/`):
-Seven skills covering all capabilities above. Project contract: `CLAUDE.md`.
+**Claude** (implemented — `.claude/skills/web-xp*`):
+Seven skills covering all capabilities above. Project contract: `CLAUDE.md`. Skills are authored in `.claude/skills/` — the platform-native discovery path for Claude Code.
 
 **Codex** (to build — `adapters/codex/`):
 Same capability set. Skill format and project contract mechanism TBD during implementation.
@@ -207,7 +207,7 @@ To add Web XP support for another agent platform:
 1. Implement the four runtime capabilities and three setup capabilities above, in whatever skill/plugin format your platform uses.
 2. Point all file references at the core files (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`).
 3. Define a project contract mechanism that can express `off | explicit | always-on`.
-4. Place the adapter in `adapters/<platform>/`.
+4. Place adapter documentation and packaging in `adapters/<platform>/`. If the platform requires a specific path for skill discovery (e.g. `.claude/skills/` for Claude Code), authored files may live there instead — document the path in the adapter README.
 
 The adapter does not need to implement orchestration. That is a separate layer.
 
@@ -224,27 +224,29 @@ Depends on at least one agent adapter being installed. Does not modify core Web 
 
 ---
 
-## Repo Structure (proposed)
+## Repo Structure
+
+Core Web XP lives at the repo root. Adapter documentation and packaging live under `adapters/<platform>/`. Some adapters may also keep authored files in a platform-native path when the platform expects it (e.g. Claude skills in `.claude/skills/`). Orchestration integrations live under `orchestration/`.
 
 ```
-code-guidelines/
+web-xp/
 ├── code-guidelines.md          # core standard
 ├── code-philosophy.md          # core explanatory context
 ├── bin/
 │   ├── pre-commit-check.sh     # core mechanical checks
 │   └── check-web-xp-sync.sh    # internal sync (this repo only)
+├── .claude/
+│   └── skills/                 # Claude adapter (authored here — platform-native path)
+│       ├── web-xp/
+│       ├── web-xp-check/
+│       ├── web-xp-apply/
+│       ├── web-xp-review/
+│       ├── web-xp-init/
+│       ├── web-xp-on/
+│       └── web-xp-off/
 ├── adapters/
-│   ├── claude/                 # Claude adapter (implemented)
-│   │   └── skills/
-│   │       ├── web-xp/
-│   │       ├── web-xp-check/
-│   │       ├── web-xp-apply/
-│   │       ├── web-xp-review/
-│   │       ├── web-xp-init/
-│   │       ├── web-xp-on/
-│   │       └── web-xp-off/
+│   ├── claude/                 # Claude adapter docs and install instructions
 │   └── codex/                  # Codex adapter (to build)
-│       └── ...
 ├── orchestration/              # smux layer (to build)
 │   └── smux/
 ├── CLAUDE.md                   # this repo's own contract
@@ -257,7 +259,7 @@ code-guidelines/
 ## Build Order
 
 1. **Formalize enforcement modes** — document the three-state model (`off | explicit | always-on`) in skill descriptions and docs. The current `/web-xp-on` and `/web-xp-off` commands stay as-is — they toggle between `off` and `always-on`. `explicit` is the natural state before any project contract is created and does not need a command. Update skill descriptions to use the state names consistently.
-2. **Restructure repo** — move Claude skills from `.claude/skills/` to `adapters/claude/skills/`. Update sync script and install instructions.
+2. **Add adapter scaffolding** — create `adapters/claude/` with a README documenting the Claude adapter (install path, skill list, contract mechanism). No file moves — `.claude/skills/` stays as the authored source. Create `adapters/codex/` placeholder.
 3. **Build second adapter** — port the capabilities to another agent platform (Codex is the current candidate) to validate the adapter interface. This is the first real test of agent-agnosticism.
 4. **Rewrite public docs** — README says "Web XP supports multiple coding agents" with per-adapter install instructions and a "Building a new adapter" section.
 5. **Build smux orchestration layer** — role assignment, topology selection, message routing. Optional install on top of any adapter combination.
