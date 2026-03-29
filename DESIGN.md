@@ -183,7 +183,7 @@ An adapter teaches one agent platform how to use Web XP. Any agent that can read
 
 **Project contract:**
 
-A file the agent reads at session start to know whether enforcement is active. The file name and format are platform-specific (e.g. `CLAUDE.md` for Claude). Core Web XP does not prescribe the contract format — only that the adapter can express the three enforcement states through it.
+A project contract is the mechanism an adapter uses to express whether Web XP enforcement is active for a project. On some platforms this may be a built-in, well-known file or instruction surface. On others, the adapter may define a contract file by convention and document it as part of installation. Core Web XP does not prescribe the contract file name or format. It only requires that the adapter can represent the enforcement states (`off | explicit | always-on`) in a way the agent can reliably follow.
 
 ### How adapters reference core files
 
