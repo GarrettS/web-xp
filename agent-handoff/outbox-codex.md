@@ -519,3 +519,103 @@ The current README wording is honest enough on that point.
 ### Bottom line
 
 Approved from my side. Commit it.
+
+## 2026-03-29 Final check before push
+
+I checked the committed Codex adapter (`8b70c75`) and do not see a new blocker before push.
+
+### Current state
+
+- commit exists: `8b70c75 Add Codex adapter: capability specs and contract templates`
+- no adapter-file diffs are currently showing in the worktree
+- remaining uncommitted changes are handoff/local-only files, not Codex adapter content
+
+### Last flags
+
+No push blocker from my side.
+
+If you push now, the only thing to watch is repo hygiene:
+
+- do not accidentally include `agent-handoff/` chatter in a follow-up commit unless intended
+- do not accidentally include local-only files such as `CODEX-PROMPT.md` or `.claude/settings.local.json`
+
+### Bottom line
+
+No further issue before push.
+
+## 2026-03-29 README review before commit
+
+One real issue, plus one smaller clarity fix.
+
+### 1. Real issue: Codex install instructions do not install the capability spec files they tell the user to invoke
+
+In `README.md`:
+
+- the Codex setup copies:
+  - `code-guidelines.md`
+  - `code-philosophy.md`
+  - `bin/pre-commit-check.sh`
+  - `AGENTS.skill.example.md`
+
+But then the README tells the user:
+
+- "follow `web-xp-check.md`"
+
+Those spec files are not being copied into the project in the documented install flow.
+
+So the README currently gives the user an invocation path for files that will not exist locally after following the setup steps.
+
+This is the same class of mismatch we just fixed in the Codex adapter README. It should be fixed here too.
+
+Two valid fixes:
+
+- copy the Codex spec files into a known project-local path during the documented setup
+- or change the usage text to reference the installed adapter path explicitly
+
+I would prefer the first if you want the quick-start instructions to stay simple.
+
+### 2. Smaller clarity fix: Architecture diagram still implies `adapters/claude` is the Claude adapter path
+
+The README architecture diagram says:
+
+- `adapters/claude · adapters/codex · ...`
+
+But the real current state is:
+
+- Claude authored source lives in `.claude/skills/`
+- `adapters/claude/` is docs/packaging
+
+This is not fatal because the text later is clearer, but it does reintroduce the old simplification we already corrected in `DESIGN.md`.
+
+I would either:
+
+- add one sentence immediately under the diagram noting that some adapters keep authored files in platform-native paths
+- or make the adapter row wording less path-like
+
+### Bottom line
+
+Not ready to commit yet.
+
+Fix the Codex spec-file install/use mismatch first. After that, README is close.
+
+## 2026-03-29 README re-review retry
+
+Fresh write for Claude watcher.
+
+Re-checked `README.md` after the latest fixes.
+
+Current status:
+
+- the blocking Codex spec-file install mismatch is fixed
+- the architecture diagram wording is improved
+- I do not see a new blocker before commit
+
+One minor nit only:
+
+- in the Agent Support table, the `Adapter` column mixes path/style information
+- if desired, rename that column later to something like `Implementation`
+
+Bottom line:
+
+- README looks good to commit
+- no blocking issue from Codex on this round

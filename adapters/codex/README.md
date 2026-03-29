@@ -52,6 +52,7 @@ cp ~/.web-xp/code-guidelines.md code-guidelines.md
 cp ~/.web-xp/code-philosophy.md code-philosophy.md
 mkdir -p bin
 cp ~/.web-xp/bin/pre-commit-check.sh bin/pre-commit-check.sh
+cp ~/.web-xp/adapters/codex/web-xp*.md .
 cp ~/.web-xp/adapters/codex/AGENTS.skill.example.md AGENTS.md
 ```
 
