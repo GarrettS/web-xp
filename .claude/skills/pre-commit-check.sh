@@ -20,28 +20,77 @@
 set -euo pipefail
 
 FAIL=0
+WARN_COUNT=0
 RED='\033[0;31m'
+YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
 EXCLUDES="node_modules|\.git|pre-commit-check\.sh|code-guidelines\.md"
 
+# $4 (optional): "allow_override" — if set, a web-xp:allow comment on
+# the matched line or the line above downgrades the hit from FAIL to WARN.
+# Only enable this for checks where documented convention overrides are legitimate.
 check() {
   local label="$1"
   local pattern="$2"
   local glob="$3"
+  local overridable="${4:-}"
   local hits
 
   hits=$(grep -rn --include="$glob" -E "$pattern" . 2>/dev/null \
     | grep -Ev "$EXCLUDES" \
     || true)
 
-  if [ -n "$hits" ]; then
+  if [ -z "$hits" ]; then
+    echo -e "${GREEN}PASS${NC}  $label"
+    return
+  fi
+
+  # If overrides are not allowed for this check, all hits are failures.
+  if [ "$overridable" != "allow_override" ]; then
     echo -e "${RED}FAIL${NC}  $label"
     echo "$hits" | head -20
     echo ""
     FAIL=1
-  else
+    return
+  fi
+
+  local fail_hits="" warn_hits=""
+
+  while IFS= read -r hit; do
+    local file line_num
+    file=$(echo "$hit" | cut -d: -f1)
+    line_num=$(echo "$hit" | cut -d: -f2)
+
+    # Check current line and previous line for web-xp:allow
+    local context
+    context=$(sed -n "$((line_num > 1 ? line_num - 1 : 1)),${line_num}p" "$file" 2>/dev/null || true)
+
+    if echo "$context" | grep -q 'web-xp:allow'; then
+      warn_hits="${warn_hits}${hit}
+"
+    else
+      fail_hits="${fail_hits}${hit}
+"
+    fi
+  done <<< "$hits"
+
+  if [ -n "$fail_hits" ]; then
+    echo -e "${RED}FAIL${NC}  $label"
+    echo "$fail_hits" | head -20
+    echo ""
+    FAIL=1
+  fi
+
+  if [ -n "$warn_hits" ]; then
+    echo -e "${YELLOW}WARN${NC}  $label  [override acknowledged]"
+    echo "$warn_hits" | head -20
+    echo ""
+    WARN_COUNT=$((WARN_COUNT + 1))
+  fi
+
+  if [ -z "$fail_hits" ] && [ -z "$warn_hits" ]; then
     echo -e "${GREEN}PASS${NC}  $label"
   fi
 }
@@ -61,7 +110,8 @@ check "javascript: pseudo-protocol" \
 
 check "Inline <style> blocks" \
   '<style[ >]' \
-  '*.html'
+  '*.html' \
+  allow_override
 
 check "Self-closing slash on void elements" \
   '<(img|br|hr|input|meta|link|area|base|col|embed|source|track|wbr)\b[^>]*/>' \
@@ -217,10 +267,17 @@ echo ""
 if [ $FAIL -ne 0 ]; then
   echo -e "${RED}Items flagged for review.${NC}"
   echo "Not all flags are violations — review each in context."
+  if [ $WARN_COUNT -gt 0 ]; then
+    echo "$WARN_COUNT override(s) acknowledged (web-xp:allow)."
+  fi
   echo "Structural rules require manual inspection (see /web-xp-check)."
   exit 1
 else
-  echo -e "${GREEN}All mechanical checks passed.${NC}"
+  if [ $WARN_COUNT -gt 0 ]; then
+    echo -e "${GREEN}All mechanical checks passed.${NC} $WARN_COUNT override(s) acknowledged."
+  else
+    echo -e "${GREEN}All mechanical checks passed.${NC}"
+  fi
   echo "Structural rules require manual inspection (see /web-xp-check)."
   exit 0
 fi

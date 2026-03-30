@@ -1108,3 +1108,122 @@ I do not see a blocker in either change.
 No further blocker from Codex on this round.
 
 The remaining open concern is still the inline-style override handling in `pre-commit-check.sh`, which is a separate product issue and does not need to block this Codex adapter/docs update.
+
+## 2026-03-29 Review of `web-xp:allow` override mechanism
+
+There is one real design problem in the current implementation.
+
+### Main issue
+
+The override mechanism currently applies to **every** greppable check, not just the inline-style case that motivated it.
+
+Because the `check()` helper now looks for `web-xp:allow` generically, the same marker can downgrade all of these from FAIL to WARN:
+
+- inline event handlers
+- `javascript:` URLs
+- `eval()`
+- `alert()`
+- loose equality
+- and anything else checked through `check()`
+
+That is too broad.
+
+For documented exceptions, an override can make sense for a narrow subset of rules. It should not become a blanket escape hatch for the entire mechanical check system.
+
+### Recommendation
+
+Scope overrides to specific checks that are intentionally overridable.
+
+The safest immediate move is:
+
+- support `web-xp:allow` for inline `<style>` only
+
+If later you want more, add them explicitly one by one.
+
+Possible implementation shapes:
+
+1. Add an `allow_override` flag to `check()`
+   - call it `true` only for specific checks
+2. Hardcode the override behavior only in the inline-style check path
+
+Either is fine. The important part is not making overrides global.
+
+### Answers to your specific questions
+
+#### 1. Does this solve the elitefuellabs.com problem?
+
+Yes, **if** the override is scoped narrowly.
+
+Adding:
+
+```html
+<!-- web-xp:allow inline style -->
+```
+
+above the documented exception in `index.html` is acceptable.
+
+#### 2. Is `web-xp:allow` the right marker?
+
+Yes.
+
+It reads better than:
+
+- `ignore`
+- `skip`
+
+and is less ambiguous than `override`.
+
+#### 3. Previous line only, or further back?
+
+Previous line only is the right default.
+
+If the marker needs to be nearby to count, the override stays explicit and local. Looking back 2-3 lines makes accidental or overly broad suppression more likely.
+
+Current line or previous line is reasonable.
+
+#### 4. Edge cases
+
+The biggest edge case is the broad-suppression problem above.
+
+A smaller one:
+
+- if the override comment is separated from the target by a blank line, it will not count
+
+I think that is acceptable. It encourages keeping the override tightly attached to the exception.
+
+### Bottom line
+
+The idea is good.
+
+The current implementation is too broad.
+
+Restrict `web-xp:allow` to explicitly approved checks, starting with inline `<style>` only.
+
+## 2026-03-29 Re-review after override scoping
+
+Checked the updated `bin/pre-commit-check.sh`.
+
+The broad-suppression problem is fixed:
+
+- override support is now gated by a 4th `check()` argument
+- only the inline `<style>` check passes `allow_override`
+- other checks ignore `web-xp:allow`
+
+That addresses the main design problem from my earlier review.
+
+### Answer
+
+I do not see a blocker here now.
+
+### One minor wording suggestion only
+
+If you want, tighten the comment above `check()` slightly:
+
+- current: "Only passed for checks where documented exceptions are legitimate."
+- possible tweak: "Only enable this for checks where documented convention overrides are legitimate."
+
+Not a blocker. Just slightly more aligned with the comments policy language in `code-guidelines.md`.
+
+### Bottom line
+
+Looks good to commit.
