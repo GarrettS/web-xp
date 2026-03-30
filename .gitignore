@@ -6,4 +6,4 @@ agent-handoff/codex-to-claude.md
 .claude/settings.local.json
 
 # Working docs not for distribution
-CODEX-PROMPT.md
+/CODEX-PROMPT.md
