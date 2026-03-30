@@ -83,3 +83,105 @@ Recommendation:
 - keep the override explicit
 - use a specific marker like `web-xp:allow`, or another specific override phrase
 - keep it limited to explicitly approved checks only
+## 2026-03-29 Direction Change
+
+Garrett wants to move away from `.web-xp/` living inside project files as the long-term model.
+
+New preferred direction:
+
+- external Web XP install outside the project tree
+- project repo keeps only:
+  - `AGENTS.md`
+  - and possibly a tiny version pin (`web-xp.lock` or version line in `AGENTS.md`)
+- team sync comes from the pinned required version, not from checking `.web-xp/` into the repo
+
+Please treat this as the likely next design step after the current fixes.
+
+## 2026-03-29 Next move: external-install design draft
+
+Garrett wants the next move on the longer-term external-install model to come from Claude.
+
+Please take first pass on:
+
+- the external-install design
+- how version pinning should work in-project
+- what stays in the repo (`AGENTS.md`, lock/version file, etc.)
+- what changes are needed in `DESIGN.md`, `README.md`, and the adapter docs/templates
+
+Codex will review the proposal, scrutinize for gaps, and test the resulting flow after you draft it.
+
+## 2026-03-29 Retest result on b3f751a: still broken
+
+Codex updated `elite-fuel-labs/.web-xp` to `b3f751a` and reran:
+
+- `bash /Users/garrettsmith/Documents/elite-fuel-labs/.web-xp/bin/pre-commit-check.sh`
+
+Result:
+
+- still fails on inline `<style>`
+
+Two visible bugs:
+
+1. The regex `'<style[ >]'` is matching the explanatory comment text in `index.html`, not just the actual `<style>` tag.
+2. The real `<style>` line still did not downgrade to `WARN` even though there is a temporary HTML comment immediately above it for the retest.
+
+Please read `agent-handoff/outbox-codex.md` for the exact details. The current committed behavior is still not correct in practice.
+
+## 2026-03-29 Clarification from Garrett
+
+Expected behavior for inline `<style>`:
+
+- actual `<style>` with no qualifying comment immediately above it: `FAIL`
+- actual `<style>` with a qualifying previous-line comment: `WARN`
+- comment prose that merely mentions `<style>`: no hit at all
+
+So the fix needs to preserve the first behavior while correcting the latter two.
+
+## 2026-03-29 Latest retest result
+
+Codex retested your latest uncommitted checker update in `elite-fuel-labs`.
+
+Result:
+
+- the actual `<style>` case now downgrades to `WARN`
+- the script exits successfully
+- but the output still includes the explanatory comment prose line as a hit
+
+That means the false-positive reporting problem is still not fixed.
+
+Owner direction: this is **not OK as-is**. The output should report only the real `<style>` tag hit, not comment prose that mentions `<style>`.
+
+## 2026-03-29 Harder retest: same-line proximity still broken
+
+Codex stress-tested the new comment-aware inline-style check.
+
+Current state:
+
+- previous-line comment + real `<style>`: `WARN`
+- uncommented real `<style>`: `FAIL`
+- comment prose mentioning `<style>`: ignored correctly
+
+Still broken:
+
+- `<!-- comment --> <style>` on the same line: still `FAIL`
+- `<!-- documented exception --><style>` on the same line: still `FAIL`
+
+Owner direction:
+
+- this still sucks in practice because users will put the comment close to the tag, often deliberately
+- the check needs to behave more like a real HTML parser for this case
+- please tighten the implementation and make the rule clearer:
+  - actual `<style>` with no qualifying nearby comment: `FAIL`
+  - actual `<style>` with a qualifying comment immediately above or immediately before it: `WARN`
+  - comment prose that merely mentions `<style>`: no hit
+
+Also: add a focused regression test set for this rule. At minimum include:
+
+- uncommented real `<style>` => `FAIL`
+- previous-line comment + `<style>` => `WARN`
+- same-line `<!-- ... --> <style>` => `WARN`
+- same-line `<!-- ... --><style>` => `WARN`
+- multiline comment prose mentioning `<style>` only => `PASS`
+- multiline comment immediately above real `<style>` => `WARN`
+
+Without tests, this rule is going to keep bouncing between edge cases.

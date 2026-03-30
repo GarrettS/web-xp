@@ -111,10 +111,100 @@ check "javascript: pseudo-protocol" \
   'href\s*=\s*["'"'"']javascript:' \
   '*.html'
 
-check "Inline <style> blocks" \
-  '<style[ >]' \
-  '*.html' \
-  overridable
+# Inline <style> — comment-aware check.
+# Uses awk to track <!-- --> state. Only flags <style> outside comments.
+# Outputs WARN: or FAIL: prefix so the shell knows the override status.
+# A <style> is WARN if:
+#   - the previous line was entirely a comment (no code on it), or
+#   - a comment appeared on the same line before the <style> tag.
+# A <style> inside a comment is skipped entirely.
+STYLE_HITS=$(find . -name '*.html' | grep -Ev "$EXCLUDES" | while read -r f; do
+  awk '
+    BEGIN { in_comment = 0; prev_line_was_comment = 0 }
+    {
+      line = $0
+      tmp = line
+      comment_before_tag = 0
+      line_has_code = 0
+      line_has_comment = 0
+      while (tmp != "") {
+        if (in_comment) {
+          idx = index(tmp, "-->")
+          if (idx > 0) {
+            in_comment = 0
+            line_has_comment = 1
+            tmp = substr(tmp, idx + 3)
+          } else { break }
+        } else {
+          idx = index(tmp, "<!--")
+          if (idx > 0) {
+            before = substr(tmp, 1, idx - 1)
+            if (match(before, /<style[[:space:]>]/)) {
+              tag = (prev_line_was_comment) ? "WARN" : "FAIL"
+              print tag ":" FILENAME ":" NR ":" line
+              line_has_code = 1
+              break
+            }
+            # Check for non-whitespace before comment
+            if (match(before, /[^[:space:]]/)) {
+              line_has_code = 1
+            }
+            in_comment = 1
+            line_has_comment = 1
+            tmp = substr(tmp, idx + 4)
+          } else {
+            if (match(tmp, /<style[[:space:]>]/)) {
+              tag = (prev_line_was_comment || comment_before_tag) ? "WARN" : "FAIL"
+              print tag ":" FILENAME ":" NR ":" line
+            }
+            # Check for non-whitespace content
+            if (match(tmp, /[^[:space:]]/)) {
+              line_has_code = 1
+            }
+            break
+          }
+          comment_before_tag = line_has_comment
+        }
+      }
+      # Previous line counts as "comment line" only if it had
+      # a comment and no code outside the comment
+      prev_line_was_comment = (line_has_comment && !line_has_code) || in_comment
+    }
+  ' "$f"
+done 2>/dev/null || true)
+
+if [ -z "$STYLE_HITS" ]; then
+  echo -e "${GREEN}PASS${NC}  Inline <style> blocks"
+else
+  s_fail="" s_warn=""
+  while IFS= read -r hit; do
+    tag=$(echo "$hit" | cut -d: -f1)
+    rest=$(echo "$hit" | cut -d: -f2-)
+    if [ "$tag" = "WARN" ]; then
+      s_warn="${s_warn}${rest}
+"
+    else
+      s_fail="${s_fail}${rest}
+"
+    fi
+  done <<< "$STYLE_HITS"
+
+  if [ -n "$s_fail" ]; then
+    echo -e "${RED}FAIL${NC}  Inline <style> blocks"
+    echo "$s_fail" | head -20
+    echo ""
+    FAIL=1
+  fi
+  if [ -n "$s_warn" ]; then
+    echo -e "${YELLOW}WARN${NC}  Inline <style> blocks  [commented exception]"
+    echo "$s_warn" | head -20
+    echo ""
+    WARN_COUNT=$((WARN_COUNT + 1))
+  fi
+  if [ -z "$s_fail" ] && [ -z "$s_warn" ]; then
+    echo -e "${GREEN}PASS${NC}  Inline <style> blocks"
+  fi
+fi
 
 check "Self-closing slash on void elements" \
   '<(img|br|hr|input|meta|link|area|base|col|embed|source|track|wbr)\b[^>]*/>' \

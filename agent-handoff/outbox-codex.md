@@ -1319,3 +1319,100 @@ After adding the marker:
 
 - the inline `<style>` check should downgrade from FAIL to WARN
 - exit code should no longer fail on that acknowledged exception alone
+## 2026-03-29 External Install Direction
+
+The `.web-xp/` project-local model works, but Garrett's reaction is the important signal: it feels messy if the checker and adapter files live inside the app repo tree.
+
+Recommended direction change:
+
+- Treat Web XP as an external tool, not a vendored project dependency.
+- Keep only a small project-side reference in the repo:
+  - `AGENTS.md`
+  - and possibly a tiny version pin such as `web-xp.lock` or a version line inside `AGENTS.md`
+- Install Web XP outside the project, for example under a user-space path.
+- Sync teams by pinning the required Web XP version in the project, not by checking `.web-xp/` into the repo.
+
+Why:
+
+- cleaner project tree
+- less repo pollution
+- still allows team consistency if the project records the required Web XP version
+
+Implication:
+
+- `.web-xp/` can remain a transitional/test setup
+- but the better long-term design is external install + pinned version reference in repo
+## 2026-03-29 Retest on elite-fuel-labs after updating to b3f751a
+
+Retest completed against the current committed version.
+
+Setup:
+
+- source repo HEAD: `b3f751a`
+- `elite-fuel-labs/.web-xp` was updated from `60e055e` to `b3f751a`
+- ran: `bash /Users/garrettsmith/Documents/elite-fuel-labs/.web-xp/bin/pre-commit-check.sh`
+
+Result:
+
+- still fails
+
+Current output for the inline-style check:
+
+- `./index.html:11:    Inline <style> is an intentional exception to the external stylesheet`
+- `./index.html:18:  <style>`
+
+Two concrete bugs are now visible:
+
+1. False positive from comment text
+
+- the regex `'<style[ >]'` matches the explanatory comment text on line 11
+- that means the checker is flagging prose, not just the actual tag
+
+2. Override still did not downgrade the real `<style>` hit
+
+- `index.html` currently has `<!-- Temporary retest comment -->` on line 17 immediately above `<style>` on line 18
+- with the current comment-based override logic, line 18 should have become `WARN`
+- it still showed up under `FAIL`
+
+So the current committed behavior is still not correct in practice.
+
+Recommended next step:
+
+- tighten the inline-style matcher so it only catches the actual tag, not comment prose
+- then re-test the override behavior again on the real `<style>` line
+
+## 2026-03-29 Retest of latest uncommitted fix
+
+I copied the current local `bin/pre-commit-check.sh` into `elite-fuel-labs/.web-xp/bin/pre-commit-check.sh` and reran the checker.
+
+Behavior is improved but still not acceptable as-is.
+
+What now works:
+
+- the actual `<style>` case is downgraded to `WARN`
+- the overall script exits successfully
+
+What is still wrong:
+
+- the WARN output still includes the explanatory comment prose line:
+  - `./index.html:11:    Inline <style> is an intentional exception to the external stylesheet`
+
+So the false-positive reporting problem is still present. The output should only report the real `<style>` tag hit, not comment prose mentioning `<style>`.
+
+Owner direction: this is **not OK as-is**.
+
+## 2026-03-29 Harder retest passed
+
+I retested the latest uncommitted inline-style check against the harder matrix.
+
+Results:
+
+- uncommented real `<style>` => `FAIL`
+- previous-line comment + `<style>` => `WARN`
+- same-line `<!-- ... --> <style>` => `WARN`
+- same-line `<!-- ... --><style>` => `WARN`
+- prose-only mention of `<style>` inside comments => `PASS`
+
+This version now behaves the way Garrett asked for.
+
+From my side: good to commit.
