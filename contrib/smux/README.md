@@ -25,7 +25,8 @@ Human → Claude → Codex → Claude → Human
 1. Human gives Claude a task
 2. Claude works, writes to outbox, runs `tmux-bridge handoff codex` (auto-sends)
 3. Codex pane receives the prompt via `tmux send-keys`, reviews, writes to outbox, runs `tmux-bridge handoff claude` (auto-sends)
-4. Claude acts on review, runs `tmux-bridge escalate "Ready for review"` when done
+4. Claude acts on review, runs `tmux-bridge escalate claude "Ready for review"` when done
+5. Human sees notification in their pane, replies with `tmux-bridge handoff claude "approved"` or `tmux-bridge handoff codex "fix X"`
 
 ## Files
 
@@ -42,6 +43,7 @@ From inside a tmux session:
 
 ```bash
 contrib/smux/bin/tmux-bridge list
+contrib/smux/bin/tmux-bridge register human %0
 contrib/smux/bin/tmux-bridge register codex %1
 contrib/smux/bin/tmux-bridge register claude %2
 contrib/smux/bin/tmux-bridge handoff codex "Review the latest note from Claude."
@@ -79,7 +81,7 @@ Emits timestamped terminal notifications when either handoff file changes. On ma
 - `notify <role|pane-id> <message>`: show a tmux status-line message in a pane
 - `paste <role|pane-id> <text>`: paste text into a pane without executing it
 - `handoff <codex|claude> [note]`: notify the pane, paste a standard inbox-check prompt, and auto-send
-- `escalate <message>`: fire terminal bell + macOS notification to get the human's attention
+- `escalate <from-role> <message>`: notify the human pane with bell + macOS notification, tagged with which agent is asking
 
 ## State
 

@@ -15,7 +15,7 @@ Usage:
   tmux-bridge notify <role|pane-id> <message>
   tmux-bridge paste <role|pane-id> <text>
   tmux-bridge handoff <codex|claude> [note]
-  tmux-bridge escalate <message>
+  tmux-bridge escalate <from-role> <message>
 
 Environment:
   SMUX_ROLE_FILE   Override role registry path
@@ -23,7 +23,8 @@ Environment:
 Notes:
   - Roles are stored outside the repo by default: ~/.web-xp/smux/roles.tsv
   - 'handoff' pastes a standard inbox-check prompt and auto-sends it.
-  - 'escalate' fires terminal bell + macOS notification to get the human's attention.
+  - 'escalate' notifies the human pane with the requesting agent's identity.
+  - Register human pane: tmux-bridge register human %0
 EOF
 }
 
@@ -40,11 +41,11 @@ ensure_role_dir() {
 
 valid_role() {
   case "$1" in
-    codex|claude)
+    codex|claude|human)
       return 0
       ;;
     *)
-      echo "tmux-bridge: unsupported role '$1' (expected codex or claude)" >&2
+      echo "tmux-bridge: unsupported role '$1' (expected codex, claude, or human)" >&2
       exit 1
       ;;
   esac
@@ -181,16 +182,26 @@ case "$cmd" in
     ;;
 
   escalate)
-    shift
-    message="${*:-Agent needs human attention}"
-    # Terminal bell
-    printf '\a'
+    require_tmux
+    from_role="${2:-}"
+    shift 2 || true
+    message="${*:-needs human attention}"
+    if [ -z "$from_role" ]; then
+      echo "Usage: tmux-bridge escalate <from-role> <message>" >&2
+      exit 1
+    fi
+    human_pane="$(resolve_target "human")"
+    display_msg="[$from_role] $message"
+    # Notify human pane
+    tmux display-message -t "$human_pane" "$display_msg"
+    # Terminal bell in human pane
+    tmux send-keys -t "$human_pane" "printf '\\a'" Enter
     # macOS notification
     if command -v osascript >/dev/null 2>&1; then
-      safe_message="${message//\"/\\\"}"
+      safe_message="${display_msg//\"/\\\"}"
       osascript -e "display notification \"$safe_message\" with title \"smux: human needed\" sound name \"Glass\"" 2>/dev/null || true
     fi
-    echo "ESCALATE: $message"
+    echo "ESCALATE: $display_msg"
     ;;
 
   ""|-h|--help|help)
