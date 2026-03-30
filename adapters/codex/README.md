@@ -10,7 +10,7 @@ Initial implementation. Capability specs are prompt/spec files that define each 
 
 Codex does not have a built-in project contract mechanism like Claude's `CLAUDE.md`. This adapter defines one by convention:
 
-1. A project contract file (`AGENTS.md`) tells Codex what to read and run each session.
+1. A project contract file (`CODEX.md`) tells Codex what to read and run each session.
 2. Capability spec files (one per Web XP capability) define what each operation does.
 3. The user tells Codex to follow the contract and use the spec files.
 
@@ -28,17 +28,30 @@ Codex does not have a built-in project contract mechanism like Claude's `CLAUDE.
 
 ## Project contract
 
-`AGENTS.md` — a convention-based contract file. Copy `AGENTS.example.md` to `AGENTS.md` in your project root.
+`CODEX.md` — a convention-based contract file. Copy `CODEX.example.md` to `CODEX.md` in your project root.
 
-The contract references all Web XP files from `.web-xp/` and defines `.web-xp/adapters/codex/` as the spec directory.
+The contract references Web XP files from the external install (`~/.web-xp/`) and defines `~/.web-xp/adapters/codex/` as the spec directory.
 
 ## Install
 
+Web XP is installed once per user, not per project.
+
 ```bash
-git submodule add https://github.com/GarrettS/web-xp.git .web-xp
-cp .web-xp/adapters/codex/AGENTS.example.md AGENTS.md
+git clone https://github.com/GarrettS/web-xp.git ~/.web-xp
+```
+
+Then in each project:
+
+```bash
+cp ~/.web-xp/adapters/codex/CODEX.example.md CODEX.md
+```
+
+To update:
+
+```bash
+cd ~/.web-xp && git pull
 ```
 
 ### Usage
 
-Tell Codex to read `AGENTS.md` at the start of each session. When invoking a specific capability, tell Codex to follow the corresponding spec file by name (e.g. "follow `web-xp-check.md` to audit the current diff"). The contract tells Codex where to find the spec files.
+Point Codex to `CODEX.md` when starting a session. When invoking a specific capability, tell Codex to follow the corresponding spec file by name (e.g. "follow `web-xp-check.md`"). The contract tells Codex where to find the spec files.

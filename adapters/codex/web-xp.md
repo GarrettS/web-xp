@@ -1,6 +1,6 @@
 # Web XP — Load Session Constraints
 
-Read `.web-xp/code-guidelines.md` and `.web-xp/code-philosophy.md`. Apply the following as constraints for all code written or reviewed in this session.
+Read `code-guidelines.md` and `code-philosophy.md` from your Web XP install. Apply the following as constraints for all code written or reviewed in this session.
 
 ## Design Principles
 
@@ -15,7 +15,7 @@ Read `.web-xp/code-guidelines.md` and `.web-xp/code-philosophy.md`. Apply the fo
 
 Event Delegation, Active Object, Shared Key, Ancestor Class, Dispatch Table, CSS over JS, `hidden` attribute, Extract Shared Logic, Template and cloneNode, Decompose Conditional.
 
-For full pattern definitions, read `.web-xp/code-guidelines.md`. For reasoning and examples, read `.web-xp/code-philosophy.md`.
+For full pattern definitions, read `code-guidelines.md` from your Web XP install. For reasoning and examples, read `code-philosophy.md`.
 
 ## For this session
 

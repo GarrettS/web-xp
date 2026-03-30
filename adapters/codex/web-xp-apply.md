@@ -28,5 +28,5 @@ Report: how many applied, skipped, declined.
 
 If any edits were made:
 - Remove CSS selectors, IDs, classes, and variables made unreferenced by the refactor.
-- Run `bash .web-xp/bin/pre-commit-check.sh` to verify no mechanical violations introduced.
+- Run `bash ~/.web-xp/bin/pre-commit-check.sh` to verify no new mechanical violations.
 - Review changed JS for correctness — no broken references, missing arguments, or changed behavior.

@@ -1,12 +1,12 @@
 # Web XP Off — Disable Enforcement
 
-Comment out Web XP directives in the project's `AGENTS.md` so they are inactive for all sessions.
+Comment out Web XP directives in the project's `CODEX.md` so they are inactive for all sessions.
 
 ## Procedure
 
-### 1. Locate AGENTS.md
+### 1. Locate CODEX.md
 
-Look for `AGENTS.md` in the project root. If it does not exist: "No Web XP directives found." Stop.
+Look for `CODEX.md` in the project root. If it does not exist: "No Web XP directives found." Stop.
 
 ### 2. Check for Web XP directives
 

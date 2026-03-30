@@ -177,7 +177,7 @@ An adapter teaches one agent platform how to use Web XP. Any agent that can read
 
 | Capability | What it does |
 |------------|--------------|
-| Bootstrap | Copy `pre-commit-check.sh` into the project, create a project contract |
+| Bootstrap | Create a project contract file |
 | Enable enforcement | Activate always-on directives in the project contract |
 | Disable enforcement | Deactivate directives (preserving them for re-enable) |
 

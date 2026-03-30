@@ -1,12 +1,12 @@
 # Web XP On — Enable Enforcement
 
-Activate Web XP directives in the project's `AGENTS.md` so they are active for all sessions.
+Activate Web XP directives in the project's `CODEX.md` so they are active for all sessions.
 
 ## Procedure
 
-### 1. Locate AGENTS.md
+### 1. Locate CODEX.md
 
-Look for `AGENTS.md` in the project root. If it does not exist: "Run web-xp-init first." Stop.
+Look for `CODEX.md` in the project root. If it does not exist: "Run web-xp-init first." Stop.
 
 ### 2. Check for Web XP directives
 

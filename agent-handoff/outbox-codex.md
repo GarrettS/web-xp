@@ -1467,3 +1467,298 @@ One non-blocking improvement for later:
 
 - `run_case()` currently runs the checker twice per test case
 - acceptable for now, but later you could capture output and exit code from a single invocation to keep the harness simpler and cheaper
+
+## 2026-03-29 External install design: framing
+
+The key design question is not just "what should Codex use?" It is:
+
+- should Web XP have one shared canonical external install for all agents?
+- or separate external installs per agent?
+
+My take:
+
+- a shared canonical install such as `~/.web-xp/` is better **if** both agents can actually consume it cleanly
+- if they cannot, forcing one shared path is the wrong abstraction
+
+Why shared is attractive:
+
+- one place to update core files
+- one canonical version
+- less duplication
+- cleaner cross-agent consistency
+
+But only if it is operationally real:
+
+- can Claude use `~/.web-xp/` as canonical source while still exposing what it needs in `~/.claude/skills/`?
+- can Codex read from `~/.web-xp/` directly?
+- can both stay in sync without extra manual copying every time?
+
+So I would frame the next design step as:
+
+- shared canonical install if the agents can actually use it
+- agent-specific external installs if they cannot
+
+I would not start from "Codex install path" alone. Start from whether a shared canonical install is genuinely workable across adapters.
+
+## 2026-03-29 External install design response
+
+I agree with the direction, with a few important constraints.
+
+### 1. Shared canonical install
+
+Yes: one shared canonical install is the better model **if** both adapters can actually consume it cleanly.
+
+Recommended shape:
+
+- canonical install: `~/.web-xp/`
+- Claude adapter material sourced from that install, then copied/synced into `~/.claude/skills/`
+- Codex reads directly from `~/.web-xp/`
+
+That gives:
+
+- one place to update core files
+- one canonical installed version
+- less duplication across agents
+
+This is the main architectural win. The install model should be designed around that, not around Codex in isolation.
+
+### 2. `AGENTS.md` path strategy
+
+I agree with your Option B lean.
+
+Use natural-language contract wording in `AGENTS.md`, not env vars.
+
+Reason:
+
+- env vars add another setup step and another failure mode
+- this is an agent contract, not a shell script
+- Codex can follow a documented install convention without literal shell-expanded paths in the contract
+
+So `AGENTS.md` should say things like:
+
+- read `code-guidelines.md` and `code-philosophy.md` from your Web XP install
+- run the checker from your Web XP install
+
+Then the Codex adapter docs define the install location convention explicitly as `~/.web-xp/`.
+
+### 3. Spec-file path strategy
+
+For the spec files themselves, I would be careful about hardcoding `~/.web-xp/` too aggressively.
+
+Better:
+
+- if the spec can naturally refer to "your Web XP install", do that
+- use literal `~/.web-xp/` only where concrete commands/examples are needed
+
+Why:
+
+- keeps the contract/document model cleaner
+- reduces dependence on how any specific runtime expands `~`
+
+### 4. `pre-commit-check.sh`
+
+I do **not** think we should default back to copying `pre-commit-check.sh` into the project.
+
+That would reintroduce the same pollution problem we are explicitly trying to get rid of.
+
+Preferred model:
+
+- the checker stays in the canonical Web XP install
+- project contract tells the agent to run it from there
+
+Only copy it into the project if a real workflow/tooling constraint appears that makes the external path unworkable.
+
+### 5. Submodule fallback
+
+Yes, keep submodule as a documented alternative, but not the default and not co-equal in the main docs.
+
+Reason:
+
+- some teams/projects will want pinned vendored copies
+- but making it co-primary adds choice noise and weakens the clean external-install story
+
+So:
+
+- main path: external canonical install
+- fallback path: submodule/vendor mode in adapter docs
+
+### 6. Version pinning
+
+I would not leave versioning as fully manual if we are now making external install the primary model.
+
+At minimum, the design should reserve a small project-side place for version intent, even if enforcement comes later.
+
+Recommended direction:
+
+- project keeps `AGENTS.md`
+- optionally add a tiny version pin later (`web-xp.lock` or a version line in `AGENTS.md`)
+
+If you do not want to implement version pinning yet, that is fine. But the docs/design should leave a clear place for it instead of pretending manual update is the final model.
+
+### Bottom line
+
+I agree with:
+
+- shared `~/.web-xp/` canonical install
+- natural-language `AGENTS.md`
+- no project-local `.web-xp/` by default
+- submodule as fallback only
+
+I disagree with:
+
+- copying `pre-commit-check.sh` back into the project as the default
+
+The broader architectural implication:
+
+- this should become the install model for Web XP core across adapters
+- not just a Codex-specific workaround
+
+## 2026-03-29 Hook model direction
+
+On hooks/extensions: I would avoid implicit hook discovery.
+
+Better direction:
+
+- Web XP runs its own core checks
+- Web XP can also run explicitly registered extra hooks/extensions
+- registration is explicit, not "look in some folder and run whatever is there"
+
+The clean CLI shape would be something like:
+
+- `web-xp add-hook <name> <path>`
+- `web-xp remove-hook <name>`
+- `web-xp show-hooks`
+
+Why this is better:
+
+- works with or without Git
+- no ambiguity about what ran
+- gives users custom behavior without polluting core Web XP
+- avoids inventing fuzzy "where should Web XP look for hooks?" rules
+
+Execution model:
+
+- `web-xp check` runs core Web XP checks
+- then runs any explicitly registered extra hooks in a defined order
+- output should distinguish core Web XP results from hook results
+
+Architecturally:
+
+- Git hooks remain optional wrappers around Web XP
+- user/project custom behavior becomes an explicit extension mechanism
+- if a user extension proves broadly useful, it can later be promoted into core Web XP
+
+## 2026-03-29 External install review: two issues and a direction change
+
+I reviewed the current external-install edits.
+
+### 1. Literal `~/.web-xp/` is now too baked into Codex contracts/specs
+
+This cuts against the better contract model we just discussed.
+
+I would change:
+
+- `AGENTS.example.md`
+- Codex spec files
+
+so they do not depend on literal `~` expansion as part of the contract model.
+
+Preferred split:
+
+- docs/examples can name `~/.web-xp/`
+- contracts/specs should prefer natural-language "your Web XP install" wording where possible
+
+### 2. Submodule support no longer has a strong reason to exist
+
+Given the external canonical install model, submodule now mostly adds:
+
+- extra docs burden
+- split-path maintenance
+- another partially supported configuration to keep coherent
+
+The old reasons for submodule were:
+
+- pinning per project
+- keeping files in-repo
+- project-specific customization
+
+But under the new model:
+
+- version pinning can be handled separately later
+- project-specific behavior can be explicit extensions/overrides
+- keeping the whole repo vendored in-project no longer looks like the right default or even a strong alternative
+
+My recommendation:
+
+- drop submodule as a supported path
+- keep one install story: external canonical install
+- handle project-specific behavior through explicit extensions/overrides, not vendoring the whole repo
+
+That gives a much cleaner model:
+
+- `~/.web-xp/` = canonical install
+- project = contract file + maybe version pin later
+- optional custom behavior = explicit extension mechanism
+
+## 2026-03-29 Contract-file naming concern
+
+New design concern from Garrett:
+
+- `AGENTS.md` is acceptable only if it stays genuinely agent-agnostic
+- if it ends up being effectively "the Codex contract file", the name is misleading
+- once contract prose starts needing agent-specific branching, it gets messy fast
+
+Possible better shape later:
+
+- keep Web XP externally installed at `~/.web-xp/`
+- keep small project-local config under something like `.web-xp/agents/`
+- for example:
+  - `.web-xp/agents/codex.md`
+  - `.web-xp/agents/claude.md`
+
+That would avoid overloading a generic `AGENTS.md` name for what is currently a Codex-specific contract.
+
+This is not necessarily a blocker for the current commit, but it should be treated as a real architecture/design question, not just naming bikeshed.
+
+## 2026-03-29 Rename review: not ready to commit yet
+
+The `AGENTS` → `CODEX` rename is incomplete.
+
+Still stale:
+
+- `README.md`
+  - install example still copies `AGENTS.example.md` to `AGENTS.md`
+  - usage text still says Codex should read `AGENTS.md`
+  - enforcement/contract text still says Codex uses `AGENTS.md`
+- `adapters/codex/README.md`
+  - still describes the contract as `AGENTS.md`
+  - install step still copies `AGENTS.example.md` to `AGENTS.md`
+  - usage text still says to read `AGENTS.md`
+- `adapters/codex/web-xp-init.md`
+  - still checks/creates `AGENTS.md`
+- `adapters/codex/web-xp-on.md`
+  - still targets `AGENTS.md`
+- `adapters/codex/web-xp-off.md`
+  - still targets `AGENTS.md`
+
+So the rename decision itself is fine, but the implementation is inconsistent. This is still a blocker before commit.
+
+## 2026-03-29 Final external-install review
+
+I reviewed the actual changed files, not just the handoff summary.
+
+No blocker from my side now.
+
+What I verified:
+
+- `AGENTS` references are fully replaced with `CODEX`
+- README and adapter docs now tell a single coherent external-install story
+- Claude init no longer copies the checker into projects
+- Codex contract/spec wording is consistent with the external-install model
+
+One minor non-blocking note only:
+
+- `adapters/codex/CODEX.example.md` still includes `(~/.web-xp/)` inline in prose
+- acceptable as-is, but if you want the contract maximally path-agnostic, that parenthetical could be removed later
+
+From my side: good to commit.

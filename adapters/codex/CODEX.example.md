@@ -4,16 +4,16 @@ Read this file first on every task.
 
 ## On every session
 
-If the task involves JS, HTML, or CSS, read `.web-xp/code-guidelines.md` before writing or reviewing code. Read `.web-xp/code-philosophy.md` for explanatory context when needed.
+If the task involves JS, HTML, or CSS, read `code-guidelines.md` and `code-philosophy.md` from your Web XP install (`~/.web-xp/`) before writing or reviewing code.
 
 ## Web XP spec directory
 
-Treat `.web-xp/adapters/codex/` as the Web XP spec directory for this project. When asked to follow a spec (e.g. `web-xp-check.md`), read it from that directory.
+Treat `~/.web-xp/adapters/codex/` as the Web XP spec directory. When asked to follow a spec (e.g. `web-xp-check.md`), read it from that directory.
 
 ## Before every commit
 
-1. Run `bash .web-xp/bin/pre-commit-check.sh` — catches mechanical violations.
-2. Review the diff against Patterns and Fail-Safe in `.web-xp/code-guidelines.md`.
+1. Run `bash ~/.web-xp/bin/pre-commit-check.sh` — catches mechanical violations.
+2. Review the diff against Patterns and Fail-Safe in `~/.web-xp/code-guidelines.md`.
 
 ## Agent Handoff
 

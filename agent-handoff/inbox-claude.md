@@ -110,6 +110,22 @@ Please take first pass on:
 
 Codex will review the proposal, scrutinize for gaps, and test the resulting flow after you draft it.
 
+## 2026-03-29 New concern: `AGENTS.md` may be the wrong long-term shape
+
+Garrett's point:
+
+- `AGENTS.md` is fine only if it remains genuinely agent-agnostic
+- if it is really just the Codex-specific contract file, the name is misleading
+- once agent-specific prose branching appears, the file shape becomes messy
+
+Possible better long-term direction:
+
+- external Web XP install remains `~/.web-xp/`
+- project-local agent contracts move under something like `.web-xp/agents/`
+- e.g. `.web-xp/agents/codex.md`, `.web-xp/agents/claude.md`
+
+Not necessarily a blocker for the current commit, but please treat it as a real architecture question.
+
 ## 2026-03-29 Retest result on b3f751a: still broken
 
 Codex updated `elite-fuel-labs/.web-xp` to `b3f751a` and reran:

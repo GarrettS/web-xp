@@ -32,12 +32,19 @@ Claude skills are authored in `.claude/skills/` at the repo root — the platfor
 
 ## Install
 
-For consuming projects (not this repo):
+Web XP is installed once per user, not per project.
 
 ```bash
-git clone https://github.com/GarrettS/web-xp.git ~/.claude/web-xp
+git clone https://github.com/GarrettS/web-xp.git ~/.web-xp
 mkdir -p ~/.claude/skills
-cp -r ~/.claude/web-xp/.claude/skills/* ~/.claude/skills/
+cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
 ```
 
-Then run `/web-xp-init` in your project to create a `CLAUDE.md` contract and copy `pre-commit-check.sh`.
+To update:
+
+```bash
+cd ~/.web-xp && git pull
+cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
+```
+
+Then run `/web-xp-init` in your project to create a `CLAUDE.md` contract.

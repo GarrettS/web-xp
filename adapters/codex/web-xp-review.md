@@ -6,7 +6,7 @@ Review code provided by the user — pasted snippets, file paths, or directories
 
 ### 1. Load the standards
 
-Read `.web-xp/code-guidelines.md`. For explanatory context, read `.web-xp/code-philosophy.md`.
+Read `code-guidelines.md` from your Web XP install. For explanatory context, read `code-philosophy.md`.
 
 ### 2. Receive code to review
 

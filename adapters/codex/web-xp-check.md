@@ -4,11 +4,11 @@ Audit the current diff against the Web XP standards. Report findings. Do not edi
 
 ## Step 1 — Mechanical checks
 
-Run `bash .web-xp/bin/pre-commit-check.sh` (or the project-local equivalent if `bin/pre-commit-check.sh` exists). If it reports violations, list them and stop — mechanical issues must be fixed before structural review.
+Run `bash ~/.web-xp/bin/pre-commit-check.sh`. If it reports violations, list them and stop — mechanical issues must be fixed before structural review.
 
 ## Step 2 — Structural review
 
-Read the Patterns and Fail-Safe sections of `.web-xp/code-guidelines.md`.
+Read the Patterns and Fail-Safe sections of `code-guidelines.md` from your Web XP install.
 
 Get the diff: use `git diff --cached` if it has output, otherwise `git diff`. If both are empty, report "No staged or unstaged changes to review. To review existing files regardless of git state, use `web-xp-review`." and stop.
 

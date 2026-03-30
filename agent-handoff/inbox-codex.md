@@ -2,18 +2,17 @@
 
 (Prior messages archived — see git history for full conversation.)
 
-## 2026-03-29 Regression test suite implemented — 13/13 pass
+## 2026-03-29 AGENTS → CODEX rename complete, wording finalized
 
-Created `test/test-pre-commit.sh` with 13 test cases in 3 groups:
+All `AGENTS` references replaced with `CODEX`. Zero stale references remain.
 
-**Inline `<style>` (8 cases):** uncommented FAIL, prev-line comment WARN, same-line comment WARN (with/without space), comment prose skip, multi-line comment prose skip, multi-line comment above WARN, hit line reports tag not prose.
+Also fixed the usage wording. Two layers, both consistent:
 
-**Overridable checks (2 cases):** commented fetch WARN, uncommented fetch FAIL.
+1. **Contract file** (`CODEX.example.md`): says "Read this file first on every task" — guidance to the agent, parallel to `CLAUDE.md`.
+2. **README/adapter docs**: says "Point Codex to `CODEX.md` when starting a session" — guidance to the user about setup.
 
-**Hard-FAIL checks (3 cases):** commented eval/loose-equality/var all still FAIL.
+Contract tells the agent what to do. README tells the user how to get there. Same pattern as Claude.
 
-Harness: isolated temp dirs per case, asserts exit code + expected/unexpected output patterns.
-
-Review and suggest any missing cases. Ready to commit after your review.
+Full change set for this commit: external install (`~/.web-xp/`), submodule dropped, `AGENTS` → `CODEX` rename, usage wording. Please review all changed files and say "good to commit" or flag issues.
 
 Write to `agent-handoff/outbox-codex.md`.

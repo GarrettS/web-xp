@@ -35,6 +35,20 @@ Web XP is not just style guidance. Its concrete examples live in `code-philosoph
 
 If you want the argument and examples first, start with `code-philosophy.md`. If you want the operational rules and named patterns first, start with `code-guidelines.md`.
 
+## Install
+
+Web XP is installed once per user, not per project. Both agents share the same install.
+
+```bash
+git clone https://github.com/GarrettS/web-xp.git ~/.web-xp
+```
+
+To update:
+
+```bash
+cd ~/.web-xp && git pull
+```
+
 ## Agent Support
 
 Web XP is agent-agnostic. The standard is the same regardless of which agent enforces it. Agent-specific adapters teach each platform how to load, check, review, and apply the standard.
@@ -48,59 +62,28 @@ See [Architecture](#architecture) for the full design. To add support for anothe
 
 ### Claude Code
 
-First-time setup:
+After installing Web XP:
 
 ```bash
-git clone https://github.com/GarrettS/web-xp.git ~/.claude/web-xp
 mkdir -p ~/.claude/skills
-cp -r ~/.claude/web-xp/.claude/skills/* ~/.claude/skills/
+cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
 ```
 
-To update:
-
-```bash
-cd ~/.claude/web-xp && git pull
-cp -r .claude/skills/* ~/.claude/skills/
-```
-
-Then run `/web-xp-init` in your project to create a `CLAUDE.md` contract and copy `pre-commit-check.sh`.
+Then run `/web-xp-init` in your project to create a `CLAUDE.md` contract.
 
 See `adapters/claude/README.md` for full details.
 
 ### Codex
 
-First-time setup:
+After installing Web XP, in each project:
 
 ```bash
-git submodule add https://github.com/GarrettS/web-xp.git .web-xp
-cp .web-xp/adapters/codex/AGENTS.example.md AGENTS.md
+cp ~/.web-xp/adapters/codex/CODEX.example.md CODEX.md
 ```
 
-Tell Codex to read `AGENTS.md` at the start of each session. Invoke capabilities by referencing the spec files by name (e.g. "follow `web-xp-check.md`").
+Point Codex to `CODEX.md` when starting a session. Invoke capabilities by referencing the spec files by name (e.g. "follow `web-xp-check.md`").
 
 See `adapters/codex/README.md` for full details.
-
-## Git Submodule
-
-If you want the standards files present inside your own repository for direct references, pinned revisions, or project-specific standards work:
-
-```bash
-git submodule add https://github.com/GarrettS/web-xp.git .web-xp
-```
-
-The standards files and adapters live in `.web-xp/`. The hosting project records a specific standards commit.
-
-To update a consuming project:
-
-```bash
-cd .web-xp
-git pull origin main
-cd ..
-git add .web-xp
-git commit -m "Update Web XP standards"
-```
-
-Note: `bin/check-web-xp-sync.sh` is internal to the Web XP repo — it auto-copies root standards files into `.claude/skills/` with DO NOT EDIT headers. Submodule consumers do not need it; the submodule pointer itself pins your standards version.
 
 ## Capabilities
 
@@ -119,7 +102,7 @@ Seven capabilities, shared across all adapters. The capability names are the sam
 
 | Capability | Purpose |
 |------------|---------|
-| `web-xp-init` | Set up a new project with contract and pre-commit script |
+| `web-xp-init` | Set up a new project with a contract file |
 | `web-xp-on` | Enable always-on enforcement |
 | `web-xp-off` | Disable enforcement |
 
@@ -137,7 +120,7 @@ Three states, orthogonal to which agent is running:
 | **explicit** | Standards available on demand. User invokes capabilities manually. |
 | **always-on** | Standards loaded every session. Checks required before every commit. |
 
-Each adapter expresses these through its platform's project contract mechanism (`CLAUDE.md` for Claude, `AGENTS.md` for Codex).
+Each adapter expresses these through its platform's project contract mechanism (`CLAUDE.md` for Claude, `CODEX.md` for Codex).
 
 ## Architecture
 
@@ -168,7 +151,7 @@ See `DESIGN.md` for the full architecture, role definitions, and orchestration t
 To add Web XP support for another agent platform:
 
 1. Implement the four runtime capabilities and three setup capabilities in whatever format your platform uses.
-2. Point all file references at the core files (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`).
+2. Point all file references at the core files in the Web XP install (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`).
 3. Define a project contract mechanism that can express `off | explicit | always-on`.
 4. Place adapter documentation in `adapters/<platform>/`. If the platform requires a specific path for discovery, authored files may live there instead — document the path in the adapter README.
 
@@ -182,22 +165,9 @@ Each rule traces back to a specific failure observed during development. When th
 
 > "The main thing that helps me see propagation is being told to look. The CLAUDE.md pre-commit sequence forces me to zoom out after I've been heads-down editing. Without that step, I'd mark the task done after the last edit." — Claude
 
-## Canonical Workflow
-
-This repository is the canonical source for Web XP.
-
-When changing Web XP itself:
-
-1. Edit and commit in a working clone of `web-xp`.
-2. Push the change to the canonical GitHub repository.
-3. Update any consuming project that vendors the standards as a submodule.
-4. Commit the submodule pointer update in that parent project separately.
-
-Changing the standards and updating a consuming project to use that change are separate repository changes.
-
 ## Disabling
 
-Web XP enforcement is driven by your project's contract file (`CLAUDE.md` for Claude, `AGENTS.md` for Codex). To disable it for a project, use `web-xp-off` (or manually comment out the directives). To re-enable, use `web-xp-on`. To disable globally, remove the adapter from your agent's skill/spec path.
+Web XP enforcement is driven by your project's contract file (`CLAUDE.md` for Claude, `CODEX.md` for Codex). To disable it for a project, use `web-xp-off` (or manually comment out the directives). To re-enable, use `web-xp-on`. To disable globally, remove the adapter from your agent's skill/spec path.
 
 ## License
 
