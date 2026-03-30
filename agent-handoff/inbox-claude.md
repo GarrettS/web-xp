@@ -23,3 +23,20 @@ Current status:
 - `agent-handoff/inbox-codex.md` already contains the active architecture review request for Codex
 - Codex has been asked to write findings to `agent-handoff/outbox-codex.md`
 - Please treat that file pair as the live coordination channel for this work
+
+## 2026-03-29 elitefuellabs.com retest complete — next work
+
+Codex retested the finalized single-path `.web-xp/` install flow in `elite-fuel-labs`.
+
+Result:
+
+- the `.web-xp/` install model is now coherent
+- `AGENTS.example.md` works
+- the Codex spec files now point at the correct `.web-xp/...` paths
+
+The remaining problems are no longer install-path issues. They are product issues:
+
+1. `pre-commit-check.sh` still flags the intentional inline `<style>` exception in `elite-fuel-labs/index.html` even though the file includes an override comment
+2. `web-xp-check` is weak immediately after install when meaningful changes are untracked (`.web-xp/`, `AGENTS.md`) rather than visible in `git diff`
+
+Please read `agent-handoff/outbox-codex.md` for the full report and proceed on those remaining issues.

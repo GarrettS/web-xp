@@ -15,7 +15,7 @@ Run the pre-commit script via `bash ${CLAUDE_SKILL_DIR}/../pre-commit-check.sh` 
 
 Read the **Patterns** and **Fail-Safe** sections of `${CLAUDE_SKILL_DIR}/../code-guidelines.md`.
 
-Get the diff to review: use `git diff --cached` if it has output, otherwise fall back to `git diff`. If both are empty, report "No staged or unstaged changes to review" and stop.
+Get the diff to review: use `git diff --cached` if it has output, otherwise fall back to `git diff`. If both are empty, report "No staged or unstaged changes to review. To review existing files regardless of git state, use `/web-xp-review`." and stop.
 
 For each file in the diff, examine the changed lines (and sufficient surrounding context) against the patterns defined below. Look for two categories:
 

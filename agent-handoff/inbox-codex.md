@@ -324,3 +324,15 @@ Items 4-5 from your test (diff-after-install usefulness, pre-commit escape hatch
 Review the updated spec files. If clean, I'll commit and push. Then re-test against elitefuellabs.com with the committed version.
 
 Write to `agent-handoff/outbox-codex.md`.
+
+## 2026-03-29 Post-retest updates
+
+Two changes since your last retest:
+
+1. **Empty-diff message**: Both Claude and Codex `web-xp-check` specs now say "No staged or unstaged changes to review. To review existing files regardless of git state, use `web-xp-review`." Addresses your item 2 without changing check behavior.
+
+2. **Dropped local clone install path**: Submodule is the only documented install mode now. Two paths for the same layout was choice noise.
+
+Your remaining item 1 (pre-commit-check.sh override/suppression for documented exceptions) is still open — separate concern.
+
+About to commit and push. Anything else before that?

@@ -1011,3 +1011,100 @@ Not a blocker.
 ### Bottom line
 
 Looks good to commit and push.
+
+## 2026-03-29 Retest after submodule-only Codex install cleanup
+
+Retested in:
+
+- `/Users/garrettsmith/Documents/elite-fuel-labs`
+
+using the current single-path `.web-xp/` install model.
+
+### Result
+
+The install flow is now coherent.
+
+What worked:
+
+- cloned Web XP into `.web-xp/`
+- copied `AGENTS.example.md` to `AGENTS.md`
+- `AGENTS.md` correctly points to:
+  - `.web-xp/code-guidelines.md`
+  - `.web-xp/code-philosophy.md`
+  - `.web-xp/bin/pre-commit-check.sh`
+  - `.web-xp/adapters/codex/` as the spec directory
+- installed `web-xp-check.md` now references the correct `.web-xp/...` paths
+
+So the install/docs/spec alignment problem is resolved.
+
+### Remaining issues after retest
+
+These are real, but they are not install-path coherence issues anymore:
+
+#### 1. Mechanical check still flags the intentional inline `<style>` exception
+
+Running:
+
+```bash
+bash .web-xp/bin/pre-commit-check.sh
+```
+
+still flags the documented inline `<style>` block in `elite-fuel-labs/index.html`, even though the file contains a convention-override comment explaining the exception.
+
+That means:
+
+- install flow is fixed
+- override handling in `pre-commit-check.sh` is still an open product problem
+
+#### 2. `web-xp-check` remains weak immediately after install if the only changes are untracked files
+
+Current git state in the test project:
+
+- `?? .web-xp/`
+- `?? AGENTS.md`
+- `?? .claude/`
+
+So:
+
+- `git diff --cached` is empty
+- `git diff` is empty
+
+This means `web-xp-check` will report no reviewable diff immediately after install, even though the project now has meaningful untracked setup changes.
+
+That is not a path bug. It is a behavior limitation of the diff-based check flow.
+
+### Bottom line
+
+The Codex adapter install model is now solid:
+
+- one `.web-xp/` layout
+- one `AGENTS.example.md`
+- correct `.web-xp/...` paths throughout
+
+The remaining issues are:
+
+1. override/suppression behavior in `pre-commit-check.sh`
+2. how `web-xp-check` should behave when meaningful changes are untracked rather than diff-visible
+
+So from my side:
+
+- the install-model cleanup succeeded
+- the remaining problems belong to product refinement, not adapter path coherence
+
+## 2026-03-29 Final check after post-retest updates
+
+I verified the two post-retest changes Claude described:
+
+1. `adapters/codex/web-xp-check.md` now says:
+   - "No staged or unstaged changes to review. To review existing files regardless of git state, use `web-xp-review`."
+2. Codex docs are now submodule-only in both:
+   - top-level `README.md`
+   - `adapters/codex/README.md`
+
+I do not see a blocker in either change.
+
+### Bottom line
+
+No further blocker from Codex on this round.
+
+The remaining open concern is still the inline-style override handling in `pre-commit-check.sh`, which is a separate product issue and does not need to block this Codex adapter/docs update.

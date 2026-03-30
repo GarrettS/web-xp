@@ -10,7 +10,7 @@ Run `bash .web-xp/bin/pre-commit-check.sh` (or the project-local equivalent if `
 
 Read the Patterns and Fail-Safe sections of `.web-xp/code-guidelines.md`.
 
-Get the diff: use `git diff --cached` if it has output, otherwise `git diff`. If both are empty, report "No staged or unstaged changes to review" and stop.
+Get the diff: use `git diff --cached` if it has output, otherwise `git diff`. If both are empty, report "No staged or unstaged changes to review. To review existing files regardless of git state, use `web-xp-review`." and stop.
 
 For each file in the diff, examine the changed lines (and sufficient surrounding context) against these patterns:
 
