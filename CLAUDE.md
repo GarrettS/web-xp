@@ -23,14 +23,9 @@ Do not use symlinks for standards file copies in `.claude/skills/`. They break o
 When collaborating with another agent, use the shared-file protocol in `AGENT-HANDOFF.md`.
 
 Before substantial work and before replying:
-1. Check whether `AGENT-HANDOFF.md`, `agent-handoff/inbox-claude.md`, and any collaboration-relevant outbox files (for example `agent-handoff/outbox-codex.md`) changed since last read.
-2. If any changed, re-read them.
-3. If no prior read state is available, read them.
-
-For Codex collaboration:
-- Check `agent-handoff/outbox-codex.md` before asking the user for information Codex may already have provided.
-- Write findings, status updates, and requests to `agent-handoff/outbox-claude.md`.
-- Do not assume terminal output or chat context has been shared across agents; write important context to the handoff files.
+1. Read `agent-handoff/codex-to-claude.md` (your inbound file).
+2. Write to `agent-handoff/claude-to-codex.md` (your outbound file).
+3. Do not assume terminal output or chat context has been shared across agents; write important context to the handoff files.
 
 ## Edit tool
 

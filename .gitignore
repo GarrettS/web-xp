@@ -1,0 +1,9 @@
+# Live handoff state (protocol is in AGENT-HANDOFF.md)
+agent-handoff/claude-to-codex.md
+agent-handoff/codex-to-claude.md
+
+# Local settings
+.claude/settings.local.json
+
+# Working docs not for distribution
+CODEX-PROMPT.md
