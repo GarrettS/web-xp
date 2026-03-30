@@ -10,7 +10,7 @@ Check that `~/.web-xp/` exists. If it does not exist, report: "Install Web XP fi
 
 ### 2. Create project contract
 
-If no `CODEX.md` exists, copy the contract template:
+If no `CODEX.md` exists, copy the built contract:
 
 ```bash
 cp ~/.web-xp/adapters/codex/CODEX.example.md CODEX.md

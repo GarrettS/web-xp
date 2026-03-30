@@ -9,27 +9,20 @@ Set up a project to use the Web XP standards skill.
 
 ## Procedure
 
-### 1. Create workflow contract
+### 1. Verify Web XP is installed
 
-If no `CLAUDE.md` exists, create a starter:
+Check that `~/.web-xp/` exists. If it does not exist, report: "Install Web XP first: `git clone https://github.com/GarrettS/web-xp.git ~/.web-xp`" and stop.
 
-```markdown
-# Claude Code — Project Contract
+### 2. Create workflow contract
 
-Read this file first on every task.
+If no `CLAUDE.md` exists, copy the built contract:
 
-## On every session
-
-If the task involves JS, HTML, or CSS, run `/web-xp` before writing or reviewing code.
-
-## Before every commit
-
-1. Run `/web-xp-check` — audit the diff against Web XP patterns.
-2. Run `bash ~/.web-xp/bin/pre-commit-check.sh` — catches mechanical violations.
+```bash
+cp ~/.web-xp/adapters/claude/CLAUDE.example.md CLAUDE.md
 ```
 
 If `CLAUDE.md` already exists, report: "CLAUDE.md already exists — skipping."
 
-### 2. Report
+### 3. Report
 
 Summarize what was created or skipped.

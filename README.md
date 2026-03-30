@@ -81,7 +81,7 @@ After installing Web XP, in each project:
 cp ~/.web-xp/adapters/codex/CODEX.example.md CODEX.md
 ```
 
-Point Codex to `CODEX.md` when starting a session. Invoke capabilities by referencing the spec files by name (e.g. "follow `web-xp-check.md`").
+Point Codex to `CODEX.md` when starting a session. Invoke capabilities by spec file name (e.g. "follow `web-xp-check.md`").
 
 See `adapters/codex/README.md` for full details.
 

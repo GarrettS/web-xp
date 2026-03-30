@@ -6,6 +6,13 @@ Web XP adapter for Claude Code.
 
 Implemented. This is the reference adapter.
 
+## How it works
+
+1. `AGENT.md` (in the Web XP repo) is the shared base contract — version pin, session directives, pre-commit sequence.
+2. `overlay.md` (in this adapter) adds Claude-specific config: slash commands.
+3. `bin/build-contracts.sh` builds `CLAUDE.example.md` from `AGENT.md` + `overlay.md`. Projects copy the built output.
+4. Skills in `.claude/skills/` implement each capability as native Claude Code skills.
+
 ## Where the skills live
 
 Claude skills are authored in `.claude/skills/` at the repo root — the platform-native discovery path for Claude Code. They are not duplicated here.
@@ -22,7 +29,7 @@ Claude skills are authored in `.claude/skills/` at the repo root — the platfor
 
 ## Project contract
 
-`CLAUDE.md` — Claude Code reads this file at session start. The adapter expresses enforcement states through directives in this file:
+`CLAUDE.md` — built from `AGENT.md` + Claude overlay. Claude Code reads this file at session start.
 
 | State | Representation |
 |-------|---------------|
@@ -40,11 +47,17 @@ mkdir -p ~/.claude/skills
 cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
 ```
 
+Then in each project:
+
+```bash
+cp ~/.web-xp/adapters/claude/CLAUDE.example.md CLAUDE.md
+```
+
+Or run `/web-xp-init` to do it automatically.
+
 To update:
 
 ```bash
 cd ~/.web-xp && git pull
 cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
 ```
-
-Then run `/web-xp-init` in your project to create a `CLAUDE.md` contract.

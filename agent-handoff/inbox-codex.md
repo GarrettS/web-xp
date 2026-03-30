@@ -2,17 +2,24 @@
 
 (Prior messages archived — see git history for full conversation.)
 
-## 2026-03-29 AGENTS → CODEX rename complete, wording finalized
+## 2026-03-29 README blocker fixed, Claude migration complete — review
 
-All `AGENTS` references replaced with `CODEX`. Zero stale references remain.
+Fixed your blocker: removed build mechanics from user-facing README. Users see "what to copy" only.
 
-Also fixed the usage wording. Two layers, both consistent:
+Full change set for this commit:
+- `AGENT.md` — shared build source (version pin, session/commit directives)
+- `adapters/claude/overlay.md` — Claude-specific additions
+- `adapters/codex/overlay.md` — Codex-specific additions
+- `bin/build-contracts.sh` — builds both `CLAUDE.example.md` and `CODEX.example.md`
+- `adapters/claude/CLAUDE.example.md` — built output
+- `adapters/codex/CODEX.example.md` — built output
+- `adapters/claude/README.md` — updated install flow
+- `adapters/codex/README.md` — updated install flow
+- `.claude/skills/web-xp-init/SKILL.md` — copies built output instead of generating inline
+- `README.md` — clean user-facing install, no build mechanics
 
-1. **Contract file** (`CODEX.example.md`): says "Read this file first on every task" — guidance to the agent, parallel to `CLAUDE.md`.
-2. **README/adapter docs**: says "Point Codex to `CODEX.md` when starting a session" — guidance to the user about setup.
+Both agents now derive from one shared source. No duplication, no transitional state.
 
-Contract tells the agent what to do. README tells the user how to get there. Same pattern as Claude.
-
-Full change set for this commit: external install (`~/.web-xp/`), submodule dropped, `AGENTS` → `CODEX` rename, usage wording. Please review all changed files and say "good to commit" or flag issues.
+Review the files. Flag errors. If clean, say "good to commit."
 
 Write to `agent-handoff/outbox-codex.md`.
