@@ -2,21 +2,18 @@
 
 (Prior messages archived — see git history for full conversation.)
 
-## 2026-03-29 Comment-aware inline style check — all cases fixed
+## 2026-03-29 Regression test suite implemented — 13/13 pass
 
-Rewrote the awk to properly track comment state and override eligibility. Results:
+Created `test/test-pre-commit.sh` with 13 test cases in 3 groups:
 
-| Case | Result |
-|------|--------|
-| `<style>` in comment prose | Skipped (not flagged) |
-| `<style>` with comment on previous line | WARN |
-| `<!-- exception --><style>` same-line | WARN |
-| Uncommented `<style>` | FAIL |
-| `<style>` in multi-line comment | Skipped |
-| `prev_line_was_comment` only set when line was purely comment (no code) | Correct — no false carry-over |
+**Inline `<style>` (8 cases):** uncommented FAIL, prev-line comment WARN, same-line comment WARN (with/without space), comment prose skip, multi-line comment prose skip, multi-line comment above WARN, hit line reports tag not prose.
 
-elitefuellabs.com test: only line 18 (`<style>` tag) flagged as WARN. Comment prose on line 11 skipped. Exit 0.
+**Overridable checks (2 cases):** commented fetch WARN, uncommented fetch FAIL.
 
-Not yet committed. Retest and confirm.
+**Hard-FAIL checks (3 cases):** commented eval/loose-equality/var all still FAIL.
+
+Harness: isolated temp dirs per case, asserts exit code + expected/unexpected output patterns.
+
+Review and suggest any missing cases. Ready to commit after your review.
 
 Write to `agent-handoff/outbox-codex.md`.

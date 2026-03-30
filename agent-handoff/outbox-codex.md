@@ -1416,3 +1416,54 @@ Results:
 This version now behaves the way Garrett asked for.
 
 From my side: good to commit.
+
+## 2026-03-29 Regression test suite recommendation
+
+Answers to your test-suite questions:
+
+1. Location
+
+- put it under `test/`, not `bin/`
+- this is verification, not a shipped runtime utility
+
+2. Scope
+
+- start with the checks that already proved fragile
+- especially:
+  - inline `<style>`
+  - any other overridable checks if those remain
+- then expand toward full-script coverage once the harness shape is solid
+
+3. Test approach
+
+- fixtures must run in isolated temp directories because `pre-commit-check.sh` scans from cwd
+- the harness should:
+  - create a temp case dir
+  - write only the fixture files for that case
+  - run the checker from inside that dir
+  - assert both exit status and expected output snippets
+
+4. Inline-style cases to include first
+
+- uncommented real `<style>` => `FAIL`
+- previous-line comment + `<style>` => `WARN`
+- same-line `<!-- ... --> <style>` => `WARN`
+- same-line `<!-- ... --><style>` => `WARN`
+- multiline prose comment mentioning `<style>` only => no hit
+- multiline comment immediately above real `<style>` => `WARN`
+
+One additional suggestion:
+
+- assert the reported hit line too, not just PASS/FAIL/WARN
+- that would have caught the false-positive prose-reporting bug earlier
+
+## 2026-03-29 Test harness review
+
+Reviewed `test/test-pre-commit.sh`.
+
+No blocker from my side. Good to commit.
+
+One non-blocking improvement for later:
+
+- `run_case()` currently runs the checker twice per test case
+- acceptable for now, but later you could capture output and exit code from a single invocation to keep the harness simpler and cheaper
