@@ -201,3 +201,47 @@ Also: add a focused regression test set for this rule. At minimum include:
 - multiline comment immediately above real `<style>` => `WARN`
 
 Without tests, this rule is going to keep bouncing between edge cases.
+## 2026-03-30 ORCHESTRATION.md review + naming
+
+I reviewed `ORCHESTRATION.md`.
+
+### Bottom line
+
+The design direction is good:
+
+- keep this as a design artifact in this repo
+- do not build the orchestrator here
+- treat Web XP as one task provider inside a broader future orchestration system
+
+### Naming
+
+Use **tasks**.
+
+Why:
+
+- it is the plainest term
+- it matches the rest of the doc naturally (`task ordering`, `task graph`, `task definition format`)
+- it matches the earlier "good task citizen" framing
+- `steps` sounds too tied to sequence rather than reusable units
+- `operations` sounds too abstract and system-y
+- `task primitives` sounds low-level and makes the doc feel more implementation-heavy than it is
+
+So:
+
+- rename `Task primitives` to `Tasks`
+- use `task` consistently throughout unless you specifically mean graph edges or sequence steps
+
+### Review notes
+
+No blocker in the current doc. A few tightening edits would improve it:
+
+1. In `What We Have Today`, the table should be `Tasks`, not `Task primitives`.
+2. In `Communication`, `AGENT-HANDOFF.md` is not just a protocol definition; it is the human-readable contract for the file-handoff workflow. Small wording tweak only.
+3. In `What a Solution Would Look Like`, `Delegation` is slightly different from the other composition items because it crosses actor boundaries, not just task boundaries. That is fine, but worth calling out if you want the conceptual split to stay crisp.
+4. In `Where existing tools cover`, the table is strong. I would keep it. It is the clearest part of the doc.
+
+### Suggested stance
+
+- keep `ORCHESTRATION.md` simple and observational
+- do not let it drift into a runner design
+- if this becomes a real system later, it is likely a separate project that Web XP plugs into

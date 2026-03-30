@@ -259,6 +259,51 @@ Suggested mapping:
   - tells Codex to read `code-guidelines.md` and `code-philosophy.md`
   - applies Web XP as session constraints
 
+## 2026-03-30 ORCHESTRATION.md review + naming
+
+I reviewed `ORCHESTRATION.md`.
+
+### Bottom line
+
+The design direction is good:
+
+- keep this as a design artifact in this repo
+- do not build the orchestrator here
+- treat Web XP as one task provider inside a broader future orchestration system
+
+### Naming
+
+Use **tasks**.
+
+Why:
+
+- it is the plainest term
+- it matches the rest of the doc naturally (`task ordering`, `task graph`, `task definition format`)
+- it matches the earlier "good task citizen" framing
+- `steps` sounds too tied to sequence rather than reusable units
+- `operations` sounds too abstract and system-y
+- `task primitives` sounds low-level and makes the doc feel more implementation-heavy than it is
+
+So:
+
+- rename `Task primitives` to `Tasks`
+- use `task` consistently throughout unless you specifically mean graph edges or sequence steps
+
+### Review notes
+
+No blocker in the current doc. A few tightening edits would improve it:
+
+1. In `What We Have Today`, the table should be `Tasks`, not `Task primitives`.
+2. In `Communication`, `AGENT-HANDOFF.md` is not just a protocol definition; it is the human-readable contract for the file-handoff workflow. Small wording tweak only.
+3. In `What a Solution Would Look Like`, `Delegation` is slightly different from the other composition items because it crosses actor boundaries, not just task boundaries. That is fine, but worth calling out if you want the conceptual split to stay crisp.
+4. In `Where existing tools cover`, the table is strong. I would keep it. It is the clearest part of the doc.
+
+### Suggested stance
+
+- keep `ORCHESTRATION.md` simple and observational
+- do not let it drift into a runner design
+- if this becomes a real system later, it is likely a separate project that Web XP plugs into
+
 - `web-xp-check.md`
   - read-only audit
   - run `bin/pre-commit-check.sh`
@@ -2041,3 +2086,537 @@ Feedback:
 Direct answer to the latest request:
 
 - good to commit
+
+## 2026-03-29 What next after 981e251
+
+Recommended next order:
+
+1. issue cleanup
+2. extension mechanism
+3. orchestration / `smux`
+
+Why:
+
+- the install + contract + shared-source model is now settled enough to clean up the open issues against current reality
+- extension mechanism is the next product-level flexibility layer on top of that stable base
+- orchestration should still come after extension/config mechanics, not before
+
+## 2026-03-30 Reality check follow-up: DESIGN.md still lags reality
+
+README looks fine now.
+
+Remaining reality-gap findings are in `DESIGN.md`:
+
+1. Claude adapter description is stale.
+
+- current text still describes Claude mainly as skills plus `CLAUDE.md`
+- but Claude now also derives its built contract from shared `AGENT.md` + `adapters/claude/overlay.md`
+- Codex mentions the shared build source; Claude should too
+
+2. Repo structure section is stale.
+
+The tree should now account for:
+
+- `AGENT.md`
+- `bin/build-contracts.sh`
+- `adapters/claude/overlay.md`
+- `adapters/claude/CLAUDE.example.md`
+- `adapters/codex/overlay.md`
+
+So the remaining docs cleanup is not in `README.md`; it is in `DESIGN.md`.
+
+## 2026-03-30 One remaining stale point in DESIGN.md
+
+Most of `DESIGN.md` now reflects reality.
+
+One thing still feels stale/overclaimed:
+
+- `DESIGN.md` still presents the `smux` orchestration layer as a concrete repo/design layer with its own subsection and repo location (`orchestration/smux/`)
+- but README was already corrected to stop presenting unimplemented orchestration as part of current reality
+
+So there is still a docs-consistency gap:
+
+- either keep `DESIGN.md` clearly future-facing for orchestration and label it as not yet implemented
+- or tone it down the same way README was toned down
+
+Right now `DESIGN.md` still reads as if `smux` is a more concrete part of the repo plan than it actually is today.
+
+## 2026-03-30 Final reality-check nits in DESIGN.md
+
+Two small stale/inconsistent spots remain:
+
+1. In **Project setup (not a runtime role)**, the bootstrap bullet still says:
+
+- "set up a new project with contract and pre-commit script"
+
+That is stale after the external-install change. It should just say contract/project setup, not copying a pre-commit script.
+
+2. In **Repo Structure**, the prose line above the tree still says:
+
+- "Orchestration integrations live under `orchestration/`."
+
+But the tree no longer includes that directory, and the current doc position is that orchestration is planned/not implemented.
+
+That line should either:
+
+- be removed for now
+- or be rewritten to make the future/planned status explicit
+
+## 2026-03-30 Issue recommendations
+
+Recommendations against current repo reality:
+
+### #1 Make Web XP agent-agnostic
+
+- **Close**
+
+Reason:
+
+- architecture work is done
+- public docs were rewritten
+- external install + shared `AGENT.md` contract source is now live
+- Claude + Codex both exist as real adapters
+
+### #2 Add Codex as a first-class adapter
+
+- **Close**
+
+Reason:
+
+- Codex adapter is implemented
+- tested against a real project
+- contract/install/docs are in place
+
+### #3 Add optional smux orchestration
+
+- **Keep open, but update the issue text**
+
+Reason:
+
+- orchestration is still not implemented
+- design ideas exist, but the repo/docs have been corrected to avoid presenting it as current reality
+
+So #3 should stay open as a planned future issue, but its wording should match the current state:
+
+- design explored
+- adapter/install/contract foundation now in place
+- implementation not started
+
+## 2026-03-30 Direct review of issue closure/update messages
+
+These are basically right. I would use them with only small tightening.
+
+### #1 — close
+
+Approved direction. Slight wording tweak:
+
+> Implemented. Web XP now has a three-layer architecture (core / adapters / planned orchestration) reflected in `DESIGN.md`. Claude and Codex adapters are both live. External install at `~/.web-xp/` with shared `AGENT.md` build source. README rewritten as agent-neutral. Build order steps 1-4 are complete.
+
+Reason for tweak:
+
+- keeps orchestration clearly in the planned/not-implemented bucket
+
+### #2 — close
+
+Approved.
+
+Suggested wording:
+
+> Implemented. Codex now has seven capability spec files, a `CODEX.md` contract built from shared `AGENT.md` + Codex overlay, and shared contract generation via `bin/build-contracts.sh`. Tested against elitefuellabs.com. Pre-commit mechanical checks and regression coverage were strengthened during the implementation.
+
+Reason for tweak:
+
+- slightly less tied to one override detail
+- captures the lasting outcome rather than one intermediate bugfix
+
+### #3 — keep open, update description
+
+Approved direction.
+
+Suggested wording:
+
+> Leave open. smux/orchestration design has been explored in `DESIGN.md` (roles, topologies, coder/auditor split), but implementation has not started. The adapter/install/contract foundation is now in place, so this remains the next planned layer rather than current functionality.
+
+Bottom line:
+
+- #1 close
+- #2 close
+- #3 stay open, update wording
+
+## 2026-03-30 Extension mechanism design response
+
+Here is the simplest useful shape.
+
+### 1. Where extensions live
+
+Split by ownership:
+
+- user-installed extension code lives in `~/.web-xp/extensions/`
+- project enables/configures extensions in project-local config
+
+That keeps:
+
+- core Web XP external and reusable
+- project-specific enablement local to the project
+- no need to modify core to add custom behavior
+
+Given the current contract layout, the clean project-side home is shared config in `AGENT.md`.
+
+### 2. How they hook in
+
+Do **not** make `pre-commit-check.sh` discover or run them implicitly.
+
+Use a separate explicit extension mechanism.
+
+Core rule:
+
+- Web XP core commands run core behavior
+- extensions run only if explicitly registered/enabled
+
+So the right future entry point is not "edit `pre-commit-check.sh`" but something more like:
+
+- `web-xp check` runs core checks
+- then runs enabled extensions in a defined order
+
+Until there is a wrapper command, the design can still define the extension mechanism first and keep execution manual/documented.
+
+### 3. Interface
+
+Start with the simplest interface:
+
+- executable script
+- zero or minimal fixed arguments
+- exit code semantics:
+  - `0` = pass
+  - nonzero = fail
+- stdout/stderr shown as extension output
+
+Optional later:
+
+- structured metadata
+- named phases
+- richer result format
+
+But first version should just be "registered script with clear exit semantics".
+
+### 4. Agent-agnostic vs agent-specific
+
+Extensions should be **agent-agnostic by default**.
+
+Reason:
+
+- examples like Puppeteer, Selenium, custom linters, naming checks are not tied to Claude or Codex
+- they are project/workflow extensions, not adapter behavior
+
+If an extension needs agent-specific integration later, that should be a separate adapter concern, not the base extension model.
+
+### 5. Smallest useful first version
+
+Phase 1:
+
+- project-local config in `AGENT.md` listing enabled extension scripts
+- scripts live in `~/.web-xp/extensions/` or project-owned paths
+- documented/manual invocation order
+
+Example use cases:
+
+- Puppeteer smoke test before commit
+- custom naming convention check
+- project-specific lint/verification step
+
+### Recommendation
+
+Keep it explicit and simple:
+
+- no implicit hook discovery
+- no Git dependency
+- no changes inside `pre-commit-check.sh`
+- agent-agnostic script extensions
+- project-local enablement via shared config
+
+If you later add CLI helpers, then commands like:
+
+- `web-xp add-extension <name> <path>`
+- `web-xp remove-extension <name>`
+- `web-xp show-extensions`
+
+would be a clean layer on top of the same model.
+
+## 2026-03-30 Rethink accepted: tasks, not extensions
+
+Yes, this reframe improves the model.
+
+The better framing is:
+
+- Web XP is a set of tasks
+- it does not own the workflow container
+- it should compose cleanly inside a broader task chain
+
+So instead of:
+
+- "users extend Web XP"
+
+the better model is:
+
+- "Web XP participates in a task chain the user or team owns"
+
+### What changes
+
+The explicit-registration model becomes much less important as the primary design.
+
+Why:
+
+- explicit registration made sense when we were treating Web XP as the orchestrator
+- but if Web XP is just one task among others, the outer workflow should own composition
+
+Examples:
+
+- `eslint -> web-xp mechanical check -> web-xp structural review -> puppeteer smoke -> deploy`
+- Makefile target
+- CI job sequence
+- shell script
+- agent-directed pre-commit sequence
+
+In that world, Web XP should expose clean task primitives and not try to become the extension host.
+
+### What Web XP should own
+
+Web XP should own:
+
+- standalone tasks with clear inputs/outputs
+- stable invocation points
+- clear pass/fail/findings behavior
+- docs showing how to compose Web XP tasks into a larger chain
+
+Web XP should not own:
+
+- the user's whole pipeline
+- automatic discovery of adjacent tools
+- a bespoke extension runtime unless a real gap appears later
+
+### Practical implication
+
+The near-term next step is probably not "build an extension mechanism."
+
+It is:
+
+- document Web XP tasks as composable units
+- define their interface more explicitly
+- show example compositions with other tasks
+
+For example:
+
+- `bash ~/.web-xp/bin/pre-commit-check.sh` = mechanical task
+- agent contract review step = structural task
+- optional external task = Puppeteer / unit tests / project lint
+
+### Interface guidance
+
+Keep task interface simple:
+
+- executable command
+- clear exit code semantics
+- human-readable output
+- optionally later: structured output if composition pressure justifies it
+
+### Revised recommendation
+
+Instead of "extension mechanism" as the next thing, I would reframe the next design work as:
+
+- task-chain composition
+
+Concrete deliverables could be:
+
+1. define/document Web XP task primitives
+2. document example task chains
+3. only introduce registration/extension machinery later if real composition pain appears
+
+So yes: the new framing changes my recommendation. The explicit-registration model is no longer the main path. Composition-first is the better design.
+
+## 2026-03-30 Chain / pipeline pattern response
+
+This is closer to a **pipeline of tasks with fail-fast control** than classic Chain of Responsibility.
+
+Why:
+
+- Chain of Responsibility usually means "pass a request down handlers until one handles it"
+- here, we usually want multiple tasks to run in sequence, not one handler to claim the request
+- the key behavior is ordered execution, shared context, and optional short-circuit on failure
+
+So the better framing is:
+
+- task pipeline
+- or task chain
+- with fail-fast / continue-on-failure policy per step
+
+### 1. Pattern choice
+
+Best fit:
+
+- pipeline for the dataflow / sequencing model
+- filter-chain semantics for stop/continue behavior when needed
+
+So I would not lean too hard on "Chain of Responsibility" as the primary name. It risks implying only one task handles the work.
+
+### 2. Concrete interface
+
+Keep the first version extremely small.
+
+Each task should have:
+
+- **Input**
+  - current project working directory
+  - optionally diff/file scope if the caller provides it
+  - environment/context from the runner
+
+- **Output**
+  - human-readable stdout/stderr
+  - exit code
+
+- **Control semantics**
+  - `0` = pass
+  - nonzero = fail
+
+That is enough for composition.
+
+Optional later, only if needed:
+
+- machine-readable findings
+- typed outputs
+- previous-task annotations fed forward
+
+But I would not start there.
+
+### 3. What runs the chain
+
+Minimum viable version:
+
+- **not** a new task runner
+- let the project or user own orchestration
+
+Examples:
+
+- shell script
+- Makefile target
+- CI job
+- agent contract sequence
+
+So Web XP should document:
+
+- what tasks it exposes
+- how to call them
+- what their exit behavior means
+
+Only build a lightweight runner if composition pain becomes real.
+
+### 4. Where Web XP fits
+
+Exactly as you framed it:
+
+- Web XP provides tasks in the chain
+- it does not own the chain
+
+Examples:
+
+- `bash ~/.web-xp/bin/pre-commit-check.sh`
+- agent-driven structural review step
+- project-owned tasks like Puppeteer, ESLint, unit tests
+
+Web XP is one participant in a broader task sequence.
+
+### 5. Minimum viable version
+
+Ship:
+
+1. documented Web XP task primitives
+2. documented exit semantics
+3. example compositions
+
+For example:
+
+- `web-xp mechanical task`
+- `web-xp structural review task`
+- project task chain examples:
+  - `eslint -> web-xp mechanical -> web-xp review -> puppeteer`
+
+Do **not** start by building an ANT-like runner.
+
+That is overkill until there is real evidence that users need Web XP to own execution order itself.
+
+### Recommendation
+
+The next design deliverable should probably be:
+
+- a short "Task Composition" section in docs/design
+
+Contents:
+
+- Web XP tasks available today
+- how they signal pass/fail
+- example ways to compose them with project tasks
+- explicit statement that Web XP does not own the pipeline
+
+If later there is real demand for declarative ordering, then a tiny chain runner/config can be added. But that should be phase 2, not the first move.
+
+## 2026-03-30 Bigger-than-Web-XP addendum
+
+The new framing is important:
+
+- this task-chain idea may be larger than Web XP itself
+- Web XP may be one consumer/participant, not the home of the orchestration system
+
+This also connects back to terminology we already used:
+
+- `smux` discussion was **agent orchestration**
+- this newer task-chain idea is **task orchestration**
+
+They are related, but they are not the same thing.
+
+### Recommendation
+
+For now, treat this as **not a feature of Web XP core**.
+
+Best near-term stance:
+
+- Web XP should be a good task citizen
+- Web XP should document how its tasks compose with other tasks
+- Web XP should not try to become the generic task runner/orchestrator yet
+
+So among the options you listed:
+
+- option 3 is best **for now**: use existing tools (scripts, Make, CI, agent contracts) and document composition
+- option 2 may become right later **if** a real reusable orchestration/task-runner concept emerges that is broader than Web XP
+
+I would not build it inside Web XP first and only later discover it should have been separate.
+
+### Implication for issue #3
+
+Issue #3 should stay focused on `smux` / agent orchestration for Web XP.
+
+This broader task-chain/orchestrator idea is adjacent, but it is not the same issue.
+If it becomes concrete, it probably deserves its own issue or even its own repo.
+
+## 2026-03-30 Direct response: capture design here, build later elsewhere if needed
+
+Direct answer:
+
+- put the design doc **here** for now
+- keep it simple
+- do **not** build the orchestrator/task runner in this repo yet
+
+Recommended shape:
+
+- `ORCHESTRATION.md` in this repo
+
+Why:
+
+- the pain was discovered through Web XP work
+- the concrete lessons are freshest here
+- a lightweight design artifact is cheap and useful
+- implementation still looks bigger than Web XP and should only move to a separate project if the need keeps proving itself
+
+So the sequence should be:
+
+1. capture the design here now
+2. validate that the need persists beyond this immediate workflow
+3. if it does, build the implementation elsewhere later
