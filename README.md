@@ -2,30 +2,26 @@
 
 ### AI-Assisted XP for Lean, Transparent Web Front-End
 
-Governing rules, named refactoring patterns, and review capabilities for building applications directly on the web platform. The code stays legible, stable, and maintainable as it grows.
+Web XP gives you a shared doctrine, review workflow, and agent adapters for building on the web platform without losing architectural clarity as the project grows.
 
-Web XP takes the XP habits of tight feedback, simple design, and continuous refactoring and turns the dials up with AI-assisted review. The goal is not more generated code for its own sake. The goal is better code, produced faster, under active human judgment.
-
-Kent Beck once asked, "What if we took all the good practices and turned the dials up to 11?" Web XP takes that instinct seriously on the web platform: AI tightens the feedback, review, and refactoring loops rather than replacing engineering judgment.
-
-## Why It Exists
+## Why Use It
 
 AI writes code fast. Without constraints, it writes inconsistency and maintenance debt just as fast.
 
-Web XP exists to keep speed from dissolving into slop. It defines governing rules, reusable patterns, and review capabilities for applications built directly on the web platform, with an emphasis on code that remains clear, debuggable, and durable over time.
+Web XP exists to keep speed from dissolving into slop. It applies shared standards, review discipline, and web-platform-first structure so code stays clear, debuggable, and durable as the project grows.
 
-The point is not to recreate framework dependency in lighter clothing. Many framework abstractions solve problems introduced by the framework itself. Web XP keeps more of the system legible by working with the DOM and standardized Web APIs directly.
+The point is not to recreate framework dependency in lighter clothing. Many framework abstractions solve problems introduced by the framework itself.
 
 ## What You Get
 
-- **Governing standards** in `code-guidelines.md`: principles, named patterns, language rules, and formatting defaults.
-- **Explanatory context** in `code-philosophy.md`: why the standards work, how framework-era assumptions weakened, and what replaces common abstractions.
-- **Agent adapters** for Claude Code and Codex: load the standards, audit a diff, review arbitrary code, or walk through fixes interactively.
-- **Mechanical checks** in `bin/pre-commit-check.sh` for recurring violations such as inline handlers, hardcoded colors, loose equality, and junk-drawer filenames.
+- **Governing standards** in `code-guidelines.md`: principles, named patterns, language rules, and formatting defaults
+- **Explanatory context** in `code-philosophy.md`: why the standards work and what replaces common framework-era assumptions
+- **Agent adapters** for Claude Code and Codex: load the standard, audit a diff, review arbitrary code, or walk through fixes interactively
+- **Mechanical checks** in `bin/pre-commit-check.sh` for recurring violations such as inline handlers, hardcoded colors, loose equality, and junk-drawer filenames
 
 ## What It Covers
 
-Web XP is not just style guidance. Its concrete examples live in `code-philosophy.md`, especially around:
+Concrete examples and reasoning live in `code-philosophy.md`, especially around:
 
 - routing and URL-driven navigation
 - state management and scope
@@ -33,105 +29,68 @@ Web XP is not just style guidance. Its concrete examples live in `code-philosoph
 - failure handling and graceful degradation
 - DOM ownership, dispatch, and CSS-driven state
 
-If you want the argument and examples first, start with `code-philosophy.md`. If you want the operational rules and named patterns first, start with `code-guidelines.md`.
+If you want the operational rules and named patterns first, start with `code-guidelines.md`.
 
-## Install
+## Quick Start
 
-Web XP is installed once per user, not per project. Both agents share the same install.
+Install Web XP once:
 
 ```bash
 git clone https://github.com/GarrettS/web-xp.git ~/.web-xp
 ```
 
-To update:
+Update later with:
 
 ```bash
 cd ~/.web-xp && git pull
 ```
 
-## Agent Support
-
-Web XP is agent-agnostic. The standard is the same regardless of which agent enforces it. Agent-specific adapters teach each platform how to load, check, review, and apply the standard.
-
-| Agent | Implementation | Status |
-|-------|----------------|--------|
-| Claude Code | Native Agent Skills packaged to `.claude/skills/` | Implemented |
-| Codex | Agent Skill spec files (`adapters/codex/`) | Implemented |
-
-See [Architecture](#architecture) for the full design. To add support for another agent, see [Building a New Adapter](#building-a-new-adapter).
-
-The same Web XP Agent Skills exist across agents. What changes is the packaging, not the intended behavior.
-
 ### Claude Code
 
-After installing Web XP:
+Install the Claude runtime files:
 
 ```bash
 mkdir -p ~/.claude/skills
 cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
 ```
 
-Then run `/web-xp-init` in your project to create or update the Web XP block in `CLAUDE.md`.
+In a project, run:
 
-See `adapters/claude/README.md` for full details.
+```text
+/web-xp-init
+```
+
+That creates or updates the Web XP-managed block in `CLAUDE.md`.
 
 ### Codex
 
-After installing Web XP, in each project:
+In a project, create a `CODEX.md` contract from the Web XP template:
 
 ```bash
 cp ~/.web-xp/adapters/codex/CODEX.example.md CODEX.md
 ```
 
-In Codex, each Web XP Agent Skill is represented by a flat spec file in
-`adapters/codex/` (`web-xp.md`, `web-xp-check.md`, etc.). These files are the
-Codex equivalents of the Claude Agent Skill directories.
+Then point Codex to `CODEX.md` when starting a session.
 
-Point Codex to `CODEX.md` when starting a session. Invoke Agent Skills by spec file name (e.g. "follow `web-xp-check.md`").
+## Project Activation
 
-See `adapters/codex/README.md` for full details.
+The global install makes Web XP available to the agent. The project contract activates Web XP behavior in a specific project.
 
-### What Gets Installed
+- `CLAUDE.md` activates Web XP for Claude Code in that project
+- `CODEX.md` activates Web XP for Codex in that project
+- without a project contract, Web XP is still available globally, but usage is manual
+- `web-xp-on` enables always-on behavior in that project
+- `web-xp-off` disables enforcement in that project
 
-System install (`~/.web-xp`):
+Project mode is local to the project:
 
-- full Web XP checkout
-- adapter source and built contract templates
-- Codex Agent Skill spec files in `adapters/codex/*.md`
-- maintainer/build tooling used inside the Web XP checkout itself
-
-Claude runtime/package install (`~/.claude/skills/`):
-
-```bash
-mkdir -p ~/.claude/skills
-cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
-```
-
-Codex runtime/package install:
-
-- Codex reads the flat spec files directly from `~/.web-xp/adapters/codex/`
-
-Project install:
-
-- Claude Code projects: `CLAUDE.md`
-- Codex projects: `CODEX.md`
-
-### Project Footprint
-
-Web XP's current project footprint is limited to the agent contract file (`CLAUDE.md` for Claude Code, `CODEX.md` for Codex).
-
-Current behavior:
-
-- `web-xp-init` creates the contract file if it does not exist
-- if the contract file already exists, `web-xp-init` inserts or replaces the
-  Web XP-managed block and leaves surrounding content alone
-- if the existing managed block has drift, `web-xp-init` warns and replaces it
-- `web-xp-on` / `web-xp-off` toggle the existing Web XP directives inside the
-  managed block only
+- **explicit**: Web XP is available on demand
+- **always-on**: Web XP runs every session and before every commit
+- **off**: Web XP stays inactive in that project
 
 ## Agent Skills
 
-Seven Agent Skills, shared across all adapters. The skill names are the same regardless of agent.
+Web XP provides seven Agent Skills across adapters.
 
 ### Runtime
 
@@ -146,124 +105,129 @@ Seven Agent Skills, shared across all adapters. The skill names are the same reg
 
 | Agent Skill | Purpose |
 |------------|---------|
-| `web-xp-init` | Set up a new project with a contract file |
+| `web-xp-init` | Set up or update a project contract |
 | `web-xp-on` | Enable always-on enforcement |
 | `web-xp-off` | Disable enforcement |
 
 How each Agent Skill is invoked depends on the agent:
+
 - **Claude Code**: slash commands (`/web-xp`, `/web-xp-check`, etc.)
-- **Codex**: reference the spec file by name (e.g. "follow `web-xp-check.md`")
+- **Codex**: reference the spec file by name (for example `web-xp-check.md`)
 
-## Enforcement Modes
+## What Gets Installed
 
-Three states, orthogonal to which agent is running:
+System install (`~/.web-xp`):
 
-| Mode | Behavior |
-|------|----------|
-| **off** | Standards not loaded. No pre-commit checks. |
-| **explicit** | Standards available on demand. User invokes Agent Skills manually. |
-| **always-on** | Standards loaded every session. Checks required before every commit. |
+- full Web XP checkout
+- core doctrine files
+- adapter source and built contract templates
+- maintainer/build tooling used inside the Web XP checkout
 
-Each adapter expresses these through its platform's project contract mechanism (`CLAUDE.md` for Claude, `CODEX.md` for Codex).
+Claude runtime/package install (`~/.claude/skills/`):
 
-## Architecture
+- generated Claude skill files copied from the Web XP checkout
 
-Web XP has three layers, each independent:
+Codex runtime/package install:
 
-```
-┌─────────────────────────────────────────────────┐
-│  Agent Adapters                                 │
-│  Claude · Codex · ...                           │
-├─────────────────────────────────────────────────┤
-│  Core Web XP                                    │
-│  code-guidelines.md · code-philosophy.md        │
-│  bin/pre-commit-check.sh                        │
-└─────────────────────────────────────────────────┘
-```
+- Codex reads the flat spec files directly from `~/.web-xp/adapters/codex/`
 
-**Core** is the standard. It has no opinion about which agent runs it.
-**Adapters** teach a specific agent how to use the standard. The adapter list is open. Authored adapter files live under `adapters/<platform>/`; platform-native runtime/package paths (for example `.claude/skills/`) are populated from that source as needed.
+Project footprint:
 
-See `DESIGN.md` for the full architecture and role definitions.
+- Claude Code projects: `CLAUDE.md`
+- Codex projects: `CODEX.md`
+- the Web XP-managed block inside that project contract file
 
-### Project Contracts
+Current behavior:
 
-Each agent's project contract is built from two sources:
+- `web-xp-init` creates the contract file if it does not exist
+- if the contract file already exists, `web-xp-init` inserts or replaces the Web XP-managed block and leaves surrounding content alone
+- if the existing managed block has drift, `web-xp-init` warns and replaces it
+- `web-xp-on` and `web-xp-off` toggle the Web XP directives inside the managed block only
 
-1. **`AGENT.md`** — the shared base contract. Project-level rules that apply to every agent regardless of platform.
-2. **`adapters/<agent>/overlay.md`** — agent-specific contract additions (platform config, invocation style, discovery paths).
+## Update, Disable, and Remove
 
-`tools/build-contracts.sh` concatenates them to produce the built contract (e.g. `CLAUDE.example.md`, `CODEX.example.md`). Projects copy the built contract as their `CLAUDE.md` or `CODEX.md`.
+### Update
 
-From `tools/build-contracts.sh`:
+Update the global install:
 
 ```bash
-# Because the build is plain concatenation (cat), anything in AGENT.md
-# or overlay.md appears verbatim in the output. Do not put maintainer
-# comments, build-chain docs, or internal notes in those files —
-# they will leak into emitted project contracts.
+cd ~/.web-xp && git pull
 ```
+
+For Claude Code, re-copy the runtime files after updating:
 
 ```bash
-build() {
-  local overlay="$1" output="$2"
-  local result
-  result="$(cat "$AGENT" "$overlay")"
-  ...
-}
+cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
 ```
 
-## Building a New Adapter
+### Disable
 
-To add Web XP support for another agent platform:
+Disable Web XP in a project:
 
-1. Implement the four runtime Agent Skills and three setup Agent Skills in whatever format your platform uses.
-2. Point all file references at the core files in the Web XP install (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`).
-3. Define a project contract mechanism that can express `off | explicit | always-on`.
-4. Place adapter documentation and authored adapter files in `adapters/<platform>/`. If the platform requires a specific path for discovery, treat that path as generated/runtime packaging and document it in the adapter README.
+- use `web-xp-off`
+- or manually comment out the Web XP directives inside the managed block
 
-## Workflow Strategy
+Re-enable it with `web-xp-on`.
 
-For AI-assisted development under active human review. The standards constrain AI output and provide a shared vocabulary for correction and refactoring. They are most effective in the hands of an experienced developer who can recognize when the AI is structurally right, mechanically wrong, or conceptually off-base.
-
-Each rule traces back to a specific failure observed during development. When the AI produces an anti-pattern, do not just fix the code. Tighten the rule so the failure is easier to catch the next time.
-
-### Why the Pre-Commit Sequence Matters
-
-> "The main thing that helps me see propagation is being told to look. The CLAUDE.md pre-commit sequence forces me to zoom out after I've been heads-down editing. Without that step, I'd mark the task done after the last edit." — Claude
-
-## Disabling
-
-Web XP enforcement is driven by your project's contract file (`CLAUDE.md` for Claude, `CODEX.md` for Codex). To disable it for a project, use `web-xp-off` (or manually comment out the directives). To re-enable, use `web-xp-on`. To disable globally, remove the adapter from your agent's configured skill/spec path.
-
-## Removal
-
-Two removal scopes exist today.
-
-### Get It Out Of My Project
+### Remove From a Project
 
 Current project removal is manual:
 
-- delete `CLAUDE.md` or `CODEX.md` if Web XP is the only thing in the file
-- or remove/comment out the Web XP directives if you want to keep the rest of
-  the file
+- remove the Web XP-managed block from `CLAUDE.md` or `CODEX.md`
+- if the file exists only for Web XP, remove the file
 
-`web-xp-off` disables enforcement, but does not remove the file.
-
-### Get It Off My System
+### Remove From Your System
 
 Current system removal is also manual:
-
-- remove the Web XP checkout:
 
 ```bash
 rm -rf ~/.web-xp
 ```
 
-- for Claude Code, also remove the copied Agent Skills from `~/.claude/skills/` if
-  you previously installed them there
+For Claude Code, also remove the copied runtime files from `~/.claude/skills/` if you installed them there.
 
-Web XP does not yet provide a dedicated cleanup/remove command.
+## Architecture
+
+Web XP has two main parts:
+
+- **Core Web XP**: `code-guidelines.md`, `code-philosophy.md`, and `bin/pre-commit-check.sh`
+- **Agent adapters**: Claude, Codex, and future agents that apply the same standard in different packaging formats
+
+Authored adapter files live under `adapters/<platform>/`. Platform-native runtime/package paths such as `.claude/skills/` are generated from that source as needed.
+
+See `DESIGN.md` for the full architecture.
+
+### Project Contracts
+
+Each built project contract comes from two sources:
+
+1. `AGENT.md` — the shared base contract
+2. `adapters/<agent>/overlay.md` — agent-specific additions
+
+`tools/build-contracts.sh` builds the emitted templates (for example `CLAUDE.example.md` and `CODEX.example.md`) from those sources.
+
+## Adapter Details
+
+Claude Code:
+
+- native skill directories in `.claude/skills/`
+- project contract in `CLAUDE.md`
+- see `adapters/claude/README.md`
+
+Codex:
+
+- flat spec files in `adapters/codex/`
+- project contract in `CODEX.md`
+- see `adapters/codex/README.md`
+
+## Building a New Adapter
+
+To add Web XP support for another agent platform:
+
+1. Implement the four runtime Agent Skills and three setup Agent Skills in that platform's format.
+2. Point all file references at the core files in the Web XP install (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`).
+3. Define a project contract mechanism that can express `off | explicit | always-on`.
+4. Place adapter documentation and authored adapter files in `adapters/<platform>/`. If the platform requires a specific discovery path, treat that path as generated/runtime packaging and document it in the adapter README.
 
 ## License
 
