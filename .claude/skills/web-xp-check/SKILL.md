@@ -1,11 +1,8 @@
-<!-- DO NOT EDIT — canonical source is /adapters/claude/web-xp-check/SKILL.md.
-     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->
-
 ---
 name: web-xp-check
 description: "Audit git diff against Web XP standard patterns. Activate when: about to commit, 'check my code', 'audit', 'pre-commit', 'review the diff', verifying quality."
 ---
-
+<!-- DO NOT EDIT — canonical source is /adapters/claude/web-xp-check/SKILL.md.     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->
 # Web XP Check — Read-Only Audit
 
 Audit the current diff against the Web XP standards. Report findings. Do not edit any files.

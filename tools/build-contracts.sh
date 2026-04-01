@@ -1,6 +1,8 @@
 #!/bin/bash
-# Builds agent-specific contract files from shared AGENT.md
-# + per-adapter overlays.
+# Internal maintainer tooling in the Web XP checkout (`~/.web-xp`).
+# Not run inside consuming project repos during normal Web XP use.
+# Builds the shipped agent-specific contract templates from shared
+# `AGENT.md` + per-adapter overlays.
 #
 # AGENT.md is the shared base contract — project-level rules that apply
 # to every agent. This script concatenates it with each adapter's

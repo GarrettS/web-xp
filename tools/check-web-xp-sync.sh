@@ -50,22 +50,31 @@ inject_and_copy() {
   fi
 }
 
-copy_if_changed() {
-  local src="$1" dest="$2"
-
-  if [ "$(cat "$dest" 2>/dev/null)" != "$(cat "$src")" ]; then
-    mkdir -p "$(dirname "$dest")"
-    cp "$src" "$dest"
-    git add "$dest"
-    SYNCED=$((SYNCED + 1))
-  fi
-}
-
 inject_skill_header() {
   local src="$1" skill_name="$2"
+  local header
 
-  printf '<!-- DO NOT EDIT — canonical source is /adapters/claude/%s/SKILL.md.\n' "$skill_name"
-  printf '     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->\n\n'
+  header="$(printf '<!-- DO NOT EDIT — canonical source is /adapters/claude/%s/SKILL.md.\n' "$skill_name")"
+  header+="$(printf '     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->\n\n')"
+
+  if [ "$(head -1 "$src")" = "---" ]; then
+    awk -v injected="$header" '
+      BEGIN { frontmatter_closed = 0; delimiter_count = 0 }
+      {
+        print
+        if (!frontmatter_closed && $0 == "---") {
+          delimiter_count++
+          if (delimiter_count == 2) {
+            printf "%s", injected
+            frontmatter_closed = 1
+          }
+        }
+      }
+    ' "$src"
+    return
+  fi
+
+  printf '%s' "$header"
   cat "$src"
 }
 
@@ -76,6 +85,7 @@ for pair in "${STANDARD_PAIRS[@]}"; do
 
   INJECTED="$(inject_and_copy "$SRC" "$DEST" "$STYLE")"
   if [ "$(cat "$DEST" 2>/dev/null)" != "$INJECTED" ]; then
+    mkdir -p "$(dirname "$DEST")"
     printf '%s\n' "$INJECTED" > "$DEST"
     git add "$DEST"
     SYNCED=$((SYNCED + 1))
