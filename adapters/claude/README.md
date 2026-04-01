@@ -66,7 +66,7 @@ Then in each project:
 cp ~/.web-xp/adapters/claude/CLAUDE.example.md CLAUDE.md
 ```
 
-Or run `/web-xp-init` to do it automatically.
+Or run `/web-xp-init` to create or update the Web XP block automatically.
 
 To update:
 

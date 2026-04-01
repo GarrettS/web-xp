@@ -1,3 +1,5 @@
+<!-- BEGIN WEB-XP: managed block. Edit outside this block. Changes inside may be replaced by Web XP commands. -->
+
 # Web XP Project Contract
 
 Read this file first on every task.
@@ -16,3 +18,5 @@ If the task involves JS, HTML, or CSS, read `code-guidelines.md` and `code-philo
 ## Claude Code
 
 Use `/web-xp` to load the standards. Use `/web-xp-check` to audit the diff. Use `/web-xp-review` to review any code. Use `/web-xp-apply` to walk through fixes with approval.
+
+<!-- END WEB-XP -->

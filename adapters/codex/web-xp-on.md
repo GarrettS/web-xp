@@ -1,6 +1,6 @@
 # Web XP On — Enable Enforcement
 
-Activate Web XP directives in the project's `CODEX.md` so they are active for all sessions.
+Activate the Web XP directives inside the managed block in the project's `CODEX.md` so they are active for all sessions.
 
 ## Procedure
 
@@ -8,20 +8,34 @@ Activate Web XP directives in the project's `CODEX.md` so they are active for al
 
 Look for `CODEX.md` in the project root. If it does not exist: "Run web-xp-init first." Stop.
 
-### 2. Check for Web XP directives
+### 2. Check for the Web XP-managed block
 
-Look for the "On every session" and "Before every commit" sections that reference Web XP files or checks.
+Look for the Web XP-managed block:
 
-If no directives exist (neither active nor commented out): "Run web-xp-init first." Stop.
+```md
+<!-- BEGIN WEB-XP: managed block. Edit outside this block. Changes inside may be replaced by Web XP commands. -->
+...
+<!-- END WEB-XP -->
+```
 
-### 3. Check current state
+If no managed block exists: "Run web-xp-init first." Stop.
 
-If directives are already active (not inside HTML comments): "Already on." Stop.
+### 3. Check for Web XP directives inside the block
 
-### 4. Uncomment
+Look inside the managed block for the "On every session" and "Before every commit" sections that reference Web XP files or checks.
 
-Remove HTML comment markers (`<!-- ... -->`) to activate the directives.
+If no directives exist inside the managed block (neither active nor commented out): "Run web-xp-init first." Stop.
 
-### 5. Report
+### 4. Check current state
+
+If directives inside the managed block are already active (not inside HTML comments): "Already on." Stop.
+
+### 5. Uncomment
+
+Remove HTML comment markers (`<!-- ... -->`) to activate the directives inside the managed block.
+
+Never modify content outside the managed block.
+
+### 6. Report
 
 "Web XP enforcement enabled."

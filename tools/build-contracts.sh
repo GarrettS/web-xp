@@ -23,7 +23,7 @@ BUILT=0
 build() {
   local overlay="$1" output="$2"
   local result
-  result="$(cat "$AGENT" "$overlay")"
+  result="$(printf '%s\n\n' '<!-- BEGIN WEB-XP: managed block. Edit outside this block. Changes inside may be replaced by Web XP commands. -->'; cat "$AGENT" "$overlay"; printf '\n<!-- END WEB-XP -->\n')"
 
   if [ "$(cat "$output" 2>/dev/null)" != "$result" ]; then
     printf '%s\n' "$result" > "$output"

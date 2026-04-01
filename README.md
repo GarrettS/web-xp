@@ -71,7 +71,7 @@ mkdir -p ~/.claude/skills
 cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
 ```
 
-Then run `/web-xp-init` in your project to create a `CLAUDE.md` contract.
+Then run `/web-xp-init` in your project to create or update the Web XP block in `CLAUDE.md`.
 
 See `adapters/claude/README.md` for full details.
 
@@ -122,14 +122,12 @@ Web XP's current project footprint is limited to the agent contract file (`CLAUD
 
 Current behavior:
 
-- `web-xp-init` creates the contract file by copying the built template if the
-  file does not already exist
-- if the contract file already exists, `web-xp-init` skips and does not merge
-- `web-xp-on` / `web-xp-off` toggle the existing Web XP directives inside that
-  file
-
-This current behavior is intentionally documented as-is here. Changes to how
-existing contract files are updated are tracked separately.
+- `web-xp-init` creates the contract file if it does not exist
+- if the contract file already exists, `web-xp-init` inserts or replaces the
+  Web XP-managed block and leaves surrounding content alone
+- if the existing managed block has drift, `web-xp-init` warns and replaces it
+- `web-xp-on` / `web-xp-off` toggle the existing Web XP directives inside the
+  managed block only
 
 ## Agent Skills
 

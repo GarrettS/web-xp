@@ -1,5 +1,7 @@
 # Agent Handoff Protocol
 
+This protocol is for developing Web XP itself — coordinating the agents that work on this repo. It is not part of the Web XP product and is not emitted into user projects. The repo's own contract files (`CLAUDE.md`) reference this protocol; the built contract templates (`CLAUDE.example.md`, `CODEX.example.md`) do not.
+
 Use shared files in `agent-handoff/` to coordinate work between agents.
 
 Core principle:
