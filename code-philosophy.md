@@ -6,20 +6,18 @@ AI-assisted XP for lean, transparent web front-end architecture.
 
 ## The Approach
 
-Vanilla JavaScript. No frameworks or build tools required. The constraint produces simpler code that is easier to debug — fewer layers of abstraction, no build pipeline to untangle. Writing without a framework requires more discipline, but the result is more transparent: changes are faster because there is less between you and the running code.
+Web XP is designed and tested against web-platform code, not framework-managed abstractions. No framework is required by default, and no build pipeline needs to be untangled before the code becomes readable. This requires more discipline than the default AI-assisted workflow, but the result is more transparent and more durable. Quality is not free, but low-quality acceleration is more expensive: the time saved by loose generation is usually paid back in debugging, inconsistency, and maintenance.
 
 Named patterns applied through continuous refactoring, small commits, each one leaving the code cleaner than the last. Every rule in this doctrine was extracted from production code, not adapted from textbook examples. The examples are drawn from real applications; the failures they address were observed, debugged, and fixed before the rule was written.
 
-This approach asks for more discipline up front than the default AI-assisted workflow. The goal is not to generate code faster at any cost, but to produce code that remains clear, stable, and maintainable as the project grows. Quality is not free, but low-quality acceleration is more expensive: the time saved by loose generation is usually paid back with interest in debugging, inconsistency, and maintenance.
-
-- **No framework, no framework debt.** There is no abstraction layer to learn, no version to upgrade, no deprecation cycle to chase. The patterns used here — Active Object, Shared Key, event delegation, dispatch tables — are rooted in how the web platform works. They will work the same in ten years. See §Libraries, Frameworks, and TypeScript for the full reasoning.
+- **Work with the web platform directly.** The patterns used here — event delegation, dispatch tables, Shared Key, Active Object — work with the DOM and standard APIs rather than abstracting over them. No abstraction layer to learn, no version to upgrade, no deprecation cycle to chase. See §Libraries, Frameworks, and TypeScript for the full reasoning.
 - **A living code-guidelines document as a contract.** It keeps every contributor — human or AI — honest across sessions. It is not a suggestion file. It governs.
 - **Pattern literacy over code generation.** Changes are justified by named refactoring patterns from the software engineering canon: Compose Method, Extract Shared Logic, Decompose Conditional. The question is never "does it work" — it is "is this the right abstraction?"
 - **The AI is a pair programmer, not a code generator.** Its output is reviewed, challenged, and corrected. "Caught you slipping" is the expected dynamic, not an exception.
 
 ## What This Produces
 
-Code that is future-proof, tuneable, maintainable, robust, clear, and fast. Vanilla JS starts at the performance ceiling — there is no framework overhead to optimize away. The guidelines compound: each refactoring encodes a principle that applies to the next, across projects. The codebase gets more consistent over time instead of accumulating layers of different authors' styles and framework idioms.
+Code that is readable, maintainable, and resilient to change. The guidelines compound: each refactoring encodes a principle that applies to the next, across projects. The codebase gets more consistent over time instead of accumulating layers of different styles and framework idioms.
 
 ## Libraries, Frameworks, and TypeScript
 
@@ -126,21 +124,13 @@ Web XP was designed around this principle. Its core contract is canonical and ad
 
 Migration cost is not an abstract future concern; it is wasted time, wasted energy, and distorted code. A good tool can disappear and leave behind healthy code. A bad tool leaves behind ruins.
 
-## The Market Reality
+## The Role of Judgment
 
-The volume of framework-heavy, AI-generated, nobody-reviewed code is growing. Developers who cannot distinguish a for loop from a DFS are churning out large applications built on the worst practices, compounding the existing mass of bloated framework code. This will produce spectacular failures.
+Following these rules mechanically produces cleaner code. That is valuable but incomplete.
 
-When it does, the people who can point to principled, performant, maintainable vanilla code will be in a very different position. Code quality is not a luxury — it is a market differentiator. The code quality renaissance is here.
+The deeper value comes from knowing when to push back on AI output, when a rule should bend, and when clean-looking code is still the wrong abstraction. The guidelines encode judgment extracted from production failures. They do not replace the judgment needed to apply them well.
 
-## Why This Cannot Be Easily Replicated
-
-Someone could copy these guidelines and get mechanical value — a linter-level improvement. But the process requires judgment that guidelines cannot transfer:
-
-- **An experienced developer** who knows the patterns by name can use the guidelines and push back on AI output effectively. They get most of the value.
-- **A mid-level developer** follows the rules but does not know when to break them, when to push back, when the AI is slipping. They produce clean-looking code that misses the deeper design.
-- **A vibe coder** ignores the guidelines within three prompts because they slow things down. That is the whole point — they slow things down *just enough* to get it right.
-
-The edge is not the document. It is the ability to pair-program with an AI to make the code better.
+The edge is not the document. It is your ability to pair-program with an AI to make the code better.
 
 ---
 
@@ -217,9 +207,9 @@ When taking an exception, comment the code stating which default is overridden a
 
 ## Adopting the Doctrine
 
-The guidelines are the canonical doctrine. They are not a project-specific document with transfer notes — they are the standard, and individual projects overlay their own decisions on top.
+The doctrine is the governing standard in `code-guidelines.md` — principles, patterns, language rules, formatting, and comments policy. It is not project-specific. Individual projects overlay their own decisions on top.
 
-**The doctrine** — principles, patterns, language rules, formatting, and comments policy — applies to any vanilla JS browser application without modification. The examples in `code-guidelines.md` are drawn from real projects (anatomy tools, quiz systems, interactive maps). They illustrate the rules; they are not requirements. A dental scheduling app, a commodity trading dashboard, and a medical reference tool all follow the same Fail-Safe, Shared Key, and Event Delegation rules — with different domain vocabulary, different data shapes, and different UI concerns.
+The doctrine applies to any browser application built directly on the web platform. The examples in `code-guidelines.md` are drawn from real projects (anatomy tools, quiz systems, interactive maps). They illustrate the rules; they are not requirements. A dental scheduling app, a commodity trading dashboard, and a medical reference tool all follow the same Fail-Safe, Shared Key, and Event Delegation rules — with different domain vocabulary, different data shapes, and different UI concerns.
 
 **Project overlays** handle decisions that vary by project:
 - Directory names and structure (app/dev separation is doctrine; specific directory names are overlay)
@@ -229,4 +219,6 @@ The guidelines are the canonical doctrine. They are not a project-specific docum
 - Theming (light/dark is doctrine when theming is needed; whether theming is needed is a project decision)
 - Color system (CSS custom properties for all colors is a strong default; a two-color utility app may not need the indirection)
 
-A project overlay is a separate file — not a fork of the doctrine. For example, the [PRI Pelvis Restoration study tool](https://github.com/GarrettS/pelvis) uses `prd/project.md` as its overlay — directory structure, asset rules, content authority, and architecture decisions live there. The doctrine evolves; overlays track project-specific decisions that the doctrine intentionally leaves open. When the overlay contradicts the doctrine, the overlay must state which rule it overrides and why, per §Defaults and Exceptions.
+A project overlay is a separate file — not a fork of the doctrine. For example, the [PRI Pelvis Restoration study tool](https://github.com/GarrettS/pelvis) uses `prd/project.md` as its overlay — content authority, directory structure, asset rules, and key architecture decisions all live there, separate from the doctrine itself.
+
+The doctrine evolves; overlays track project-specific decisions that the doctrine intentionally leaves open. When the overlay contradicts the doctrine, the overlay must state which rule it overrides and why, per §Defaults and Exceptions.
