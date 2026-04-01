@@ -1,19 +1,22 @@
 # Codex Adapter
 
-Web XP adapter for Codex. Implements the adapter interface as capability spec files and a built contract.
+Web XP adapter for Codex. Implements the adapter interface as flat spec files and a built contract.
 
 ## Status
 
-Initial implementation. Capability specs are prompt/spec files that define each Web XP capability for Codex. If Codex gains a formal skill packaging system, these files become the source material for that packaging.
+Initial implementation. Prompt/spec files define each Web XP operation for Codex. If Codex gains a formal skill packaging system, these files become the source material for that packaging.
 
 ## How it works
 
 1. `AGENT.md` (in the Web XP repo) is the shared base contract — version pin, session directives, pre-commit sequence.
 2. `overlay.md` (in this adapter) adds Codex-specific config: spec directory, handoff protocol.
 3. The install builds `CODEX.md` from `AGENT.md` + `overlay.md`. Projects get one file.
-4. Capability spec files (one per Web XP capability) define what each operation does.
+4. One spec file per Web XP operation defines what each operation does.
 
-## Capabilities
+These flat `.md` spec files are the Codex equivalents of the Claude skill
+directories in `adapters/claude/`.
+
+## Spec Files
 
 | Spec file | Role | Purpose |
 |-----------|------|---------|
@@ -47,4 +50,4 @@ cd ~/.web-xp && git pull
 
 ### Usage
 
-Point Codex to `CODEX.md` when starting a session. Invoke capabilities by spec file name (e.g. "follow `web-xp-check.md`").
+Point Codex to `CODEX.md` when starting a session. Invoke Web XP by spec file name (e.g. "follow `web-xp-check.md`").
