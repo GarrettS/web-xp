@@ -190,8 +190,8 @@ All adapters point at the same core files. They do not duplicate the standard �
 
 ### Existing adapters
 
-**Claude** (implemented — `.claude/skills/web-xp*`):
-Seven native skills covering all capabilities above. Project contract: `CLAUDE.md`, built from shared `AGENT.md` + Claude overlay. Skills are authored in `.claude/skills/` — the platform-native discovery path for Claude Code.
+**Claude** (implemented — `adapters/claude/` source, packaged to `.claude/skills/`):
+Seven native skills covering all capabilities above. Project contract: `CLAUDE.md`, built from shared `AGENT.md` + Claude overlay. Claude skill source lives in `adapters/claude/`; `.claude/skills/` is the platform-native runtime/package path for local Claude development and install packaging.
 
 **Codex** (implemented — `adapters/codex/`):
 Capability spec files and convention-based contract (`CODEX.md`). Built from shared `AGENT.md` + Codex overlay.
@@ -203,7 +203,7 @@ To add Web XP support for another agent platform:
 1. Implement the four runtime capabilities and three setup capabilities above, in whatever skill/plugin format your platform uses.
 2. Point all file references at the core files (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`).
 3. Define a project contract mechanism that can express `off | explicit | always-on`.
-4. Place adapter documentation and packaging in `adapters/<platform>/`. If the platform requires a specific path for skill discovery (e.g. `.claude/skills/` for Claude Code), authored files may live there instead — document the path in the adapter README.
+4. Place adapter documentation and authored packaging source in `adapters/<platform>/`. If the platform requires a specific path for skill discovery (e.g. `.claude/skills/` for Claude Code), generate or sync that runtime/package path from the adapter source and document it in the adapter README.
 
 The adapter does not need to implement orchestration. That is a separate layer.
 
@@ -222,7 +222,7 @@ Depends on at least one agent adapter being installed. Does not modify core Web 
 
 ## Repo Structure
 
-Core Web XP lives at the repo root. Adapter documentation and packaging live under `adapters/<platform>/`. Some adapters may also keep authored files in a platform-native path when the platform expects it (e.g. Claude skills in `.claude/skills/`).
+Core Web XP lives at the repo root. Adapter documentation and authored packaging source live under `adapters/<platform>/`. Some adapters also have platform-native runtime/package paths generated from that source (e.g. `.claude/skills/` for Claude Code).
 
 ```
 web-xp/
@@ -235,7 +235,7 @@ web-xp/
 │   ├── build-contracts.sh      # builds agent contracts from AGENT.md + overlays
 │   └── check-web-xp-sync.sh    # internal sync (this repo only)
 ├── .claude/
-│   └── skills/                 # Claude adapter skills (platform-native path)
+│   └── skills/                 # generated Claude runtime/package path
 │       ├── web-xp/
 │       ├── web-xp-check/
 │       ├── web-xp-apply/
@@ -244,7 +244,14 @@ web-xp/
 │       ├── web-xp-on/
 │       └── web-xp-off/
 ├── adapters/
-│   ├── claude/                 # Claude overlay, built contract, docs
+│   ├── claude/                 # Claude overlay, built contract, skill source, docs
+│   │   ├── web-xp/
+│   │   ├── web-xp-check/
+│   │   ├── web-xp-apply/
+│   │   ├── web-xp-review/
+│   │   ├── web-xp-init/
+│   │   ├── web-xp-on/
+│   │   └── web-xp-off/
 │   └── codex/                  # Codex overlay, built contract, spec files, docs
 ├── contrib/                    # contributor tooling (not user-facing)
 │   └── AGENT-HANDOFF.md        # handoff protocol

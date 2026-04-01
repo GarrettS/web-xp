@@ -8,13 +8,13 @@ If the task involves JS, HTML, or CSS, run `/web-xp` before writing or reviewing
 
 ## Standards files
 
-Root copies are canonical: `code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`. The copies in `.claude/skills/` are auto-synced by `tools/check-web-xp-sync.sh`. Always edit the root copy, never the `.claude/skills/` copy.
+Canonical sources live at repo root (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`) and in `adapters/claude/` for Claude skill source. The copies in `.claude/skills/` are auto-synced by `tools/check-web-xp-sync.sh`. Always edit the canonical source, never the `.claude/skills/` copy.
 
-Do not use symlinks for standards file copies in `.claude/skills/`. They break on `cp -r` installs. The sync script handles duplication — root copies are canonical.
+Do not use symlinks for files in `.claude/skills/`. They break on `cp -r` installs. The sync script handles duplication — `.claude/skills/` is generated/local packaging output.
 
 ## Before every commit
 
-1. Run `bash tools/check-web-xp-sync.sh` — syncs root standards files → `.claude/skills/` copies, injects DO NOT EDIT headers, stages changed files.
+1. Run `bash tools/check-web-xp-sync.sh` — syncs canonical standards and Claude skill source → `.claude/skills/`, injects DO NOT EDIT headers where needed, stages changed files.
 2. Run `/web-xp-check` — audit the diff against Web XP patterns.
 3. Run `bash bin/pre-commit-check.sh` — catches mechanical code-guideline violations.
 

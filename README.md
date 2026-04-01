@@ -49,6 +49,11 @@ To update:
 cd ~/.web-xp && git pull
 ```
 
+If you are maintaining Web XP itself rather than using it in a project, keep
+repo-authoring rules and maintainer tooling separate from user docs. A
+dedicated maintainer document should cover canonical sources, generated files,
+and internal tooling behavior.
+
 ### Install Footprint
 
 Installing Web XP clones the full repo into `~/.web-xp`.
@@ -69,7 +74,7 @@ Web XP is agent-agnostic. The standard is the same regardless of which agent enf
 
 | Agent | Implementation | Status |
 |-------|----------------|--------|
-| Claude Code | Native skills (`.claude/skills/`) | Implemented |
+| Claude Code | Native skills packaged to `.claude/skills/` | Implemented |
 | Codex | Capability spec files (`adapters/codex/`) | Implemented |
 
 See [Architecture](#architecture) for the full design. To add support for another agent, see [Building a New Adapter](#building-a-new-adapter).
@@ -187,7 +192,7 @@ Web XP has three layers, each independent:
 ```
 
 **Core** is the standard. It has no opinion about which agent runs it.
-**Adapters** teach a specific agent how to use the standard. The adapter list is open. Some adapters keep authored files in a platform-native path (e.g. Claude skills in `.claude/skills/`); adapter documentation lives in `adapters/<platform>/`.
+**Adapters** teach a specific agent how to use the standard. The adapter list is open. Authored adapter files live under `adapters/<platform>/`; platform-native runtime/package paths (for example `.claude/skills/`) are populated from that source as needed.
 
 See `DESIGN.md` for the full architecture and role definitions.
 
