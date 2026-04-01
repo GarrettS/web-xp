@@ -49,6 +49,20 @@ To update:
 cd ~/.web-xp && git pull
 ```
 
+### Install Footprint
+
+Installing Web XP clones the full repo into `~/.web-xp`.
+
+That checkout includes:
+
+- core standards and checks (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`)
+- adapter files and built contract templates
+- maintainer/build tooling used inside the Web XP checkout itself
+
+Maintainer scripts such as `bin/build-contracts.sh` and
+`bin/check-web-xp-sync.sh` live in `~/.web-xp`, but are not copied into the
+user's application project.
+
 ## Agent Support
 
 Web XP is agent-agnostic. The standard is the same regardless of which agent enforces it. Agent-specific adapters teach each platform how to load, check, review, and apply the standard.
@@ -84,6 +98,41 @@ cp ~/.web-xp/adapters/codex/CODEX.example.md CODEX.md
 Point Codex to `CODEX.md` when starting a session. Invoke capabilities by spec file name (e.g. "follow `web-xp-check.md`").
 
 See `adapters/codex/README.md` for full details.
+
+### Agent Footprint
+
+Web XP has two agent-level footprints today:
+
+- the main install checkout in `~/.web-xp`
+- agent-specific runtime/package files copied from that checkout
+
+For Claude Code, the runtime/package copy lives in `~/.claude/skills/`:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
+```
+
+For Codex, the adapter files remain in `~/.web-xp/adapters/codex/`; projects
+copy `CODEX.example.md` from there when enabling Web XP in a repo.
+
+### Project Footprint
+
+Web XP's current project footprint is the project contract file:
+
+- `CLAUDE.md` for Claude Code
+- `CODEX.md` for Codex
+
+Current behavior:
+
+- `web-xp-init` creates the contract file by copying the built template if the
+  file does not already exist
+- if the contract file already exists, `web-xp-init` skips and does not merge
+- `web-xp-on` / `web-xp-off` toggle the existing Web XP directives inside that
+  file
+
+This current behavior is intentionally documented as-is here. Changes to how
+existing contract files are updated are tracked separately.
 
 ## Capabilities
 
@@ -142,6 +191,33 @@ Web XP has three layers, each independent:
 
 See `DESIGN.md` for the full architecture and role definitions.
 
+### Project Contracts
+
+Each agent's project contract is built from two sources:
+
+1. **`AGENT.md`** — the shared base contract. Project-level rules that apply to every agent regardless of platform.
+2. **`adapters/<agent>/overlay.md`** — agent-specific contract additions (platform config, invocation style, discovery paths).
+
+`bin/build-contracts.sh` concatenates them to produce the built contract (e.g. `CLAUDE.example.md`, `CODEX.example.md`). Projects copy the built contract as their `CLAUDE.md` or `CODEX.md`.
+
+From `bin/build-contracts.sh`:
+
+```bash
+# Because the build is plain concatenation (cat), anything in AGENT.md
+# or overlay.md appears verbatim in the output. Do not put maintainer
+# comments, build-chain docs, or internal notes in those files —
+# they will leak into emitted project contracts.
+```
+
+```bash
+build() {
+  local overlay="$1" output="$2"
+  local result
+  result="$(cat "$AGENT" "$overlay")"
+  ...
+}
+```
+
 ## Building a New Adapter
 
 To add Web XP support for another agent platform:
@@ -164,6 +240,35 @@ Each rule traces back to a specific failure observed during development. When th
 ## Disabling
 
 Web XP enforcement is driven by your project's contract file (`CLAUDE.md` for Claude, `CODEX.md` for Codex). To disable it for a project, use `web-xp-off` (or manually comment out the directives). To re-enable, use `web-xp-on`. To disable globally, remove the adapter from your agent's skill/spec path.
+
+## Removal
+
+Two removal scopes exist today.
+
+### Get It Out Of My Project
+
+Current project removal is manual:
+
+- delete `CLAUDE.md` or `CODEX.md` if Web XP is the only thing in the file
+- or remove/comment out the Web XP directives if you want to keep the rest of
+  the file
+
+`web-xp-off` disables enforcement, but does not remove the file.
+
+### Get It Off My System
+
+Current system removal is also manual:
+
+- remove the Web XP checkout:
+
+```bash
+rm -rf ~/.web-xp
+```
+
+- for Claude Code, also remove the copied skills from `~/.claude/skills/` if
+  you previously installed them there
+
+Web XP does not yet provide a dedicated cleanup/remove command.
 
 ## License
 

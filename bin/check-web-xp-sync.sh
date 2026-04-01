@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Internal to the code-guidelines repo. Not distributed to consuming projects.
-# Syncs root standards files → .claude/skills/ copies with DO NOT EDIT headers.
+# Internal maintainer tooling in the Web XP checkout (`~/.web-xp`).
+# Not copied into consuming project repos.
+# Syncs canonical root standards files → local `.claude/skills/` copies
+# with DO NOT EDIT headers for repo-local Claude development.
 #
 # Direction: root → .claude/skills/, never the reverse.
-# Root copies are canonical. Edits to the .claude/skills/ copies
-# will be silently overwritten by this hook. If you want to change
-# a standards file, edit the root copy.
+# Root copies are canonical for these files. Edits to the
+# `.claude/skills/` copies will be silently overwritten by this sync.
+# If you want to change a standards file, edit the root copy.
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
