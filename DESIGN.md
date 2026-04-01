@@ -216,7 +216,7 @@ smux integration is planned but not built. When implemented, it would provide:
 - Topology selection: single-agent, split, or continuous loop
 - Agent discovery: `tmux-bridge list` to find and label panes
 
-Depends on at least one agent adapter being installed. Does not modify core Web XP files. Lives in `orchestration/smux/`.
+Depends on at least one agent adapter being installed. Does not modify core Web XP files. Orchestration remains a separate future design effort, not part of current Web XP core.
 
 ---
 
@@ -246,9 +246,7 @@ web-xp/
 │   ├── claude/                 # Claude overlay, built contract, docs
 │   └── codex/                  # Codex overlay, built contract, spec files, docs
 ├── contrib/                    # contributor tooling (not user-facing)
-│   ├── AGENT-HANDOFF.md        # handoff protocol
-│   ├── ORCHESTRATION.md        # orchestration design notes
-│   └── smux/                   # smux dev workflow spike
+│   └── AGENT-HANDOFF.md        # handoff protocol
 ├── test/
 │   └── test-pre-commit.sh      # regression tests for pre-commit checks
 ├── CLAUDE.md                   # this repo's own contract
@@ -264,7 +262,7 @@ web-xp/
 2. ~~**Add adapter scaffolding**~~ — done.
 3. ~~**Build second adapter (Codex)**~~ — done. Tested against elitefuellabs.com.
 4. ~~**Rewrite public docs**~~ — done. README is agent-neutral.
-5. **Build smux orchestration layer** — role assignment, topology selection, message routing. Optional install on top of any adapter combination.
-6. **Continuous audit mode** — timer-driven auditor topology using smux or equivalent.
+5. **Design orchestration as a separate layer** — outside current Web XP core scope.
+6. **Continuous audit mode** — timer-driven auditor topology using orchestration or equivalent tooling.
 
-Steps 1-4 complete. Step 5 depends on a stable install/contract model, which is now in place.
+Steps 1-4 complete. Later orchestration work is separate from the current install/contract model.
