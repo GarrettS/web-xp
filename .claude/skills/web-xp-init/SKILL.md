@@ -31,7 +31,7 @@ cp ~/.web-xp/adapters/claude/CLAUDE.example.md CLAUDE.md
 
 If `CLAUDE.md` already exists:
 
-- if the Web XP-managed block is missing, append the built contract block to the end of the file
+- if the Web XP-managed block is missing, prepend the built contract block to the top of the file
 - if the Web XP-managed block already exists, replace that block with the current built contract block
 - if the existing block differs from the current built contract block, warn that changes inside the managed block will be replaced, then replace it
 
