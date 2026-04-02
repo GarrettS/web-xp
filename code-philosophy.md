@@ -6,7 +6,9 @@ AI-assisted XP for lean, transparent web front-end architecture.
 
 ## The Approach
 
-Web XP is designed and tested against web-platform code, not framework-managed abstractions. No framework is required by default, and no build pipeline needs to be untangled before the code becomes readable. This requires more discipline than the default AI-assisted workflow, but the result is more transparent and more durable. Quality is not free, but low-quality acceleration is more expensive: the time saved by loose generation is usually paid back in debugging, inconsistency, and maintenance.
+Web XP applies Extreme Programming to web development: small commits, continuous refactoring, pair programming, tight feedback loops, and the simplest thing that could possibly work.
+
+Here, the AI is the pair programmer, the pre-commit checks tighten feedback, and working with the web platform directly is usually the simplest thing that could possibly work. Web XP is designed and tested against web-platform code, not framework-managed abstractions. No framework is required by default, and no build pipeline needs to be untangled before the code becomes readable. This requires more discipline than the default AI-assisted workflow, but the result is more transparent and more durable. Quality is not free, but low-quality acceleration is more expensive: the time saved by loose generation is usually paid back in debugging, inconsistency, and maintenance.
 
 Named patterns applied through continuous refactoring, small commits, each one leaving the code cleaner than the last. Every rule in this doctrine was extracted from production code, not adapted from textbook examples. The examples are drawn from real applications; the failures they address were observed, debugged, and fixed before the rule was written.
 
