@@ -128,6 +128,8 @@ Web XP was designed around this principle. Its core contract is canonical and ad
 
 Migration cost is not an abstract future concern; it is wasted time, wasted energy, and distorted code. A good tool can disappear and leave behind healthy code. A bad tool leaves behind ruins.
 
+See `DESIGN.md` for the adapter architecture that makes this vendor-agnostic.
+
 ## The Role of Judgment
 
 Following these rules mechanically produces cleaner code. That is valuable but incomplete.

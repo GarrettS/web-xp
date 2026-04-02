@@ -250,7 +250,7 @@ your-project/
 - **Claude**: `/web-xp-remove` removes Web XP from `CLAUDE.md`.
 - **Codex**: `web-xp-remove` removes Web XP from `CODEX.md`.
 
-To build a new adapter or understand the build chain, see `MAINTAINERS.md`.
+For the full architecture — enforcement modes, roles, adapter interface, orchestration topologies — see `DESIGN.md`. To build a new adapter or understand the build chain, see `MAINTAINERS.md`.
 
 ## License
 
