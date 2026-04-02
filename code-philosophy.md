@@ -53,9 +53,9 @@ function applyHash() {
 window.addEventListener('hashchange', applyHash);
 ```
 
-No route objects, router context, or navigation engine are required to keep tab state in sync with the URL. React Router wraps standard browser features in components (`<Route>`, `<Link>`), hooks (`useNavigate`, `useParams`), and a matching engine — a dependency tree for capabilities the URL already provides. Deep-links work because the URL *is* the state.
+Routing is URL parsing plus dispatch. No router framework required.
 
-**State management.** React's `useState` exists because functional components discard their scope on every render. The hook lets them remember values across re-renders. But the amnesia is React's design choice — not a platform constraint. A module-scoped variable persists naturally:
+**State management.** React's `useState` exists because functional components discard scope on every render. That is React's constraint, not the platform's. Module state persists naturally:
 
 ```javascript
 // Module state — persists for the lifetime of the page.
@@ -89,7 +89,7 @@ function showScreen(cls) {
 }
 ```
 
-**Data fetching.** React's `useEffect` with an empty dependency array runs on mount — a workaround for the fact that functional components have no lifecycle. An init function called once does the same thing without the hook machinery, dependency arrays, or cleanup functions:
+**Data fetching.** `useEffect` with an empty dependency array is a workaround for missing lifecycle methods. An init function does the same thing directly:
 
 ```javascript
 export async function initDecoder() {
@@ -110,7 +110,9 @@ export async function initDecoder() {
 
 No `useEffect`. No dependency array. No cleanup return. The function runs once, fetches data, handles errors visibly, and sets up the module. The lazy-loading system calls it the first time the user visits the tab.
 
-TypeScript is a separate tradeoff, not the same discussion as frameworks. Its value is real: it catches a class of bugs before runtime. Its cost is also real: a build step, more surface area, and type machinery that can obscure intent or drift from runtime behavior at the edges. AI review now catches many of the same failures TypeScript was adopted to catch: bad signatures, null hazards, naming drift, and type confusion. The doctrine's naming rules and Fail-Safe principle address them through disciplined design and review. That makes TypeScript increasingly optional rather than foundational. Projects written in TypeScript still benefit from this doctrine fully. The doctrine does not depend on TypeScript. Treat it as a project-level overlay decision, not a prerequisite for code quality.
+TypeScript is a separate tradeoff, not the same discussion as frameworks. It adds a build step, more surface area, and type machinery that can obscure intent.
+
+The first project built under Web XP — a production single-page application — produced zero type-related bugs, without TypeScript. Strict mode, `===` always, material-accuracy naming, Fail-Safe, AI-assisted review, and a pre-commit check that catches mechanical violations covered the failure class TypeScript catches. Projects written in TypeScript benefit from Web XP. Projects using Web XP may find TypeScript unnecessary.
 
 ## Avoid Lock-In
 
@@ -153,17 +155,15 @@ When the conflict is not resolvable by these rules, state the tension and ask. D
 
 The Shared Key pattern uses a unique `id` as a single-token address across every layer — DOM lookup, dispatch routing, data access. The rationale:
 
-**Greppability.** A developer sees `cmap-edge-3` in the browser inspector, greps `cmap-edge` in the IDE, and lands exactly on the module that owns that logic. No prop-tracing through framework abstractions. No "which component renders this?" — the prefix IS the module.
+**Greppability.** A developer sees `cmap-edge-3` in the browser inspector, greps `cmap-edge` in the IDE, and lands exactly on the module that owns that logic. The prefix is the module.
 
-**Zero-translation path.** Frameworks pay a translation tax on every interaction: Event → Synthetic Event → Action Creator → Reducer → State Update → Virtual DOM Diff → Real DOM Update. The Shared Key path is: Event → Dispatch Table[ID] → Method → getElementById(ID). A straight line from click to execution, with no intermediate representations.
+**Direct execution path.** Event → Dispatch Table[ID] → Method → getElementById(ID). No intermediate representations.
 
-**Reduced indirection.** Frameworks introduce ref objects, virtual keys, and state hooks that must be reconciled against a state tree. The Shared Key collapses the distinction between DOM identity and action route. The ID is the pointer — `getElementById` for the node, `DISPATCH[id]()` for the behavior, `data[id]` for the record. All O(1), all using the same string.
+**One token, three roles.** The ID is the DOM address (`getElementById`), the dispatch key (`DISPATCH[id]()`), and the data key (`data[id]`). All O(1), all using the same string.
 
-**Collision control as a simple contract.** Critics fear ID collisions, but module-owned prefixes make collisions a failure to follow the grep protocol, not a failure of the architecture. It is a social and technical contract that scales because it is simple, not because it is wrapped in a library. If two developers both use `edge-` for different features, the collision is visible in a single grep — not hidden behind framework-managed component scoping.
+**Collision control.** Module-owned prefixes make collisions visible in a single grep. If two developers both use `edge-`, the collision is obvious — not hidden behind framework-managed scoping.
 
-**Why frameworks avoid IDs.** React discourages `id` attributes because components may be rendered multiple times, producing duplicate IDs that break `getElementById` and accessibility associations. React provides `useId()` for accessibility attributes and `useRef()` for imperative DOM access — abstractions that solve a problem the framework created by taking DOM control away from the developer. Worse, `useId()` generates opaque tokens (`:r1:`, `:r2:`) that are meaningless to human readers, invisible to grep, and useless in the browser inspector — far from "give each identifier a meaningful name from the project's ubiquitous language." React could have encouraged unique, developer-chosen IDs scoped to component instances; instead it chose disposable machine-generated tokens. In vanilla JS, the developer controls instantiation. If you need two calendars, you parameterize the ID from the caller (`salon-calendar`, `deliveries-calendar`) and there is no duplication because you decided how many instances exist and what each one is called. The Shared Key pattern works because the developer manages DOM identity directly — no reconciliation layer can invalidate an ID the developer explicitly created and maintains.
-
-**The triple-threat.** A meaningful, human-readable ID — named from the project's ubiquitous language — is the universal coordinate across JS dispatch, DOM lookup, and CSS styling. See it in the inspector, find it in the code, know what it represents. No translation layer to hide bugs.
+Frameworks handle identity indirectly because their rendering model changes the DOM ownership boundary. This doctrine keeps the developer in direct control of DOM identity.
 
 | Layer | Implementation | Doctrine |
 |---|---|---|

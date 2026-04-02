@@ -114,6 +114,10 @@ How each Agent Skill is invoked depends on the agent:
 - **Claude Code**: slash commands (`/web-xp`, `/web-xp-check`, etc.)
 - **Codex**: reference the spec file by name (for example `web-xp-check.md`)
 
+### Why the Pre-Commit Sequence Matters
+
+> "The main thing that helps me see propagation is being told to look. The CLAUDE.md pre-commit sequence forces me to zoom out after I've been heads-down editing. Without that step, I'd mark the task done after the last edit." — Claude
+
 ## What Gets Installed
 
 System install (`~/.web-xp`):
