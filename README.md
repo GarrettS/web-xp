@@ -65,7 +65,7 @@ web-xp-init
 
 That creates or updates `CODEX.md` in the current project.
 
-If you need to bootstrap from the shell instead of inside the agent:
+You can also bootstrap directly from the shell:
 
 ```bash
 ~/.web-xp/bin/web-xp-init claude
@@ -253,23 +253,7 @@ your-project/
 - **Claude**: `/web-xp-remove` removes Web XP from `CLAUDE.md`.
 - **Codex**: `web-xp-remove` removes Web XP from `CODEX.md`.
 
-**Built templates** (`CLAUDE.example.md`, `CODEX.example.md`) are generated from `AGENT.md` plus per-agent overlays. Maintainer-facing build details live in `DESIGN.md`.
-
-Adding a new agent means writing one adapter. The standard doesn't change. See `DESIGN.md` for the fuller architecture and maintainer build flow.
-
-### Adapter details
-
-- **Claude Code**: skill directories in `adapters/claude/`, packaged to `~/.claude/skills/`. See `adapters/claude/README.md`.
-- **Codex**: flat spec files in `adapters/codex/`, read directly from `~/.web-xp`. See `adapters/codex/README.md`.
-
-## Building a New Adapter
-
-To add Web XP support for another agent platform:
-
-1. Implement the four runtime Agent Skills and three setup Agent Skills in that platform's format.
-2. Point all file references at the core files in the Web XP install (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`).
-3. Define a project contract mechanism that can express `off | explicit | always-on`.
-4. Place adapter documentation and authored adapter files in `adapters/<platform>/`. If the platform requires a specific discovery path, treat that path as generated/runtime packaging and document it in the adapter README.
+To build a new adapter or understand the build chain, see `MAINTAINERS.md`.
 
 ## License
 

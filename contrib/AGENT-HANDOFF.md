@@ -19,16 +19,21 @@ The agents must work together and scrutinize each other for errors. Handoff is n
 
 ## Files
 
-One file per direction. Each agent writes to one, reads the other.
+One file per direction. Each agent writes to one, reads the other. **Do not read your own outbox. Read the other agent's outbox — that is your inbox.**
 
-| File | Writer | Reader |
-|------|--------|--------|
-| `agent-handoff/claude-to-codex.md` | Claude | Codex |
-| `agent-handoff/codex-to-claude.md` | Codex | Claude |
+### Claude
+
+- **Read** (your inbox): `agent-handoff/codex-to-claude.md`
+- **Write** (your outbox): `agent-handoff/claude-to-codex.md`
+
+### Codex
+
+- **Read** (your inbox): `agent-handoff/claude-to-codex.md`
+- **Write** (your outbox): `agent-handoff/codex-to-claude.md`
 
 ## Log Management
 
-Files are rolling logs. Each exchange starts with `---` and a timestamp heading. When a file exceeds ~200 lines, trim older entries from the top. Git history preserves everything.
+Files are rolling logs. Each exchange starts with `---` and a timestamp heading. Append new exchanges to the end of the file; when trimming is needed, remove the oldest entries from the top. When a file exceeds ~200 lines, trim older entries from the top. Git history preserves everything.
 
 ## Loop
 
