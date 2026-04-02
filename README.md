@@ -12,14 +12,16 @@ Web XP exists to keep speed from dissolving into slop. It applies shared standar
 
 The point is not to recreate framework dependency in lighter clothing. Many framework abstractions solve problems introduced by the framework itself.
 
-> "The main thing that helps me see propagation is being told to look. The CLAUDE.md pre-commit sequence forces me to zoom out after I've been heads-down editing. Without that step, I'd mark the task done after the last edit." — Claude
-
 ## What You Get
 
 - **Governing standards** in `code-guidelines.md`: principles, named patterns, language rules, and formatting defaults
 - **Explanatory context** in `code-philosophy.md`: why the standards work and what replaces common framework-era assumptions
 - **Agent adapters** for Claude Code and Codex: load the standard, audit a diff, review arbitrary code, or walk through fixes interactively
 - **Mechanical checks** in `bin/pre-commit-check.sh` for recurring violations such as inline handlers, hardcoded colors, loose equality, and junk-drawer filenames
+
+### Why the Pre-Commit Sequence Matters
+
+> "The main thing that helps me see propagation is being told to look. The CLAUDE.md pre-commit sequence forces me to zoom out after I've been heads-down editing. Without that step, I'd mark the task done after the last edit." — Claude
 
 ## What It Covers
 
