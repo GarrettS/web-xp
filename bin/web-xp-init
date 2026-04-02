@@ -10,11 +10,12 @@ END_MARKER='<!-- END WEB-XP -->'
 
 usage() {
   cat <<'EOF'
-Usage: web-xp-init [claude|codex|all]
+Usage: web-xp-init [--preview] [claude|codex|all]
 
 Bootstrap Web XP project contracts in the current directory.
 
 Defaults to `all`, which creates or updates both `CLAUDE.md` and `CODEX.md`.
+Use `--preview` to print the proposed diff without writing files.
 EOF
 }
 
@@ -67,6 +68,67 @@ prepend_block() {
   mv "$tmp" "$file"
 }
 
+render_contract() {
+  local template="$1"
+  local contract="$2"
+  local output="$3"
+
+  if [ ! -f "$contract" ]; then
+    cp "$template" "$output"
+    return
+  fi
+
+  if ! grep -Fq "$BEGIN_MARKER" "$contract"; then
+    cat "$template" > "$output"
+    printf '\n' >> "$output"
+    cat "$contract" >> "$output"
+    return
+  fi
+
+  awk -v template="$template" -v begin="$BEGIN_MARKER" -v end="$END_MARKER" '
+    BEGIN {
+      while ((getline line < template) > 0) {
+        repl = repl line ORS
+      }
+      close(template)
+    }
+    $0 == begin && !done {
+      printf "%s", repl
+      in_block=1
+      done=1
+      next
+    }
+    $0 == end && in_block {
+      in_block=0
+      next
+    }
+    !in_block { print }
+  ' "$contract" > "$output"
+}
+
+show_diff() {
+  local contract="$1"
+  local rendered="$2"
+
+  if [ ! -f "$contract" ]; then
+    git --no-pager diff --no-index --color=always -- /dev/null "$rendered" || true
+    return
+  fi
+
+  git --no-pager diff --no-index --color=always -- "$contract" "$rendered" || true
+}
+
+preview_contract() {
+  local template="$1"
+  local contract="$2"
+  local rendered
+  rendered="$(mktemp)"
+
+  render_contract "$template" "$contract" "$rendered"
+  show_diff "$contract" "$rendered"
+  rm -f "$rendered"
+}
+
 update_contract() {
   local template="$1"
   local contract="$2"
@@ -96,18 +158,38 @@ update_contract() {
   echo "updated managed block in $contract"
 }
 
+preview=0
+
+if [ "${1:-}" = "--preview" ]; then
+  preview=1
+  shift
+fi
+
 mode="${1:-all}"
 
 case "$mode" in
   all)
-    update_contract "$WEB_XP_DIR/adapters/claude/CLAUDE.example.md" "CLAUDE.md"
-    update_contract "$WEB_XP_DIR/adapters/codex/CODEX.example.md" "CODEX.md"
+    if [ "$preview" -eq 1 ]; then
+      preview_contract "$WEB_XP_DIR/adapters/claude/CLAUDE.example.md" "CLAUDE.md"
+      preview_contract "$WEB_XP_DIR/adapters/codex/CODEX.example.md" "CODEX.md"
+    else
+      update_contract "$WEB_XP_DIR/adapters/claude/CLAUDE.example.md" "CLAUDE.md"
+      update_contract "$WEB_XP_DIR/adapters/codex/CODEX.example.md" "CODEX.md"
+    fi
     ;;
   claude)
-    update_contract "$WEB_XP_DIR/adapters/claude/CLAUDE.example.md" "CLAUDE.md"
+    if [ "$preview" -eq 1 ]; then
+      preview_contract "$WEB_XP_DIR/adapters/claude/CLAUDE.example.md" "CLAUDE.md"
+    else
+      update_contract "$WEB_XP_DIR/adapters/claude/CLAUDE.example.md" "CLAUDE.md"
+    fi
     ;;
   codex)
-    update_contract "$WEB_XP_DIR/adapters/codex/CODEX.example.md" "CODEX.md"
+    if [ "$preview" -eq 1 ]; then
+      preview_contract "$WEB_XP_DIR/adapters/codex/CODEX.example.md" "CODEX.md"
+    else
+      update_contract "$WEB_XP_DIR/adapters/codex/CODEX.example.md" "CODEX.md"
+    fi
     ;;
   -h|--help|help)
     usage

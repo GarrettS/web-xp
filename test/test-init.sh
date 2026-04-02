@@ -70,4 +70,16 @@ pass "prepends managed block to existing contract"
 )
 pass "replaces drifted managed block and warns"
 
+(
+  preview_dir="$(mktemp -d)"
+  trap 'rm -rf "$tmpdir" "$preview_dir"' EXIT
+  cd "$preview_dir"
+  preview_file="$(mktemp)"
+  bash "$SCRIPT" --preview codex > "$preview_file"
+  [ ! -f CODEX.md ] || fail "preview should not create CODEX.md"
+  assert_contains "$preview_file" '+++'
+  assert_contains "$preview_file" 'Read this file first on every task.'
+)
+pass "preview shows proposed codex diff without writing"
+
 echo "$pass_count passed, 0 failed"
