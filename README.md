@@ -36,23 +36,16 @@ If you want the operational rules and named patterns first, start with `code-gui
 Install Web XP once:
 
 ```bash
-git clone https://github.com/GarrettS/web-xp.git ~/.web-xp
+git clone https://github.com/GarrettS/web-xp.git ~/.web-xp && ~/.web-xp/bin/install.sh
 ```
 
 Update later with:
 
 ```bash
-cd ~/.web-xp && git pull
+git -C ~/.web-xp pull && ~/.web-xp/bin/install.sh
 ```
 
 ### Claude Code
-
-Install the Claude runtime files:
-
-```bash
-mkdir -p ~/.claude/skills
-cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
-```
 
 In a project, run:
 
@@ -155,13 +148,7 @@ Current behavior:
 Update the global install:
 
 ```bash
-cd ~/.web-xp && git pull
-```
-
-For Claude Code, re-copy the runtime files after updating:
-
-```bash
-cp -r ~/.web-xp/.claude/skills/* ~/.claude/skills/
+git -C ~/.web-xp pull && ~/.web-xp/bin/install.sh
 ```
 
 ### Disable
