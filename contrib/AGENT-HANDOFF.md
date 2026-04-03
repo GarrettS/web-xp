@@ -23,6 +23,8 @@ One file per direction. Each agent writes to one, reads the other.
 
 **Do not read your own outbox for incoming messages.**
 
+Handoff files are gitignored. Do not commit them. They are ephemeral working state, not repo content.
+
 ### Claude
 
 - **Read** (your inbox): `agent-handoff/codex-to-claude.md`
