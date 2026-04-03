@@ -24,23 +24,19 @@ When shared contract behavior changes, also run:
 
 1. `bash tools/build-contracts.sh`
 
-## `install.sh` and the Codex workaround
+## `install.sh` and Codex skill installation
 
-`bin/install.sh` has two different jobs because Claude and Codex discover reusable commands differently.
+`bin/install.sh` has two different jobs because Claude and Codex discover skills differently.
 
-- For Claude, install is straightforward: copy `.claude/skills/*` into `~/.claude/skills/`.
-- For Codex, most adapter behavior can stay in the Web XP install at `~/.web-xp/adapters/codex/`, but setup/cleanup skills cannot rely on that alone.
+- For Claude, install copies `.claude/skills/*` into `~/.claude/skills/`.
+- For Codex, most adapter behavior stays in `~/.web-xp/adapters/codex/`, but setup/cleanup skills need to be globally discoverable.
 
-Why the Codex workaround exists:
+Why Codex setup skills are installed separately:
 
-- Codex setup tasks need to be invokable from the user's global Codex skill directory.
-- The current official Codex skills doc uses `$HOME/.agents/skills` as the user-level skill path.
-- Clean-state probing on local `codex-cli 0.118.0` showed explicit discovery works from both `$HOME/.agents/skills` and `~/.codex/skills`, but Web XP standardizes on the documented path.
-- The init/remove entrypoints are skills, not just passive docs, so they need a stable discovered location under `$HOME/.agents/skills/`.
-- Those skills in turn delegate to the canonical shell commands in this repo:
-  - `bin/web-xp-init`
-  - `bin/web-xp-remove`
-- This keeps project contract mutation logic in one place while still making the setup commands visible to Codex.
+- Codex discovers user-level skills from `$HOME/.agents/skills/` ([official skills doc](https://developers.openai.com/codex/skills)).
+- Clean-state probing on `codex-cli 0.118.0` confirmed explicit discovery works from this path.
+- The init/remove skills need global discovery so users can invoke them before a project contract exists.
+- Those skills delegate to the canonical shell commands (`bin/web-xp-init`, `bin/web-xp-remove`), keeping project contract mutation logic in one place.
 
 What `install.sh` does for Codex:
 
@@ -48,12 +44,12 @@ What `install.sh` does for Codex:
 - copies `adapters/codex/skills/web-xp-remove` to `$HOME/.agents/skills/web-xp-remove`
 - removes any previous copies first so the installed skill directory is replaced cleanly
 
-What stays outside that workaround:
+What stays in the Web XP install:
 
-- the main Codex adapter spec files remain in `~/.web-xp/adapters/codex/`
-- the workaround is only for the setup/cleanup skills that must be globally discoverable by Codex
+- the main Codex adapter skill files remain in `~/.web-xp/adapters/codex/`
+- only the setup/cleanup skills are copied to the global discovery path
 
-If Codex later changes its documented user-level path again, revisit this section and `bin/install.sh` together. Until then, `install.sh` follows the current official skills doc and keeps Codex setup aligned with the canonical Web XP install.
+If Codex later changes its documented user-level path, revisit this section and `bin/install.sh` together.
 
 ## Canonical project setup implementation
 
