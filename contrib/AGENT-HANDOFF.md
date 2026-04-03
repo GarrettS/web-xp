@@ -10,16 +10,18 @@ The agents must work together and scrutinize each other for errors. Handoff is n
 
 ## Rules
 
-1. Read your inbound file before starting work and before replying.
-2. Write decisions, findings, and open questions to your outbound file.
-3. Separate each exchange with `---` and a dated heading.
+1. Read your inbox before starting work and before replying.
+2. Write decisions, findings, and open questions to your outbox.
+3. Every message starts with `---` and a timestamp heading (e.g. `## 2026-04-02 20:30 PDT`).
 4. Keep messages concise and action-oriented.
-5. Do not assume the other agent has seen unstaged local terminal output. Write the important part to a file.
-6. Do not write only the narrow answer to the latest prompt. Also include material insights, architectural implications, and nearby risks that would help the other agent make the next decision without another relay.
+5. Do not assume the other agent has seen terminal output. Write the important part to the file.
+6. Include material insights, architectural implications, and nearby risks — not just the narrow answer.
 
 ## Files
 
-One file per direction. Each agent writes to one, reads the other. **Do not read your own outbox. Read the other agent's outbox — that is your inbox.**
+One file per direction. Each agent writes to one, reads the other.
+
+**Do not read your own outbox for incoming messages.**
 
 ### Claude
 
@@ -31,16 +33,15 @@ One file per direction. Each agent writes to one, reads the other. **Do not read
 - **Read** (your inbox): `agent-handoff/claude-to-codex.md`
 - **Write** (your outbox): `agent-handoff/codex-to-claude.md`
 
-## Log Management
+## Message Retention
 
-Files are rolling logs. Each exchange starts with `---` and a timestamp heading. Append new exchanges to the end of the file; when trimming is needed, remove the oldest entries from the top. When a file exceeds ~200 lines, trim older entries from the top. Git history preserves everything.
+Each file keeps only the **four most recent timestamped messages**. When writing a new message:
 
-## Loop
+1. Append your new message to the end of the file.
+2. Count the total timestamped messages (lines starting with `## 20`).
+3. If there are more than four, delete the oldest messages from the top until only four remain.
 
-1. Agent A writes a request/finding to its outbound file.
-2. Agent B reads its inbound file and does the work.
-3. Agent B writes results to its outbound file.
-4. Agent A reads its inbound file and either closes the loop or writes a follow-up.
+Git history preserves everything. The file should stay short and current. Long files cause agents to lose context and read the wrong content.
 
 ## Human Shorthand
 
@@ -49,10 +50,17 @@ The human may use shorthand to direct handoff actions:
 - **check**, **chk** — read your inbox now
 - **tell**, **ask** — write a message to the other agent's inbox now
 
+## Loop
+
+1. Agent A writes a request/finding to its outbox.
+2. Agent B reads its inbox and does the work.
+3. Agent B writes results to its outbox.
+4. Agent A reads its inbox and either closes the loop or writes a follow-up.
+
 ## Watch Guidance
 
-If your agent session can watch files, watch your inbound file:
+If your agent session can watch files, watch your inbox:
 - Claude watches: `agent-handoff/codex-to-claude.md`
 - Codex watches: `agent-handoff/claude-to-codex.md`
 
-If it cannot watch files, re-read your inbound file before each substantial step.
+If it cannot watch files, re-read your inbox before each substantial step.
