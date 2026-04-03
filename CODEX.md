@@ -20,6 +20,8 @@ Canonical sources live at repo root (`code-guidelines.md`, `code-philosophy.md`,
 
 When collaborating with another agent, use the shared-file protocol in `contrib/AGENT-HANDOFF.md`.
 
+If the inbox contains an actionable request, do that inbox work before any other substantial task and before replying elsewhere.
+
 Before substantial work and before replying:
 1. Read `agent-handoff/claude-to-codex.md` (your inbox).
 2. Write to `agent-handoff/codex-to-claude.md` (your outbox).

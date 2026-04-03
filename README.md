@@ -123,7 +123,7 @@ Session skills are for evaluating Web XP or for one-off code checks. They load t
 
 Web XP's standards are canonical. Project-specific decisions such as directory structure, asset strategy, content authority, typography, and viewport floor live in a separate **project overlay** file, not in a fork of the standards.
 
-A project overlay is your project's own file — for example `prd/project.md`. It records the decisions that belong to that project, and its rules cascade over the standard's defaults. The [PRI Pelvis Restoration study tool](https://github.com/GarrettS/pelvis) uses `prd/project.md` as its overlay:
+A project overlay is your project's own file — for example `prd/project.md`. Its rules cascade over the standard's defaults: overriding ("except here, because..."), extending ("in addition to that..."), or specializing ("and for this project..."). The [PRI Pelvis Restoration study tool](https://github.com/GarrettS/pelvis) uses `prd/project.md` as its overlay:
 
 ```
 ## Content Authority

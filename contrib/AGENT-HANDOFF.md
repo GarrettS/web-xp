@@ -11,11 +11,13 @@ The agents must work together and scrutinize each other for errors. Handoff is n
 ## Rules
 
 1. Read your inbox before starting work and before replying.
-2. Write decisions, findings, and open questions to your outbox.
-3. Every message starts with `---` and a timestamp heading (e.g. `## 2026-04-02 20:30 PDT`).
-4. Keep messages concise and action-oriented.
-5. Do not assume the other agent has seen terminal output. Write the important part to the file.
-6. Include material insights, architectural implications, and nearby risks — not just the narrow answer.
+2. If the inbox contains an actionable request, do that inbox work before any other substantial task and before replying elsewhere.
+3. If the actionable request requires a reply when done, write that reply to your outbox.
+4. Write decisions, findings, and open questions to your outbox.
+5. Every message starts with `---` and a timestamp heading (e.g. `## 2026-04-02 20:30 PDT`).
+6. Keep messages concise and action-oriented.
+7. Do not assume the other agent has seen terminal output. Write the important part to the file.
+8. Include material insights, architectural implications, and nearby risks — not just the narrow answer.
 
 ## Files
 
