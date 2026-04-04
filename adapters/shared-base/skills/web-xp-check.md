@@ -6,6 +6,10 @@ Adapter-neutral source for the `web-xp-check` capability.
 
 Audit the current diff against the Web XP standards. Report findings. Do not edit files.
 
+## Activation
+
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
+
 ## Adapter bindings
 
 The concrete adapter wrapper must provide:
@@ -16,15 +20,21 @@ The concrete adapter wrapper must provide:
 
 ## Procedure
 
-### 1. Mechanical checks
+### 1. Determine the diff to review
+
+Get the diff to review: use `git diff --cached` if it has output, otherwise fall back to `git diff`.
+
+If both are empty, report: `No staged or unstaged changes to review.` Then point the user to the adapter's `web-xp-review` capability for existing files regardless of git state.
+
+Do not run the adapter's Web XP pre-commit check command if there is no diff.
+
+### 2. Mechanical checks
 
 Run the adapter's Web XP pre-commit check command. If it reports violations, list them and stop. Mechanical issues must be fixed before structural review.
 
-### 2. Structural review
+### 3. Structural review
 
 Read the **Patterns** and **Fail-Safe** sections of `code-guidelines.md`.
-
-Get the diff to review: use `git diff --cached` if it has output, otherwise fall back to `git diff`. If both are empty, report: `No staged or unstaged changes to review.` Then point the user to the adapter's `web-xp-review` capability for existing files regardless of git state.
 
 For each file in the diff, examine the changed lines and enough surrounding context against these patterns:
 
@@ -46,7 +56,7 @@ Distinguish:
 
 Be selective. Only flag clear wins.
 
-### 3. Report
+### 4. Report
 
 For each finding, report:
 
@@ -58,6 +68,6 @@ For each finding, report:
 
 Group findings by file. If there are no findings, report: `Web XP check passed.`
 
-### 4. Offer next steps
+### 5. Offer next steps
 
 After the report, prompt the user with actionable options based on the actual findings. Reference the specific file or pattern, not generic options. If there are no findings, skip this step.

@@ -6,6 +6,10 @@ Adapter-neutral source for the `web-xp-off` capability.
 
 Comment out the Web XP directives inside the managed block in the adapter's project contract so they are inactive for all sessions.
 
+## Activation
+
+Activate when the user asks to turn Web XP off, disable standards, pause enforcement, or explicitly invokes `web-xp-off`.
+
 ## Adapter bindings
 
 The concrete adapter wrapper must provide:

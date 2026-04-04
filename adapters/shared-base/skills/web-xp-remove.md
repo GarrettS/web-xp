@@ -6,6 +6,10 @@ Adapter-neutral source for the `web-xp-remove` capability.
 
 Remove Web XP from the current project for the concrete adapter.
 
+## Activation
+
+Activate when the user asks to remove Web XP from the project, clean up the project contract, uninstall from the current project, or explicitly invokes `web-xp-remove`.
+
 ## Adapter bindings
 
 The concrete adapter wrapper must provide:

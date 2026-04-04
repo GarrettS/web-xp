@@ -1,6 +1,6 @@
 ---
 name: web-xp-init
-description: 'Set up or update a project with Web XP standards. Trigger: ''set up project'', ''initialize'', ''create CLAUDE.md'', ''update CLAUDE.md'', ''add pre-commit'', ''init web-xp''.'
+description: 'Activate when the user asks to initialize Web XP in a project, create or update the project contract, or explicitly invokes `web-xp-init`.'
 ---
 
 # Web XP Init — Project Setup
@@ -19,6 +19,10 @@ description: 'Set up or update a project with Web XP standards. Trigger: ''set u
 ## Purpose
 
 Set up or update a project to use Web XP.
+
+## Activation
+
+Activate when the user asks to initialize Web XP in a project, create or update the project contract, or explicitly invokes `web-xp-init`.
 
 ## Procedure
 

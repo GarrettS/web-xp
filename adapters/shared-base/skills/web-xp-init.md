@@ -6,6 +6,10 @@ Adapter-neutral source for the `web-xp-init` capability.
 
 Set up or update a project to use Web XP.
 
+## Activation
+
+Activate when the user asks to initialize Web XP in a project, create or update the project contract, or explicitly invokes `web-xp-init`.
+
 ## Adapter bindings
 
 The concrete adapter wrapper must provide:

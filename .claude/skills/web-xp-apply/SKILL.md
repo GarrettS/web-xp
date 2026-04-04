@@ -1,6 +1,6 @@
 ---
 name: web-xp-apply
-description: "Fix Web XP violations interactively with approval. Activate when: 'fix these', 'apply suggestions', 'refactor against standards', 'walk me through fixes'."
+description: 'Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.'
 ---
 <!-- DO NOT EDIT — canonical source is /adapters/claude/web-xp-apply/SKILL.md.     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->
 # Web XP Apply — Interactive Guided Fixes
@@ -18,6 +18,10 @@ description: "Fix Web XP violations interactively with approval. Activate when: 
 ## Purpose
 
 Walk through `web-xp-check` findings and apply them with human approval.
+
+## Activation
+
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
 
 ## Procedure
 

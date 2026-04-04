@@ -1,6 +1,6 @@
 ---
 name: web-xp-off
-description: 'Disable Web XP enforcement in CODEX.md. Activate when: ''turn off web-xp'', ''disable standards'', ''pause enforcement'', ''web-xp off'', ''skip web-xp''.'
+description: 'Activate when the user asks to turn Web XP off, disable standards, pause enforcement, or explicitly invokes `web-xp-off`.'
 ---
 
 # Web XP Off — Disable Enforcement
@@ -17,6 +17,10 @@ description: 'Disable Web XP enforcement in CODEX.md. Activate when: ''turn off 
 ## Purpose
 
 Comment out the Web XP directives inside the managed block in the adapter's project contract so they are inactive for all sessions.
+
+## Activation
+
+Activate when the user asks to turn Web XP off, disable standards, pause enforcement, or explicitly invokes `web-xp-off`.
 
 ## Procedure
 

@@ -6,6 +6,10 @@ Adapter-neutral source for the `web-xp-review` capability.
 
 Review code the user provides against the Web XP standards. Unlike `web-xp-check`, this works on any code from any source.
 
+## Activation
+
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
+
 ## Adapter bindings
 
 The concrete adapter wrapper must provide:

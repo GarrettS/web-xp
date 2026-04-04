@@ -1,6 +1,6 @@
 ---
 name: web-xp
-description: "Load code-guidelines.md and code-philosophy.md as session constraints. Activate when: coding task begins, 'web-xp', 'web xp', 'code guidelines', 'standards', writing or reviewing JS/HTML/CSS."
+description: 'Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.'
 ---
 <!-- DO NOT EDIT — canonical source is /adapters/claude/web-xp/SKILL.md.     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->
 # Web XP — Load Session Constraints
@@ -18,6 +18,10 @@ description: "Load code-guidelines.md and code-philosophy.md as session constrai
 ## Purpose
 
 Load the Web XP standard into the current session before writing or reviewing code.
+
+## Activation
+
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
 
 ## Procedure
 
@@ -46,7 +50,9 @@ For full pattern definitions, read `code-guidelines.md`. For reasoning and examp
 
 - Evaluate all code written or reviewed against these constraints.
 - Flag violations by pattern name.
-- When proposing code, follow the patterns.
+- When proposing code, follow the patterns for the new code you write.
+- Do not refactor existing code beyond the user's request just to make it conform to Web XP.
+- If you notice pre-existing violations outside the requested scope, ask whether to fix them now, list them, or leave them.
 - Use `code-philosophy.md` to explain reasoning, not to invent rules.
 - When the standards conflict with a request, state the tension and ask.
 - Before commit, remind the user to run the adapter's Web XP pre-commit check path.

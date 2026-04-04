@@ -1,6 +1,6 @@
 ---
 name: web-xp-remove
-description: 'Remove Web XP from this Claude project by deleting the managed block from CLAUDE.md or removing the file if it only contains Web XP. Trigger: ''remove web-xp'', ''uninstall from project'', ''clean up CLAUDE.md'', ''web-xp remove''.'
+description: 'Activate when the user asks to remove Web XP from the project, clean up the project contract, uninstall from the current project, or explicitly invokes `web-xp-remove`.'
 ---
 
 # Web XP Remove — Project Cleanup
@@ -17,6 +17,10 @@ description: 'Remove Web XP from this Claude project by deleting the managed blo
 ## Purpose
 
 Remove Web XP from the current project for the concrete adapter.
+
+## Activation
+
+Activate when the user asks to remove Web XP from the project, clean up the project contract, uninstall from the current project, or explicitly invokes `web-xp-remove`.
 
 ## Procedure
 

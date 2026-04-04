@@ -1,6 +1,6 @@
 ---
 name: web-xp-review
-description: "Review code against Web XP standards. Activate when: code pasted or file given, 'review this', 'what's wrong with this', evaluate quality, vanilla equivalent."
+description: 'Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.'
 ---
 <!-- DO NOT EDIT — canonical source is /adapters/claude/web-xp-review/SKILL.md.     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->
 # Web XP Review — Evaluate Any Code Against the Standards
@@ -18,6 +18,10 @@ description: "Review code against Web XP standards. Activate when: code pasted o
 ## Purpose
 
 Review code the user provides against the Web XP standards. Unlike `web-xp-check`, this works on any code from any source.
+
+## Activation
+
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
 
 ## Procedure
 

@@ -1,6 +1,6 @@
 ---
 name: web-xp-init
-description: 'Create or update a project''s CODEX.md contract for Web XP. Trigger when the user says "web-xp-init", asks to initialize Web XP in a Codex project, create CODEX.md, or update the Web XP project contract.'
+description: 'Activate when the user asks to initialize Web XP in a project, create or update the project contract, or explicitly invokes `web-xp-init`.'
 ---
 
 # Web XP Init — Project Setup
@@ -20,6 +20,10 @@ description: 'Create or update a project''s CODEX.md contract for Web XP. Trigge
 ## Purpose
 
 Set up or update a project to use Web XP.
+
+## Activation
+
+Activate when the user asks to initialize Web XP in a project, create or update the project contract, or explicitly invokes `web-xp-init`.
 
 ## Procedure
 

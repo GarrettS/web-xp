@@ -1,6 +1,6 @@
 ---
 name: web-xp-on
-description: "Enable Web XP enforcement in CLAUDE.md. Activate when: 'turn on web-xp', 'enable standards', 'activate enforcement', 'web-xp on', 're-enable'."
+description: 'Activate when the user asks to turn Web XP on, enable standards, re-enable enforcement, or explicitly invokes `web-xp-on`.'
 ---
 <!-- DO NOT EDIT — canonical source is /adapters/claude/web-xp-on/SKILL.md.     This copy is auto-synced by the pre-commit hook. Edits here will be overwritten. -->
 # Web XP On — Enable Enforcement
@@ -18,6 +18,10 @@ description: "Enable Web XP enforcement in CLAUDE.md. Activate when: 'turn on we
 ## Purpose
 
 Activate the Web XP directives inside the managed block in the adapter's project contract so they are active for all sessions.
+
+## Activation
+
+Activate when the user asks to turn Web XP on, enable standards, re-enable enforcement, or explicitly invokes `web-xp-on`.
 
 ## Procedure
 

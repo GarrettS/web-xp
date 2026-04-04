@@ -6,6 +6,10 @@ Adapter-neutral source for the `web-xp-apply` capability.
 
 Walk through `web-xp-check` findings and apply them with human approval.
 
+## Activation
+
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
+
 ## Adapter bindings
 
 The concrete adapter wrapper must provide:

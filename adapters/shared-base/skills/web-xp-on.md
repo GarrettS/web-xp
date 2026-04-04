@@ -6,6 +6,10 @@ Adapter-neutral source for the `web-xp-on` capability.
 
 Activate the Web XP directives inside the managed block in the adapter's project contract so they are active for all sessions.
 
+## Activation
+
+Activate when the user asks to turn Web XP on, enable standards, re-enable enforcement, or explicitly invokes `web-xp-on`.
+
 ## Adapter bindings
 
 The concrete adapter wrapper must provide:
