@@ -1,6 +1,6 @@
 ---
 name: web-xp-remove
-description: Remove Web XP from the current Codex project by deleting the managed block from CODEX.md or removing the file if it only contains Web XP. Trigger when the user says "web-xp-remove", asks to remove Web XP from a project, uninstall Web XP from the local project, or clean up CODEX.md.
+description: 'Remove Web XP from the current Codex project by deleting the managed block from CODEX.md or removing the file if it only contains Web XP. Trigger when the user says "web-xp-remove", asks to remove Web XP from a project, uninstall Web XP from the local project, or clean up CODEX.md.'
 ---
 
 # Web XP Remove — Project Cleanup

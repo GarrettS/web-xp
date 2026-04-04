@@ -1,6 +1,6 @@
 ---
 name: web-xp-review
-description: "Review code against Web XP standards. Activate when: code pasted or file given, 'review this', 'what's wrong with this', evaluate quality, vanilla equivalent."
+description: 'Review code against Web XP standards. Activate when: code pasted or file given, ''review this'', ''what''s wrong with this'', evaluate quality, vanilla equivalent.'
 ---
 
 # Web XP Review — Evaluate Any Code Against the Standards

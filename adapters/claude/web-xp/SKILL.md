@@ -1,6 +1,6 @@
 ---
 name: web-xp
-description: "Load code-guidelines.md and code-philosophy.md as session constraints. Activate when: coding task begins, 'web-xp', 'web xp', 'code guidelines', 'standards', writing or reviewing JS/HTML/CSS."
+description: 'Load code-guidelines.md and code-philosophy.md as session constraints. Activate when: coding task begins, ''web-xp'', ''web xp'', ''code guidelines'', ''standards'', writing or reviewing JS/HTML/CSS.'
 ---
 
 # Web XP — Load Session Constraints

@@ -1,3 +1,8 @@
+---
+name: web-xp-on
+description: 'Enable Web XP enforcement in CODEX.md. Activate when: ''turn on web-xp'', ''enable standards'', ''activate enforcement'', ''web-xp on'', ''re-enable''.'
+---
+
 # Web XP On — Enable Enforcement
 
 <!-- DO NOT EDIT — built from /adapters/shared-base/skills/web-xp-on.md + Codex bindings. -->

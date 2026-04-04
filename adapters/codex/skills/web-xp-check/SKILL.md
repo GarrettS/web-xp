@@ -1,3 +1,8 @@
+---
+name: web-xp-check
+description: 'Audit git diff against Web XP standard patterns. Activate when: about to commit, ''check my code'', ''audit'', ''pre-commit'', ''review the diff'', verifying quality.'
+---
+
 # Web XP Check — Read-Only Audit
 
 <!-- DO NOT EDIT — built from /adapters/shared-base/skills/web-xp-check.md + Codex bindings. -->

@@ -1,6 +1,6 @@
 ---
 name: web-xp-remove
-description: "Remove Web XP from this Claude project by deleting the managed block from CLAUDE.md or removing the file if it only contains Web XP. Trigger: 'remove web-xp', 'uninstall from project', 'clean up CLAUDE.md', 'web-xp remove'."
+description: 'Remove Web XP from this Claude project by deleting the managed block from CLAUDE.md or removing the file if it only contains Web XP. Trigger: ''remove web-xp'', ''uninstall from project'', ''clean up CLAUDE.md'', ''web-xp remove''.'
 ---
 
 # Web XP Remove — Project Cleanup

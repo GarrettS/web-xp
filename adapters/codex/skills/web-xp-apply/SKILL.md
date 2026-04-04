@@ -1,3 +1,8 @@
+---
+name: web-xp-apply
+description: 'Fix Web XP violations interactively with approval. Activate when: ''fix these'', ''apply suggestions'', ''refactor against standards'', ''walk me through fixes''.'
+---
+
 # Web XP Apply — Interactive Guided Fixes
 
 <!-- DO NOT EDIT — built from /adapters/shared-base/skills/web-xp-apply.md + Codex bindings. -->

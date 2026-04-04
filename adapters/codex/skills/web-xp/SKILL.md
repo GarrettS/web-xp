@@ -1,3 +1,8 @@
+---
+name: web-xp
+description: 'Load code-guidelines.md and code-philosophy.md as session constraints. Activate when: coding task begins, ''web-xp'', ''web xp'', ''code guidelines'', ''standards'', writing or reviewing JS/HTML/CSS.'
+---
+
 # Web XP — Load Session Constraints
 
 <!-- DO NOT EDIT — built from /adapters/shared-base/skills/web-xp.md + Codex bindings. -->
@@ -6,7 +11,7 @@
 
 - Read `~/.web-xp/code-guidelines.md`.
 - Read `~/.web-xp/code-philosophy.md`.
-- Treat this file name, `web-xp.md`, as the Codex capability surface.
+- Treat `web-xp` as the Codex capability surface.
 
 ## Shared capability
 

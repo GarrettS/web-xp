@@ -1,6 +1,6 @@
 ---
 name: web-xp-off
-description: "Disable Web XP enforcement in CLAUDE.md. Activate when: 'turn off web-xp', 'disable standards', 'pause enforcement', 'web-xp off', 'skip web-xp'."
+description: 'Disable Web XP enforcement in CLAUDE.md. Activate when: ''turn off web-xp'', ''disable standards'', ''pause enforcement'', ''web-xp off'', ''skip web-xp''.'
 ---
 
 # Web XP Off — Disable Enforcement

@@ -1,6 +1,6 @@
 ---
 name: web-xp-init
-description: "Set up or update a project with Web XP standards. Trigger: 'set up project', 'initialize', 'create CLAUDE.md', 'update CLAUDE.md', 'add pre-commit', 'init web-xp'."
+description: 'Set up or update a project with Web XP standards. Trigger: ''set up project'', ''initialize'', ''create CLAUDE.md'', ''update CLAUDE.md'', ''add pre-commit'', ''init web-xp''.'
 ---
 
 # Web XP Init — Project Setup

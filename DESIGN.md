@@ -194,7 +194,7 @@ All adapters point at the same core files. They do not duplicate the standard â€
 Seven native skills covering all capabilities above. Project contract: `CLAUDE.md`, built from `adapters/shared-base/AGENT.md` + Claude overlay. Skill behavior is authored in `adapters/shared-base/skills/` and built into concrete Claude packaging under `adapters/claude/`. `.claude/skills/` is the platform-native runtime/package path for local Claude development and install packaging.
 
 **Codex** (implemented â€” concrete packaging in `adapters/codex/`):
-Capability spec files and convention-based contract (`CODEX.md`). Contract is built from `adapters/shared-base/AGENT.md` + Codex overlay. Skill behavior is authored in `adapters/shared-base/skills/` and built into concrete Codex packaging under `adapters/codex/`.
+Discovered skill folders plus a convention-based contract (`CODEX.md`). Contract is built from `adapters/shared-base/AGENT.md` + Codex overlay. Skill behavior is authored in `adapters/shared-base/skills/` and built into concrete Codex packaging under `adapters/codex/skills/`, then installed to `$HOME/.agents/skills/`.
 
 ---
 

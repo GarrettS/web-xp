@@ -1,4 +1,3 @@
+## Codex skill invocation
 
-## Web XP spec directory
-
-Treat `~/.web-xp/adapters/codex/` as the Web XP spec directory. When asked to follow a spec (e.g. `web-xp-check.md`), read it from that directory.
+Use installed Web XP skills by name, for example `web-xp`, `web-xp-check`, `web-xp-review`, and `web-xp-init`.

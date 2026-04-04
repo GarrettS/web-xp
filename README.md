@@ -57,11 +57,12 @@ After install, here is what is on your system and what each piece does:
 ├── bin/web-xp-remove               ← shell project cleanup fallback
 ├── adapters/claude/                ← Claude skill source + overlay
 │   └── CLAUDE.example.md           ← built template
-└── adapters/codex/                 ← Codex spec files + overlay
+└── adapters/codex/                 ← Codex skill source + overlay
+    ├── skills/                     ← built Codex skills
     └── CODEX.example.md            ← built template
 
 ~/.claude/skills/                   ← Claude runtime (install.sh copies here)
-~/.codex/skills/                    ← Codex setup skills (install.sh copies here)
+$HOME/.agents/skills/               ← Codex runtime (install.sh copies here)
 
 your-project/
 ├── CLAUDE.md or CODEX.md           ← project contract
@@ -76,7 +77,7 @@ your-project/
 
 > "The main thing that helps me see propagation is being told to look. The CLAUDE.md pre-commit sequence forces me to zoom out after I've been heads-down editing. Without that step, I'd mark the task done after the last edit." — Claude
 
-**Agent adapters** package the same standard for different agents. Claude uses native skill directories. Codex uses flat spec files. The skills are the same — the packaging differs.
+**Agent adapters** package the same standard for different agents. Claude and Codex both use discovered skill directories. The skills are the same — the discovery roots and contract files differ.
 
 ## Project Activation
 
@@ -167,7 +168,7 @@ That removes the Web XP-managed block from `CLAUDE.md` and `CODEX.md` in the cur
 ### Remove From Your System
 
 ```bash
-rm -rf ~/.web-xp ~/.claude/skills/web-xp* ~/.codex/skills/web-xp*
+rm -rf ~/.web-xp ~/.claude/skills/web-xp* "$HOME"/.agents/skills/web-xp*
 ```
 
 ## Architecture
