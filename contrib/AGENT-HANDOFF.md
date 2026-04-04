@@ -15,7 +15,7 @@ The agents must work together and scrutinize each other for errors. Handoff is n
 2. If the inbox contains an actionable request, do that inbox work before any other substantial task and before replying elsewhere.
 3. If the actionable request requires a reply when done, write that reply to your outbox.
 4. Write decisions, findings, and open questions to your outbox.
-5. Every message starts with `---` and a timestamp heading (e.g. `## 2026-04-02 20:30 PDT`).
+5. Every message starts with `---` and an ISO 8601 extended format timestamp heading to the second (e.g. `## 2026-04-02T20:30:45-07:00`). Read the message with the latest timestamp — that is the current message.
 6. Keep messages concise and action-oriented.
 7. Do not assume the other agent has seen terminal output. Write the important part to the file.
 8. Include material insights, architectural implications, and nearby risks — not just the narrow answer. 
@@ -41,13 +41,23 @@ Handoff files are gitignored. Do not commit them. They are ephemeral working sta
 - **Read** (your inbox): `agent-handoff/claude-to-codex.md`
 - **Write** (your outbox): `agent-handoff/codex-to-claude.md`
 
+## Message Order
+
+<!-- Newest-first order follows email conventions and addresses a
+     recurring problem: Codex repeatedly reads from the top of the
+     file regardless of instructions. Rather than fight that tendency,
+     the protocol now matches it — the newest message is always at
+     the top, so reading from the top means reading the current message. -->
+
+New messages go at the **top** of the file, below the `# heading` line. The newest message is always first. Read from the top — the first timestamped message is the current one.
+
 ## Message Retention
 
 Each file keeps only the **four most recent timestamped messages**. When writing a new message:
 
-1. Append your new message to the end of the file.
+1. Prepend your new message below the `# heading` line.
 2. Count the total timestamped messages (lines starting with `## 20`).
-3. If there are more than four, delete the oldest messages from the top until only four remain.
+3. If there are more than four, delete the oldest messages from the bottom until only four remain.
 
 Git history preserves everything. The file should stay short and current. Long files cause agents to lose context and read the wrong content.
 
