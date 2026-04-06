@@ -28,13 +28,16 @@ if [ ! -d "$CODEX_SKILLS_SRC" ]; then
   exit 1
 fi
 
-# Claude: install skill directories (clean first, then copy)
+# Claude: clean previous Web XP install, then copy fresh
 mkdir -p "$CLAUDE_SKILLS_DEST"
 for skill_path in "$CLAUDE_SKILLS_SRC"/web-xp*/; do
   skill_name="$(basename "$skill_path")"
   rm -rf "${CLAUDE_SKILLS_DEST}/${skill_name}"
   cp -r "$skill_path" "${CLAUDE_SKILLS_DEST}/${skill_name}"
 done
+rm -f "$CLAUDE_SKILLS_DEST/code-guidelines.md" \
+      "$CLAUDE_SKILLS_DEST/code-philosophy.md" \
+      "$CLAUDE_SKILLS_DEST/pre-commit-check.sh"
 
 # Claude: install standards files alongside skills
 for standards_file in "${STANDARDS_FILES[@]}"; do
