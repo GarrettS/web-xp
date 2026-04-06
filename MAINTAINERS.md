@@ -84,51 +84,14 @@ The adapter does not need to implement orchestration. That is a separate layer.
 
 ## Testing
 
-### Prerequisites
-
-Install [Bats](https://github.com/bats-core/bats-core):
-
 ```bash
-brew install bats-core
+brew install bats-core    # one-time
+bash test/run-unit.sh     # run all unit tests
 ```
 
-### Running unit tests
+Unit tests (Bats) cover install, pre-commit checks, and adapter skill generation. E2E tests require a separate macOS user for clean-state isolation due to cross-project session state leaking ([#21](https://github.com/GarrettS/web-xp/issues/21)).
 
-From the repo root:
-
-```bash
-bash test/run-unit.sh
-```
-
-This runs all `.bats` files under `test/unit/`. The suite covers:
-
-| File | What it tests |
-|---|---|
-| `install.bats` | `bin/install.sh` copies all Claude and Codex skills to the correct paths |
-| `sync.bats` | `tools/check-web-xp-sync.sh` preserves YAML frontmatter and injects DO NOT EDIT headers correctly |
-| `pre-commit.bats` | `bin/pre-commit-check.sh` catches mechanical violations and respects comment overrides |
-
-Unit tests are local and deterministic — no network, no agent CLI, no API calls.
-
-### Behavioral / e2e tests
-
-Behavioral tests verify how agents discover and use Web XP skills in interactive sessions. These require a human because agent output is non-deterministic.
-
-Two protocol docs in `test/badcode-test-website/`:
-
-- **`TEST-PROTOCOL.md`** — automated test protocol with 4 suites (A–D) covering no-git, no-contract, full-project, and always-on-off scenarios
-- **`MANUAL-TEST.md`** — interactive manual tests for behavioral verification: auto-activation, enforcement scope, pre-commit compliance
-
-The test fixtures (`index.html`, `app.js`) contain intentionally bad code with known Web XP violations. Test results are recorded in `TEST-RESULTS.md`.
-
-To run a manual test, set up a clean test directory outside the repo, open an agent session in it, and follow the steps in the protocol. See `MANUAL-TEST.md` for the full procedure.
-
-### Known testing limitations
-
-- **Cross-project session state** ([#21](https://github.com/GarrettS/web-xp/issues/21), [openai/codex#16799](https://github.com/openai/codex/issues/16799)): Codex persists hidden session state (approved commands, behavioral rules) across projects and sessions. A "fresh session" is not reliably clean, and behavioral test results may not be reproducible. Claude has explicit cross-project memory on disk (`~/.claude/projects/`) which is accessible but not injected automatically. Neither agent provides true project-scoped isolation.
-- **No confirmed workaround yet.** Potential approaches under investigation: separate OS user account, remote/VM test environment, force context-free agent launch (flag or config unknown), or manual state clearing. See [#21](https://github.com/GarrettS/web-xp/issues/21) for details.
-- Agent e2e tests are not yet automated. Bats adoption for e2e is under evaluation (#20).
-- Legacy test scripts (`test-pre-commit.sh`, `test-sync.sh`, `test-install.sh`) are being replaced by the Bats suite. They still work but are redundant.
+See [`test/README.md`](test/README.md) for the full test suite reference, e2e setup, fixtures, and known limitations.
 
 ## Repo structure
 
