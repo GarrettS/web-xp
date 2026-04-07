@@ -36,4 +36,6 @@ The cleanup behavior is:
 
 ### 3. Report
 
-Summarize what the script removed or updated.
+Report: "Web XP enforcement is disabled. Do not apply Web XP standards or run pre-commit checks unless explicitly asked."
+
+This wording is a behavioral instruction, not just a status message. It must remain in the conversation context so the agent stops enforcing for the rest of the session.

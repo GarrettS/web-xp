@@ -50,3 +50,7 @@ Never modify content outside the Web XP-managed block.
 ### 3. Report
 
 Summarize what was created or updated, and whether the managed block was replaced.
+
+Report: "Web XP enforcement is enabled. Apply Web XP standards to new code and run pre-commit checks before commits."
+
+This wording is a behavioral instruction, not just a status message. It must remain in the conversation context so the agent enforces for the rest of the session.
