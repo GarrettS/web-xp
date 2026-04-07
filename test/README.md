@@ -14,6 +14,7 @@ bash test/run-unit.sh     # run all unit tests
 | File | Tests | What it covers |
 |---|---|---|
 | `install.bats` | 4 | install.sh copies skills and standards to correct paths, cleans stale files, preserves unrelated files |
+| `uninstall.bats` | 2 | uninstall.sh confirms by default and removes installed runtime state on approval |
 | `pre-commit.bats` | 13 | pre-commit-check.sh catches violations and respects comment overrides |
 | `sync.bats` | 3 | build-adapter-skills.sh generates correct YAML frontmatter and DO NOT EDIT headers |
 

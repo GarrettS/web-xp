@@ -167,7 +167,7 @@ That removes the Web XP-managed block from `CLAUDE.md` and `CODEX.md` in the cur
 ### Remove From Your System
 
 ```bash
-rm -rf ~/.web-xp ~/.claude/skills/web-xp* "$HOME"/.agents/skills/web-xp*
+~/.web-xp/bin/uninstall.sh
 ```
 
 ## Architecture
