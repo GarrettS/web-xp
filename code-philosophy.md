@@ -33,29 +33,16 @@ Many framework patterns presented as essential are solutions to problems the fra
 
 ### What React Router, useState, and useEffect replaced — and what they replaced it with
 
-**Routing.** The web platform provides `location.hash`, `hashchange`, `history.pushState`, and `popstate`. Routing is URL parsing plus a navigation event. The rest is application dispatch, not router machinery:
+**Routing.** The web platform provides `location.hash`, `hashchange`, `history.pushState`, and `popstate`. Routing is URL parsing plus dispatch. No router framework required:
 
 ```javascript
 function applyHash() {
-  const h = (location.hash || '').replace(/^#/, '');
-  const [tab, subtab, subview] = h.split('/');
-
-  const section = tab
-    ? document.getElementById(tab + '-content')
-    : null;
-  if (!section || !section.classList.contains('content')) {
-    activateTab('home');
-    return;
-  }
-
-  activateTab(tab);
-  activateSubtab(tab, subtab);
-  if (subview) activateSubview(tab, subtab, subview);
+  const h = location.hash.substring(1);
+  const [tab = 'home', subtab] = h.split('/');
+  activateTab(tab, subtab);
 }
 window.addEventListener('hashchange', applyHash);
 ```
-
-Routing is URL parsing plus dispatch. No router framework required.
 
 **State management.** React's `useState` exists because functional components discard scope on every render. That is React's constraint, not the platform's. Module state persists naturally:
 
