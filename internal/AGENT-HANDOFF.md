@@ -4,7 +4,7 @@
 
 This protocol is for developing Web XP itself — coordinating the agents that work on this repo. It is not part of the Web XP product and is not emitted into user projects. The repo's own contract files (`CLAUDE.md`) reference this protocol; the built contract templates (`CLAUDE.example.md`, `CODEX.example.md`) do not.
 
-Use shared files in `agent-handoff/` to coordinate work between agents.
+Use shared files in `/tmp/web-xp-agent-handoff/` to coordinate work between agents. The live handoff state does not belong in the repo.
 
 Core principle:
 
@@ -31,17 +31,17 @@ One file per direction. Each agent writes to one, reads the other.
 
 **Do not read your own outbox for incoming messages.**
 
-Handoff files are gitignored. Do not commit them. They are ephemeral working state, not repo content.
+Handoff files live outside the repo. Do not copy or move them into the checkout. They are ephemeral working state, not repo content.
 
 ### Claude
 
-- **Read** (your inbox): `agent-handoff/codex-to-claude.md`
-- **Write** (your outbox): `agent-handoff/claude-to-codex.md`
+- **Read** (your inbox): `/tmp/web-xp-agent-handoff/codex-to-claude.md`
+- **Write** (your outbox): `/tmp/web-xp-agent-handoff/claude-to-codex.md`
 
 ### Codex
 
-- **Read** (your inbox): `agent-handoff/claude-to-codex.md`
-- **Write** (your outbox): `agent-handoff/codex-to-claude.md`
+- **Read** (your inbox): `/tmp/web-xp-agent-handoff/claude-to-codex.md`
+- **Write** (your outbox): `/tmp/web-xp-agent-handoff/codex-to-claude.md`
 
 ## Message Order
 
@@ -80,7 +80,7 @@ The human may use shorthand to direct handoff actions:
 ## Watch Guidance
 
 If your agent session can watch files, watch your inbox:
-- Claude watches: `agent-handoff/codex-to-claude.md`
-- Codex watches: `agent-handoff/claude-to-codex.md`
+- Claude watches: `/tmp/web-xp-agent-handoff/codex-to-claude.md`
+- Codex watches: `/tmp/web-xp-agent-handoff/claude-to-codex.md`
 
 If it cannot watch files, re-read your inbox before each substantial step.

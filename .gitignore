@@ -1,7 +1,3 @@
-# Live handoff state (protocol is in AGENT-HANDOFF.md)
-agent-handoff/claude-to-codex.md
-agent-handoff/codex-to-claude.md
-
 # macOS
 .DS_Store
 
@@ -15,6 +11,6 @@ agent-handoff/codex-to-claude.md
 .dev-relay/
 
 # Working docs not for distribution
-/CODEX-PROMPT.md
+/internal/CODEX-PROMPT.md
 tmp/
 .video-review/

@@ -39,7 +39,7 @@ Remove the human from message routing while keeping the human in control of:
 
 ## What Already Works
 
-- `agent-handoff/*.md` is a durable, inspectable message store
+- `/tmp/web-xp-agent-handoff/*.md` is a durable, inspectable message store
 - both agents can read and write that store
 - tmux-based notification and handoff have been validated in the spike
 
@@ -70,7 +70,7 @@ workflow engine
 
 Canonical communication record:
 
-- `agent-handoff/*.md`
+- `/tmp/web-xp-agent-handoff/*.md`
 
 Properties:
 
@@ -128,7 +128,7 @@ If notifier behavior fails, agents should still be able to recover from the mark
 1. What notifier stack should be preferred in day-to-day use: tmux, hooks, watchers, or hybrid?
 2. Which automations are acceptable by default, and which must be explicitly opt-in?
 3. What is the cleanest human escalation path?
-4. How much of this belongs in `contrib/smux/` versus a more general contributor-integration layer?
+4. How much of this belongs in `internal/smux/` versus a more general contributor-integration layer?
 
 ## Short Version
 

@@ -4,12 +4,6 @@
 
 Web XP gives you a shared doctrine, review workflow, and agent adapters for building on the web platform without losing architectural clarity as the project grows.
 
-## Why Use It
-
-AI writes code fast. Without constraints, it writes inconsistency and maintenance debt just as fast.
-
-Web XP exists to keep speed from dissolving into slop. It applies shared standards, review discipline, and web-platform-first structure so code stays clear, debuggable, and durable as the project grows.
-
 ## Quick Start
 
 Install Web XP once:
@@ -43,6 +37,12 @@ Alternatively, you can bootstrap Web XP directly from the shell:
 ~/.web-xp/bin/web-xp-on claude
 ~/.web-xp/bin/web-xp-on codex
 ```
+
+## Why Use It
+
+AI writes code fast. Without constraints, it writes inconsistency and maintenance debt just as fast.
+
+Web XP exists to keep speed from dissolving into slop. It applies shared standards, review discipline, and web-platform-first structure so code stays clear, debuggable, and durable as the project grows.
 
 ### What you get
 

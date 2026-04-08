@@ -18,14 +18,14 @@ Canonical sources live at repo root (`code-guidelines.md`, `code-philosophy.md`,
 
 ## Agent Handoff
 
-When collaborating with another agent, use the shared-file protocol in `contrib/AGENT-HANDOFF.md`.
+When collaborating with another agent, use the shared-file protocol in `internal/AGENT-HANDOFF.md`.
 
-`check` and `chk` mean: read `agent-handoff/claude-to-codex.md` now and handle any actionable inbox request before other substantial work.
+`check` and `chk` mean: read `/tmp/web-xp-agent-handoff/claude-to-codex.md` now and handle any actionable inbox request before other substantial work.
 
 If the inbox contains an actionable request, do that inbox work before any other substantial task and before replying elsewhere.
 
 Before substantial work and before replying:
-1. Read `agent-handoff/claude-to-codex.md` (your inbox).
-2. Write to `agent-handoff/codex-to-claude.md` (your outbox).
-3. Do not read `agent-handoff/codex-to-claude.md` for incoming messages.
+1. Read `/tmp/web-xp-agent-handoff/claude-to-codex.md` (your inbox).
+2. Write to `/tmp/web-xp-agent-handoff/codex-to-claude.md` (your outbox).
+3. Do not read `/tmp/web-xp-agent-handoff/codex-to-claude.md` for incoming messages.
 4. Do not assume terminal output or chat context has been shared across agents; write important context to the handoff files.

@@ -104,6 +104,15 @@ Unit tests (Bats) cover install, pre-commit checks, and adapter skill generation
 
 See [`test/README.md`](test/README.md) for the full test suite reference, e2e setup, fixtures, and known limitations.
 
+## Maintainer Workflow
+
+Cross-agent maintainer coordination is documented in `internal/AGENT-HANDOFF.md`.
+
+- The protocol belongs in the repo because it is part of how maintainers work on Web XP itself.
+- The live inbox/outbox message files do not belong in the repo.
+- Keep the protocol document in-repo, but keep the live handoff state in a maintainer-local path outside the checkout.
+- In this repo's own contracts, the live handoff path is `/tmp/web-xp-agent-handoff/`.
+
 ## Repo structure
 
 Core Web XP lives at the repo root. Shared authored contract and skill source live under `adapters/shared-base/`. Concrete adapter packaging lives under `adapters/<platform>/`. Some adapters also have platform-native runtime/package paths generated from that packaging (e.g. `.claude/skills/` for Claude Code).
@@ -147,8 +156,10 @@ web-xp/
 │       ├── web-xp-review/
 │       ├── web-xp-on/
 │       └── web-xp-off/
-├── contrib/                    # contributor tooling (not user-facing)
-│   └── AGENT-HANDOFF.md        # handoff protocol
+├── internal/                   # maintainer-only workflow docs and notes
+│   ├── AGENT-HANDOFF.md
+│   ├── DEV-WORKFLOW-INTEGRATION.md
+│   ├── node-pilot-manifest-issue-draft.md
 ├── test/
 │   ├── unit/                   # Bats unit tests
 │   │   ├── pre-commit.bats
@@ -166,6 +177,7 @@ web-xp/
 │   ├── test-sync.sh            # legacy (being replaced by Bats)
 │   └── test-install.sh         # legacy (being replaced by Bats)
 ├── CLAUDE.md                   # this repo's own contract
+├── CODEX.md                    # this repo's own contract
 ├── MAINTAINERS.md              # this file
 └── README.md                   # public docs
 ```

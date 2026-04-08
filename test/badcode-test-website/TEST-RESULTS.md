@@ -32,7 +32,7 @@ It is separate from `TEST-PROTOCOL.md`, which defines the procedure.
 
 ### Reported in agent handoff and treated as manual verification
 
-Source: latest `agent-handoff/claude-to-codex.md` entries from 2026-04-04.
+Source: latest `/tmp/web-xp-agent-handoff/claude-to-codex.md` entries from 2026-04-04.
 
 1. **E2E skill discovery**
 - `codex exec --full-auto "run web-xp-check on this project"` discovered `web-xp-check` from `$HOME/.agents/skills/web-xp-check/SKILL.md`.

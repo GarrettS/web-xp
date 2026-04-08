@@ -20,14 +20,14 @@ Canonical skill sources live in `adapters/shared-base/skills/`. Generated adapte
 
 ## Agent Handoff
 
-When collaborating with another agent, use the shared-file protocol in `contrib/AGENT-HANDOFF.md`.
+When collaborating with another agent, use the shared-file protocol in `internal/AGENT-HANDOFF.md`.
 
 Before substantial work and before replying:
-1. Read `agent-handoff/codex-to-claude.md` (your inbound file).
-2. Write to `agent-handoff/claude-to-codex.md` (your outbound file).
+1. Read `/tmp/web-xp-agent-handoff/codex-to-claude.md` (your inbound file).
+2. Write to `/tmp/web-xp-agent-handoff/claude-to-codex.md` (your outbound file).
 3. Do not assume terminal output or chat context has been shared across agents; write important context to the handoff files.
 
-When the human says **check** or **chk**: read `agent-handoff/codex-to-claude.md` immediately and handle actionable inbox work before other substantial work.
+When the human says **check** or **chk**: read `/tmp/web-xp-agent-handoff/codex-to-claude.md` immediately and handle actionable inbox work before other substantial work.
 
 ## Edit tool
 
