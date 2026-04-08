@@ -6,6 +6,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TMP_HOME="$(mktemp -d)"
 TMP_INSTALL="$TMP_HOME/.web-xp"
+MANIFEST_PATH="$TMP_INSTALL/web-xp-manifest.txt"
 
 pass_count=0
 
@@ -37,14 +38,19 @@ mkdir -p "$TMP_INSTALL/bin" \
 cp "$REPO_ROOT/bin/uninstall.sh" "$TMP_INSTALL/bin/uninstall.sh"
 printf 'skill\n' > "$TMP_HOME/.claude/skills/web-xp-check/SKILL.md"
 printf 'skill\n' > "$TMP_HOME/.agents/skills/web-xp-check/SKILL.md"
+cat > "$MANIFEST_PATH" <<EOF
+# web-xp-manifest-v1
+$TMP_HOME/.claude/skills/web-xp-check/SKILL.md
+$TMP_HOME/.agents/skills/web-xp-check/SKILL.md
+EOF
 
-printf '\n' | HOME="$TMP_HOME" "$TMP_INSTALL/bin/uninstall.sh" > "$TMP_HOME/cancel.txt"
+printf '\n' | HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" "$TMP_INSTALL/bin/uninstall.sh" > "$TMP_HOME/cancel.txt"
 assert_exists "$TMP_INSTALL"
 assert_exists "$TMP_HOME/.claude/skills/web-xp-check"
 assert_exists "$TMP_HOME/.agents/skills/web-xp-check"
 pass "cancel leaves install intact"
 
-printf 'y\n' | HOME="$TMP_HOME" "$TMP_INSTALL/bin/uninstall.sh" > "$TMP_HOME/remove.txt"
+printf 'y\n' | HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" "$TMP_INSTALL/bin/uninstall.sh" > "$TMP_HOME/remove.txt"
 assert_not_exists "$TMP_INSTALL"
 assert_not_exists "$TMP_HOME/.claude/skills/web-xp-check"
 assert_not_exists "$TMP_HOME/.agents/skills/web-xp-check"

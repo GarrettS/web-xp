@@ -24,12 +24,14 @@ When shared contract behavior changes, also run:
 
 1. `bash tools/build-contracts.sh`
 
-## `install.sh` and Codex skill installation
+## `install.sh`, `uninstall.sh`, and runtime inventory
 
 `bin/install.sh` has two parallel jobs because Claude and Codex both use discovered skill folders.
 
-- For Claude, install copies `.claude/skills/*` into `~/.claude/skills/`.
+- For Claude, install copies `adapters/claude/*` into `~/.claude/skills/`.
 - For Codex, install copies `adapters/codex/skills/*` into `$HOME/.agents/skills/`.
+- Install also writes a system-level manifest at `~/.web-xp/web-xp-manifest.txt` in normal use. The manifest is a flat file: one managed installed file path per line, plus an optional header comment.
+- `bin/uninstall.sh` reads that manifest for exact removal. If the manifest is missing, uninstall falls back to the older glob-based cleanup path for backward compatibility with pre-manifest installs.
 
 Why Codex is now packaged this way:
 
@@ -42,10 +44,12 @@ What `install.sh` does for Codex:
 
 - copies every directory under `adapters/codex/skills/` into `$HOME/.agents/skills/`
 - removes any previous copies first so the installed skill directory is replaced cleanly
+- reconciles any previously recorded manifest entries that no longer belong to the current install
 
 What stays in the Web XP install:
 
 - the discovered runtime surface is the installed skill tree in `$HOME/.agents/skills/`
+- the flat manifest in `~/.web-xp/web-xp-manifest.txt` is the system-level inventory for install/uninstall cleanup
 
 If Codex later changes its documented user-level path, revisit this section and `bin/install.sh` together.
 
@@ -55,7 +59,6 @@ Project setup and cleanup are centralized in shell scripts:
 
 - `bin/web-xp-on`
 - `bin/web-xp-off`
-- `bin/web-xp-off
 
 Agent-specific setup skills should delegate to those scripts rather than reimplement the file mutation logic.
 
@@ -66,9 +69,16 @@ Why this is centralized:
 - a stable, testable entrypoint for project setup outside any single agent runtime
 - smoother Codex setup under the external-install model, where a concrete installed command is better than manual template copying
 
+System vs agent boundary:
+
+- `bin/web-xp-on` and `bin/web-xp-off` default to `all` (both adapters) when called directly from the command line. This is correct for direct CLI use, but agent skills must pass the specific agent type (`claude` or `codex`) so a skill only touches its own project contract.
+- Agent skills pass the specific agent type (`claude` or `codex`), so each skill only touches its own contract file. A skill invoked by one agent must not modify the other agent's project state.
+- `bin/install.sh` and `bin/uninstall.sh` are also system-level — they manage the machine-wide install surface across all adapters.
+
 What this means in practice:
 
 - setup skills are thin wrappers over the canonical shell implementation
+- skills pass the agent type to stay within their boundary; shell scripts default to `all` for direct CLI use
 - regression coverage belongs around the shell commands because that is where the contract mutation semantics live
 - README only needs the user-facing commands and outcomes; the architectural rationale lives here
 
@@ -104,7 +114,7 @@ web-xp/
 ├── code-philosophy.md          # core explanatory context
 ├── bin/
 │   ├── pre-commit-check.sh     # core mechanical checks
-│   ├── install.sh              # post-clone / post-pull installer
+│   ├── install.sh              # post-clone / post-pull installer + manifest writer
 │   ├── web-xp-on              # canonical project setup
 │   ├── web-xp-off             # project cleanup command
 │   └── web-xp-off              # canonical project cleanup

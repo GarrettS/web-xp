@@ -6,6 +6,7 @@ setup() {
   REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
   INSTALL_SCRIPT="$REPO_ROOT/bin/install.sh"
   TMP_HOME="$(mktemp -d)"
+  MANIFEST_PATH="$TMP_HOME/web-xp-manifest.txt"
 }
 
 teardown() {
@@ -13,7 +14,7 @@ teardown() {
 }
 
 @test "installs all Claude skills" {
-  run env HOME="$TMP_HOME" bash "$INSTALL_SCRIPT"
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
   [ "$status" -eq 0 ]
 
   assert_dir_exists "$TMP_HOME/.claude/skills/web-xp"
@@ -32,7 +33,7 @@ teardown() {
   echo "stale" > "$TMP_HOME/.claude/skills/web-xp-init/SKILL.md"
   echo "stale" > "$TMP_HOME/.claude/skills/code-guidelines.md"
 
-  run env HOME="$TMP_HOME" bash "$INSTALL_SCRIPT"
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
   [ "$status" -eq 0 ]
 
   # Stale content should be replaced with real content
@@ -45,7 +46,7 @@ teardown() {
   mkdir -p "$TMP_HOME/.claude/skills"
   echo "keep me" > "$TMP_HOME/.claude/skills/my-custom-skill.md"
 
-  run env HOME="$TMP_HOME" bash "$INSTALL_SCRIPT"
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
   [ "$status" -eq 0 ]
 
   # Unrelated file should survive
@@ -54,7 +55,7 @@ teardown() {
 }
 
 @test "installs all Codex skills" {
-  run env HOME="$TMP_HOME" bash "$INSTALL_SCRIPT"
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
   [ "$status" -eq 0 ]
 
   assert_dir_exists "$TMP_HOME/.agents/skills/web-xp"
@@ -69,7 +70,32 @@ teardown() {
   mkdir -p "$TMP_HOME/.agents/skills/web-xp-remove"
   echo "stale" > "$TMP_HOME/.agents/skills/web-xp-remove/SKILL.md"
 
-  run env HOME="$TMP_HOME" bash "$INSTALL_SCRIPT"
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
+  [ "$status" -eq 0 ]
+
+  [ ! -e "$TMP_HOME/.agents/skills/web-xp-remove" ]
+}
+
+@test "writes a flat manifest of installed files" {
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
+  [ "$status" -eq 0 ]
+
+  assert_file_exists "$MANIFEST_PATH"
+  grep -Fx "# web-xp-manifest-v1" "$MANIFEST_PATH"
+  grep -Fx "$TMP_HOME/.claude/skills/web-xp/SKILL.md" "$MANIFEST_PATH"
+  grep -Fx "$TMP_HOME/.claude/skills/code-guidelines.md" "$MANIFEST_PATH"
+  grep -Fx "$TMP_HOME/.agents/skills/web-xp-check/SKILL.md" "$MANIFEST_PATH"
+}
+
+@test "removes files from a previously recorded deprecated skill" {
+  mkdir -p "$TMP_HOME/.agents/skills/web-xp-remove"
+  cat > "$MANIFEST_PATH" <<EOF
+# web-xp-manifest-v1
+$TMP_HOME/.agents/skills/web-xp-remove/SKILL.md
+EOF
+  echo "stale" > "$TMP_HOME/.agents/skills/web-xp-remove/SKILL.md"
+
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
   [ "$status" -eq 0 ]
 
   [ ! -e "$TMP_HOME/.agents/skills/web-xp-remove" ]

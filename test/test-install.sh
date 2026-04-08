@@ -30,8 +30,9 @@ assert_not_exists() {
 
 tmp_home="$(mktemp -d)"
 trap 'rm -rf "$tmp_home"' EXIT
+MANIFEST_PATH="$tmp_home/web-xp-manifest.txt"
 
-HOME="$tmp_home" bash "$INSTALL_SCRIPT" > /dev/null
+HOME="$tmp_home" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT" > /dev/null
 
 assert_dir "$tmp_home/.claude/skills/web-xp"
 assert_dir "$tmp_home/.claude/skills/web-xp-check"
@@ -52,5 +53,8 @@ assert_dir "$tmp_home/.agents/skills/web-xp-off"
 assert_not_exists "$tmp_home/.agents/skills/web-xp-init"
 assert_not_exists "$tmp_home/.agents/skills/web-xp-remove"
 pass "installs all Codex skills"
+
+[ -f "$MANIFEST_PATH" ] || fail "missing manifest: $MANIFEST_PATH"
+pass "writes install manifest"
 
 echo "$pass_count passed, 0 failed"
