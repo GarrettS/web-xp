@@ -18,6 +18,15 @@ The concrete adapter wrapper must provide:
 - the path to `code-philosophy.md`
 - any adapter-native activation wording or command name
 
+## How to think when designing and writing code
+
+- When naming: what role does this play?
+- When entering async: cancel competing work first. Who owns this turn?
+- When a completion fires: what is current state now?
+- When proposing a pattern: does correct design prevent this problem?
+
+These are not review checks. They are the lens you design through.
+
 ## Procedure
 
 1. Read `code-guidelines.md`.

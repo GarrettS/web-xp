@@ -23,6 +23,15 @@ Load the Web XP standard into the current session before writing or reviewing co
 
 Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
 
+## How to think when designing and writing code
+
+- When naming: what role does this play?
+- When entering async: cancel competing work first. Who owns this turn?
+- When a completion fires: what is current state now?
+- When proposing a pattern: does correct design prevent this problem?
+
+These are not review checks. They are the lens you design through.
+
 ## Procedure
 
 1. Read `code-guidelines.md`.
