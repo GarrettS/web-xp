@@ -4,6 +4,56 @@ For people working on the Web XP repo itself.
 
 ---
 
+## Metadoctrine
+
+Use this section when adding, moving, trimming, or enforcing doctrine.
+
+Web XP doctrine targets agent performance, behavioral reliability, token efficiency, and human clarity. Changes to doctrine placement or wording should preserve or improve those outcomes, not just make the documents look cleaner.
+
+The doctrine and the metadoctrine are both living documents. The metadoctrine is not written first and then applied later. It is refined while the doctrine is being maintained. When cleanup work exposes a placement problem, clarify the metadoctrine. When the metadoctrine becomes clearer, update the doctrine to match it.
+
+Doctrine forms:
+- **Stated doctrine** (`code-guidelines.md`) states what code should be.
+- **Interpretive doctrine** (`code-philosophy.md`) explains how to understand and apply the doctrine.
+- **Operational doctrine** (skills, contracts, `bin/pre-commit-check.sh`, and similar artifacts) loads, prompts, summarizes, enforces, and otherwise operationalizes the doctrine in practice.
+- **Maintainer process / architecture** (`DESIGN.md`, most of this file, packaging/build notes) is outside doctrine.
+
+Decision procedure:
+1. Does this directly state what code should look like, what pattern is correct, or what counts as a violation? Put it in stated doctrine.
+2. Does it explain why a rule exists, how to interpret it, or how to reason through ambiguity? Put it in interpretive doctrine.
+3. Does it operationalize the doctrine in agent use?
+   - loading, priming, or summaries -> skills
+   - activation or enforcement-state behavior -> contracts
+   - mechanical checks or enforcement -> `bin/pre-commit-check.sh` and similar tooling
+4. Is it about packaging, build flow, maintainer workflow, or repo operation rather than the doctrine itself? Keep it in maintainer process / architecture.
+
+Anti-bleed rules:
+- Writing `because`, `the reason is`, or other extended justification in `code-guidelines.md` usually means the text is interpretive doctrine.
+- Copy-pasting a binding rule into a skill or contract is duplicated operational doctrine. Reference the source unless a short runtime prompt that orients the agent without restating the rule is needed.
+- If a check enforces something not stated in doctrine, the check is inventing doctrine.
+
+Propagation path:
+- When stated doctrine changes, check interpretive and operational doctrine.
+- When interpretive doctrine changes, check whether stated doctrine or operational summaries now need adjustment.
+- When operational doctrine changes, check that it still matches and points back to stated and interpretive doctrine.
+- When maintainer process changes, check whether it changes how doctrine work is classified or propagated.
+
+Streamlining rule:
+- Streamline by improving placement, sharpening rules, and reducing hot-path duplication and verbiage without weakening meaning.
+
+Change risk:
+- Treat doctrine edits as changes to a working instruction system, not just prose cleanup.
+- Prefer in-place clarification over cross-document moves.
+- Moving content between files changes adjacency, loading, and retention. Make that kind of change only when the expected behavioral gain is clear.
+
+Requirement language:
+- Plain English is the default.
+- RFC 2119-style keywords (`MUST`, `SHOULD`, `MAY`) are optional and should be used only for tight agent operations or repeated failure points where softer wording has proven insufficient.
+
+Change note:
+- Every doctrine cleanup change should state whether the metadoctrine changed or held.
+- Put that note in the main review artifact for the change: PR description if present, otherwise the issue comment or commit message.
+
 ## Adapters
 
 Web XP's standard is agent-agnostic — one doctrine, enforced the same way regardless of which agent runs it. Adapters are the packaging that makes this work: each agent gets its own skill format, file layout, and install path, but they all implement the same skills from the same shared source. For the full architecture — roles, enforcement modes, adapter interface — see [`DESIGN.md`](DESIGN.md).

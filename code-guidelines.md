@@ -10,8 +10,6 @@ Tool-specific workflow rules (commit process, verification, tool constraints) be
 
 ## Design Principles
 
-These principles govern judgment calls. They are not suggestions.
-
 ### Fail-Safe
 
 **No unhandled exceptions and no silent failure paths. Every failure must resolve to a defined safe outcome.**

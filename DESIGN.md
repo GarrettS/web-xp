@@ -187,6 +187,8 @@ All adapters point at the same core files. They do not duplicate the standard �
 - `code-philosophy.md` — explanatory context and examples
 - `bin/pre-commit-check.sh` — mechanical checks (runs as bash, agent-agnostic)
 
+For maintainer guidance on how doctrine is organized across these artifacts, see [`MAINTAINERS.md`](MAINTAINERS.md#metadoctrine).
+
 ### Existing adapters
 
 **Claude** (implemented — concrete packaging in `adapters/claude/`, packaged to `.claude/skills/`):
