@@ -6,19 +6,51 @@ For people working on the Web XP repo itself.
 
 ## Metadoctrine
 
-Use this section when adding, moving, trimming, or enforcing doctrine.
+Metadoctrine defines how Web XP doctrine is organized and consumed.
 
-Web XP doctrine targets agent performance, behavioral reliability, token efficiency, and human clarity. Changes to doctrine placement or wording should preserve or improve those outcomes, not just make the documents look cleaner.
+## What Is Web XP Doctrine?
 
-The doctrine and the metadoctrine are both living documents. The metadoctrine is not written first and then applied later. It is refined while the doctrine is being maintained. When cleanup work exposes a placement problem, clarify the metadoctrine. When the metadoctrine becomes clearer, update the doctrine to match it.
+Web XP *doctrine* is the principles, patterns, practices, and rules for authoring code maintained in Markdown for human and agent consumption.
 
-Doctrine forms:
-- **Stated doctrine** (`code-guidelines.md`) states what code should be.
+For agents, Web XP doctrine values high-quality output, consistent cross-agent behavior, token efficiency, and adaptability to new agents. For humans, it values clarity, coherence, and maintainability.
+
+Metadoctrine is shaped by how humans and agents read and process the doctrine. When cleanup work exposes a placement problem, clarify the metadoctrine. When the metadoctrine becomes clearer, update the doctrine to match it.
+
+Doctrine Files:
+- **Stated doctrine** (`code-guidelines.md`) states the rules for code.
 - **Interpretive doctrine** (`code-philosophy.md`) explains how to understand and apply the doctrine.
-- **Operational doctrine** (skills, contracts, `bin/pre-commit-check.sh`, and similar artifacts) loads, prompts, summarizes, enforces, and otherwise operationalizes the doctrine in practice.
-- **Maintainer process / architecture** (`DESIGN.md`, most of this file, packaging/build notes) is outside doctrine.
 
-Decision procedure:
+## Enforcement
+Agents enforce doctrine with:
+
+  - Skills — instruct agents to read and apply doctrine
+  - Agent contract files — persist always-on doctrine enforcement state for a project
+  - Pre-commit check — mechanically enforce doctrine rules that can be checked automatically.
+
+```text
+  ┌────────────────────────────────────────────┐
+  │           Web XP Doctrine Source           │
+  │                                            │
+  │  code-guidelines.md                        │
+  │  code-philosophy.md                        │
+  └────────────────────────────────────────────┘
+                   │
+     ┌─────────────┼─────────────┬──────────────┐
+     │             │             │              │
+   reads         activates      enforces       🍒
+     │             │             │
+     ▼             ▼             ▼
+  ┌───────────┐ ┌───────────┐ ┌────────────┐
+  │ Skills    │ │ Contracts │ │ Pre-commit │
+  │           │ │           │ │            │
+  │ tell      │ │ persist   │ │ checks     │
+  │ agents to │ │ always-on │ │ doctrine   │
+  │ apply     │ │ state     │ │ rules      │
+  │ doctrine  │ │           │ │            │
+  └───────────┘ └───────────┘ └────────────┘
+```
+
+## Doctrine Maintenance and Modification Decision Procedure:
 1. Does this directly state what code should look like, what pattern is correct, or what counts as a violation? Put it in stated doctrine.
 2. Does it explain why a rule exists, how to interpret it, or how to reason through ambiguity? Put it in interpretive doctrine.
 3. Does it operationalize the doctrine in agent use?
@@ -31,6 +63,7 @@ Anti-bleed rules:
 - Writing `because`, `the reason is`, or other extended justification in `code-guidelines.md` usually means the text is interpretive doctrine.
 - Copy-pasting a binding rule into a skill or contract is duplicated operational doctrine. Reference the source unless a short runtime prompt that orients the agent without restating the rule is needed.
 - If a check enforces something not stated in doctrine, the check is inventing doctrine.
+- Comments do not define program behavior. If a program consumes something as authoritative input, it must not be encoded as a comment.
 
 Propagation path:
 - When stated doctrine changes, check interpretive and operational doctrine.
@@ -48,11 +81,12 @@ Change risk:
 
 Requirement language:
 - Plain English is the default.
-- RFC 2119-style keywords (`MUST`, `SHOULD`, `MAY`) are optional and should be used only for tight agent operations or repeated failure points where softer wording has proven insufficient.
+- RFC 2119 keywords ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt)) are used only for tight agent operations to ensure behavioral consistency. 
 
 Change note:
 - Every doctrine cleanup change should state whether the metadoctrine changed or held.
 - Put that note in the main review artifact for the change: PR description if present, otherwise the issue comment or commit message.
+
 
 ## Adapters
 
