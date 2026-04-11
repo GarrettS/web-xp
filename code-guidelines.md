@@ -1,10 +1,9 @@
 # Code Guidelines
 
-Standards for web application development. Vanilla JavaScript. No frameworks or build tools required. See `code-philosophy.md` for how and why this works.
+This is Web XP’s code doctrine for humans and agents, supported with interpretive context, examples, and rationale in `code-philosophy.md`.
 
-Baseline authorities for formatting: [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html), [Google HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html), and [Code Guidelines for Rich Internet Application Development](https://web.archive.org/web/20240805191807/http://jibbering.com/faq/notes/code-guidelines/) by Garrett Smith et al. The Formatting section below overrides and extends those guides. Where both this document and the Formatting section are silent, defer to the baseline authorities.
-
-Tool-specific workflow rules (commit process, verification, tool constraints) belong in the project's workflow contract (e.g. `CLAUDE.md` for Claude Code, `.cursor/rules` for Cursor, or a team runbook). That file governs how work is done; this file governs what the code looks like.
+These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/jsguide.html) and [HTML/CSS](https://google.github.io/styleguide/htmlcssguide.html) style guides, and comp.lang.javascript
+[Code Guidelines](https://web.archive.org/web/20240805191807/http://jibbering.com/faq/notes/code-guidelines/).
 
 ---
 

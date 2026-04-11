@@ -16,7 +16,7 @@ For agents, Web XP doctrine values high-quality output, consistent cross-agent b
 
 Metadoctrine is shaped by how humans and agents read and process the doctrine. When cleanup work exposes a placement problem, clarify the metadoctrine. When the metadoctrine becomes clearer, update the doctrine to match it.
 
-Doctrine Files:
+### Doctrine Files:
 - **Stated doctrine** (`code-guidelines.md`) states the rules for code.
 - **Interpretive doctrine** (`code-philosophy.md`) explains how to understand and apply the doctrine.
 
