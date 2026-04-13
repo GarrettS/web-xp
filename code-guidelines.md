@@ -11,6 +11,8 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 
 ### Fail-Safe
 
+#### Governing Statement
+
 **No uncaught errors. No silent failure paths. Every failure must resolve to a defined safe outcome.**
 
 #### Core Distinctions
@@ -41,7 +43,7 @@ The distinction is intent:
 - *Runtime failures* — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
 - *User errors* — invalid input, out-of-range values, malformed data. Validate, give clear feedback, do not proceed with bad data.
 
-#### Anchor Example
+#### Example
 
 ```javascript
 function trySave(progress) {
@@ -112,6 +114,11 @@ This principle unifies:
 #### What This Rules Out
 
 Mismatch between domain language and code language is a defect. It inserts a translation layer into reading, debugging, and maintenance, increasing the chance that the developer's mental model drifts from the actual system. Features must be discoverable by searching for the same words the user, PRD, and authoritative domain reference use.
+
+#### Reference Examples
+
+- **[Good Names](code-philosophy.md#good-names)** — examples and interpretive guidance on material-accuracy naming and grepability.
+- **[Shared Key: Why IDs Are the Architecture](code-philosophy.md#shared-key-why-ids-are-the-architecture)** — examples of domain naming carried across IDs, dispatch, and data keys.
 
 #### Related Rules / Related Sections
 
