@@ -11,16 +11,31 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 
 ### Fail-Safe
 
-**No unhandled exceptions and no silent failure paths. Every failure must resolve to a defined safe outcome.**
+**No uncaught errors. No silent failure paths. Every failure must resolve to a defined safe outcome.**
 
+**Silent Failure**
 - When the failure affects the user's task or understanding, that outcome must be **user-visible**: a message, a retry option, a fallback, or a graceful degradation.
 - When a feature is optional and the app functions without it, **intentional degradation** is acceptable — but it must be a deliberate design decision, not an accident. Comment the code stating what is degraded and why.
+
+**Runtime Errors**
+Uncaught errors are not allowed. Caught errors must be proactively tested and handled.
+
+Common Violation Targets:
+  - `fetch()`
+  - `JSON.parse()`
+  - storage access
+  - fire-and-forget async
+  - unawaited promises — must have a failure path
+  - promise chains — must not define and test rejection 
 
 **User-initiated vs. background operations.** The visibility requirement applies to operations the user triggered or whose outcome the user expects. When the app performs a background enhancement — opportunistic state persistence, prefetching, analytics — the user did not ask for it and does not know it exists. If a background operation fails, alerting the user that something they never requested has broken is noise, not transparency. Silent degradation is the correct response: the feature that depends on the enhancement works without it, and the failure is invisible.
 
 The distinction is intent:
+
 - *User-initiated* — the user clicked Save, submitted a form, requested data. Failure must be visible.
 - *Background enhancement* — the app opportunistically persists state, preloads data, or caches a result to improve a future interaction. Failure is silent. Comment the code stating what is degraded and why.
+
+Anchor example:
 
 ```javascript
 function trySave(progress) {
@@ -35,15 +50,19 @@ function trySave(progress) {
 }
 ```
 
-**Comment the empty catch.** An empty or suppressing `catch` block looks like a mistake — a reader or linter will assume the error was swallowed accidentally. A comment in the body states that the suppression is deliberate and explains what degrades. Without the comment, the next developer adds error handling that alerts the user about a background failure they never needed to see. Use a specific name for the error parameter when the error type can be determined.
+Failure modes:
 
-Three failure modes violate this:
+1. **Unhandled throw.** An error is thrown and not handled, propagating back up the call stack, causing undefined behavior, possibly throwing the error to the user (typically shown in web browser consoles), impacting behavior and performance along the way.
+2. **Silent return.** A function returns a sentinel value `null`, `undefined`, or an empty value after a failure. The caller receives a sentinel instead of data, must check for it, and if it does not, the app breaks downstream. The user sees nothing.
+3. **Console-only catch.** A `catch` block logs to the console and continues. The error is swallowed. The user sees nothing. The app proceeds on invalid state. Console statements are not allowed in production code.
 
-1. **Unhandled throw.** An exception propagates up the stack with no `catch` that presents a user-visible response. The app enters an undefined state. A helper that checks `response.ok` and throws has not handled the failure — it has relocated it. The caller still crashes if it does not catch, and `console.error` in a `catch` block is not a user-visible response.
-2. **Silent return.** A function returns `null`, `undefined`, or an empty value after a failure. The caller receives a sentinel instead of data, must check for it, and if it does not, the app breaks downstream. The user sees nothing.
-3. **Console-only catch.** A `catch` block logs to the console and continues. The error is swallowed. The user sees nothing. The app proceeds on invalid state.
+"Handling" means the error is caught and handled. For user-initated options, present a retry option, a fallback, or a graceful degradation.
 
-"Handling" means the user sees a message, a retry option, a fallback, or a graceful degradation.
+Allowed exception shape:
+
+**Comment the empty catch.** A comment in the body states that the suppression is deliberate and explains what degrades. Without the comment, the next developer adds error handling that alerts the user about a background operation failure they never needed to see. Use a specific name for the error parameter when the error type can be determined. An empty or suppressing `catch` block looks like a mistake — a reader or linter sees the unhandled exception, then sees the reason it was unhandled in the comment, giving it a pass.
+
+Reference examples:
 
 **Two categories of failure must be addressed:**
 - *Runtime failures* — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
@@ -67,6 +86,10 @@ Specific operations that require guarded handling:
 - `JSON.parse()` — malformed data must not crash the app. Wrap in `try/catch` with a user-visible response on failure.
 - `localStorage` / `sessionStorage` — browsers throw in private mode or when quota is exceeded. Wrap access in `try/catch` with a user-visible response or silent degradation (feature works without persistence).
 - Fire-and-forget async — any `async` function called without `await` must have `.catch()` at the call site with a user-visible response.
+
+Related rules / related sections:
+
+[[related rules / related sections]]
 
 ### Ubiquitous Language
 
