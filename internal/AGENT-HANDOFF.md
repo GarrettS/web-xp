@@ -24,6 +24,7 @@ The agents must work together and scrutinize each other for errors. Handoff is n
 9. When replying with pushback, give reasons. Explain why.
 10. For multi-step tasks, complete each step, notify the other agent(s) and the human, then proceed to the next. Short; a few lines at most per step — include reasons and relevant details, but don't narrate every file edit. When all steps are done, notify again.
 11. Any questions, concerns, or problems: ask.
+12. Report environment, auth, and tool limits in active voice from your own observed state. Do not write passive blockers such as "issue filing is blocked." Write the concrete observation and actor instead, e.g. "I cannot file the issue from this environment because `gh auth status` shows invalid GitHub auth." Keep this agent-agnostic: describe your own current limitation so other agents do not misread it as theirs.
 
 ## Files
 
