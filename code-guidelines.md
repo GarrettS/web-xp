@@ -22,7 +22,7 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 - *Runtime failures* — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
 - *User errors* — invalid input, out-of-range values, malformed data. Validate, give clear feedback, do not proceed with bad data.
 
-**Messages are shared vocabulary.** Use plain, specific language in error messages. Distinguish failure cases in [Ubiquitous Language](#ubiquitous-language) so users understand what happened and reported errors are easier for the team to assess and fix.
+**Messages are shared vocabulary.** Use plain, specific language in error messages. Distinguish failure cases using [Ubiquitous Language](#ubiquitous-language) so users understand what happened, and so reported errors are easier for the team to assess and fix.
 
 #### Examples
 
@@ -42,9 +42,10 @@ function trySave(progress) {
 - Uncaught runtime errors.
 - Caught errors with no defined safe outcome.
 
-#### Empty Catch Policy
+#### Exceptions
 Handling means a defined safe outcome.
 
+**Empty Catch Policy**
 Comment empty `catch` blocks to explain what degrades and why. Otherwise they look accidental.
 
 #### Error-Specific Handling
@@ -55,9 +56,11 @@ Use specific error handling for each determinable error type.
 Common failure points:
 - `fetch()` — network errors and HTTP error status. Both paths need a user-visible response.
 
+**fetch-feedback.js**
+
 ```javascript
-function fetchReason(cause) {
-  const errorName = cause?.name;
+function fetchReason(responseOrError) {
+  const errorName = responseOrError?.name;
 
   if (errorName) {
     if (errorName === 'SyntaxError') {
@@ -68,31 +71,32 @@ function fetchReason(cause) {
     return 'unexpected error: ' + errorName;
   }
 
-  if (typeof cause?.status === 'number') {
-    return 'server returned ' + cause.status;
+  if (typeof responseOrError?.status === 'number') {
+    return 'server returned ' + responseOrError.status;
   }
   return 'unexpected error';
 }
+```
+**master-quiz.js:**
+
+```javascript
+try {
+  resp = await fetch(fullPath);
+} catch (fetchErr) {
+  showFetchError(tab, fileName, fetchErr);
+  return;
+}
+
+if (!resp.ok) {
+  showFetchError(tab, fileName, resp);
+  return;
+}
 
 try {
-  const response = await fetch('masterquiz.json');
-  if (!response.ok) {
-    showError('Could not load masterquiz.json: ' +
-      fetchReason(response) + '.');
-    return;
-  }
-  let data;
-  try {
-    data = await response.json();
-  } catch (parseError) {
-    showError('Could not load masterquiz.json: ' +
-      fetchReason(parseError) + '.');
-    return;
-  }
-  renderQuiz(data);
-} catch (err) {
-  showError('Could not load masterquiz.json: ' +
-    fetchReason(err) + '.');
+  QUESTIONS = await resp.json();
+} catch (syntaxError) {
+  showFetchError(tab, fileName, syntaxError);
+  return;
 }
 ```
 - `JSON.parse()` — malformed data throws.
@@ -117,7 +121,7 @@ This principle unifies:
 - **Shared Key** — module-owned prefixes and IDs that name the domain concept
 - **Module Cohesion** — file names that describe the domain responsibility
 
-#### What This Rules Out
+#### Violations
 
 Mismatch between domain language and code language is a defect. It inserts a translation layer into reading, debugging, and maintenance, increasing the chance that the developer's mental model drifts from the actual system. Features must be discoverable by searching for the same words the user, PRD, and authoritative domain reference use.
 
@@ -551,11 +555,12 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
 
 ## Comments
 
-Comments are a failure of the code to explain itself. When one is necessary, it should justify its existence.
+Comments are a failure of the code to express itself. When one is necessary, it should justify its existence.
 
 - Comments explain *why*, not *what*. If the comment restates the code, delete it.
 - Avoid comments likely to become obsolete. A comment that drifts from the code it describes is worse than no comment.
 - No decorative banner or landmark comments (`═══`, `───`, `****`, `/* ── Section ── */`). Use code structure — function names, module boundaries, blank lines — to communicate organization.
+- Avoid file header comments, except for necessary information that cannot be placed more locally.
 - A comment *is* warranted when code intentionally violates a project convention. State the violation, why it exists, and how it is handled instead. Without this, a future reader will "fix" the code back to the convention and break the design.
 - A comment *is* warranted in a `catch` block that intentionally suppresses an error. State what operation failed, why the failure is acceptable, and what the user loses. An empty `catch` body without a comment is indistinguishable from a bug.
 - Remove dead comments. Commented-out code, obsolete TODOs, and notes that no longer apply are clutter. They mislead readers and accumulate. If the code is gone, the comment goes with it. Version control preserves history — the comment does not need to.
