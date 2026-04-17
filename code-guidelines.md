@@ -22,9 +22,82 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 - *Runtime failures* — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
 - *User errors* — invalid input, out-of-range values, malformed data. Validate, give clear feedback, do not proceed with bad data.
 
-**Messages are shared vocabulary.** Use plain, specific language in error messages. Distinguish failure cases using [Ubiquitous Language](#ubiquitous-language) so users understand what happened, and so reported errors are easier for the team to assess and fix.
+**Messages are shared vocabulary.** Use plain, specific, [ubiquitous](#ubiquitous-language) language in error messages. Distinguish failure cases so users understand what happened, and so the team can assess and fix reported errors.
 
-#### Examples
+#### Violations
+
+**Undifferentiated error handling**
+
+**Wrong** (no error path):
+
+```javascript
+localStorage.setItem(key, JSON.stringify(data));
+```
+
+- No message: user doesn't know the operation failed.
+- Distinct failure modes (`JSON.stringify`, `setItem`) unhandled.
+
+**Wrong** (catch-all):
+
+```javascript
+try {
+  const response = await fetch(url);
+  const data = await response.json();
+  render(data);
+} catch (err) {
+  showError('Something went wrong.');
+}
+```
+
+- Generic message: user can't act on it, support can't help, QA can't triage.
+- Distinct failure modes (network, HTTP, parse) collapsed into one outcome.
+
+**Right:**
+
+```javascript
+let serialized;
+try {
+  serialized = JSON.stringify(data);
+} catch (serializeError) {
+  showError('Could not prepare ' + key + ': ' + serializeError.message);
+  return;
+}
+try {
+  localStorage.setItem(key, serialized);
+} catch (storageError) {
+  showError('Could not save ' + key + ': ' + storageError.message);
+}
+```
+
+Pattern: `localStorage\.(set|get)Item` outside try block
+Pattern: single `catch` around `fetch` + `.json()` or `.parse()`
+
+**Empty catch, no comment**
+
+**Wrong:**
+
+```javascript
+catch (e) {}
+```
+
+Suppressed error with no explanation. Indistinguishable from a bug. Next developer adds handling that may alert the user about a background failure they never needed to see.
+
+**Right:**
+
+```javascript
+catch (storageError) {
+  // Background save — not user-initiated.
+  // App functions without persistence; user loses streak data only.
+}
+```
+
+Pattern: `catch\s*\(\w*\)\s*\{\s*\}`
+
+#### Exceptions
+
+- **Empty catch**: background operation with a degradation comment explaining what the user loses.
+- **Handled elsewhere**: delegated to a caller or callee that distinguishes error types.
+
 
 ```javascript
 function trySave(progress) {
@@ -37,71 +110,6 @@ function trySave(progress) {
   }
 }
 ```
-
-#### Violations
-- Uncaught runtime errors.
-- Caught errors with no defined safe outcome.
-
-#### Exceptions
-Handling means a defined safe outcome.
-
-**Empty Catch Policy**
-Comment empty `catch` blocks to explain what degrades and why. Otherwise they look accidental.
-
-#### Error-Specific Handling
-Use specific error handling for each determinable error type.
-
-#### Reference Examples
-
-Common failure points:
-- `fetch()` — network errors and HTTP error status. Both paths need a user-visible response.
-
-**fetch-feedback.js**
-
-```javascript
-function fetchReason(responseOrError) {
-  const errorName = responseOrError?.name;
-
-  if (errorName) {
-    if (errorName === 'SyntaxError') {
-      return "response wasn't valid JSON";
-    } else if (errorName === 'TypeError') {
-      return 'network request failed';
-    }
-    return 'unexpected error: ' + errorName;
-  }
-
-  if (typeof responseOrError?.status === 'number') {
-    return 'server returned ' + responseOrError.status;
-  }
-  return 'unexpected error';
-}
-```
-**master-quiz.js:**
-
-```javascript
-try {
-  resp = await fetch(fullPath);
-} catch (fetchErr) {
-  showFetchError(tab, fileName, fetchErr);
-  return;
-}
-
-if (!resp.ok) {
-  showFetchError(tab, fileName, resp);
-  return;
-}
-
-try {
-  QUESTIONS = await resp.json();
-} catch (syntaxError) {
-  showFetchError(tab, fileName, syntaxError);
-  return;
-}
-```
-- `JSON.parse()` — malformed data throws.
-- `localStorage` / `sessionStorage` — browsers throw in private mode or when quota is exceeded.
-- Calling async functions without await leaves errors uncaught and unhandled, and can create race conditions.
 
 #### Related Rules / Related Sections
 
