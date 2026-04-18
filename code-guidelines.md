@@ -20,7 +20,9 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 
 **Two categories of failure must be addressed:**
 - *Runtime failures* — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
-- *User errors* — invalid input, out-of-range values, malformed data. Validate, give clear feedback, do not proceed with bad data.
+- *User errors* — invalid input, out-of-range values, malformed data. Validate, give clear feedback, and do not proceed with bad data.
+
+Test with empty, malformed, extreme, and hostile input. Try to trigger validation failures, storage failures, duplicate-state bugs, runtime errors, and crash paths. Prefer tests that force the app to distinguish user input errors from runtime/save errors. Record the result of each test.
 
 **Messages are shared vocabulary.** Use plain, specific, [ubiquitous](#ubiquitous-language) language in error messages. Distinguish failure cases so users understand what happened, and so the team can assess and fix reported errors.
 
@@ -41,25 +43,23 @@ localStorage.setItem(key, JSON.stringify(data));
 
 ```javascript
 try {
-  const response = await fetch(url);
-  const data = await response.json();
-  render(data);
-} catch (err) {
-  showError('Something went wrong.');
+  localStorage.setItem(key, JSON.stringify(data));
+} catch (e) {
+  showError('Could not save.');
 }
 ```
 
 - Generic message: user can't act on it, support can't help, QA can't triage.
-- Distinct failure modes (network, HTTP, parse) collapsed into one outcome.
+- Distinct failure modes (`JSON.stringify`, `setItem`) collapsed into one outcome.
 
-**Right:**
+**Right**:
 
 ```javascript
 let serialized;
 try {
   serialized = JSON.stringify(data);
 } catch (serializeError) {
-  showError('Could not prepare ' + key + ': ' + serializeError.message);
+  showError('Couldn't save flashcard: saved card data is corrupt: ' + serializeError.message);
   return;
 }
 try {
@@ -69,8 +69,37 @@ try {
 }
 ```
 
-Pattern: `localStorage\.(set|get)Item` outside try block
-Pattern: single `catch` around `fetch` + `.json()` or `.parse()`
+**Wrong** (catch-all):
+
+```javascript
+try {
+  const response = await fetch(url);
+} catch (err) {
+  showError('Something went wrong.');
+}
+```
+
+- Generic message: user can't act on it, support can't help, QA can't triage.
+- Network failure not distinguished from HTTP failure.
+
+**Right**:
+
+```javascript
+let response;
+try {
+  response = await fetch(url);
+} catch (networkError) {
+  showError('Network error — could not reach server.');
+  return;
+}
+if (!response.ok) {
+  showError('Server returned ' + response.status + '.');
+  return;
+}
+```
+
+**Pattern:** `localStorage\.(set|get)Item` outside try block
+**Pattern:** single `catch` around `fetch` + `.json()` or `.parse()`
 
 **Empty catch, no comment**
 
@@ -91,7 +120,7 @@ catch (storageError) {
 }
 ```
 
-Pattern: `catch\s*\(\w*\)\s*\{\s*\}`
+**Pattern:** `catch\s*\(\w*\)\s*\{\s*\}`
 
 #### Exceptions
 
