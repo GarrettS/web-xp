@@ -42,6 +42,8 @@ Do not add error-handling abstraction the handler does not need.
 localStorage.setItem(key, JSON.stringify(data));
 ```
 
+**Code smell:** fallible runtime operation with no error path.
+
 - Error propagates and breaks control flow.
 - App may continue from a broken state or stop before defining a safe outcome.
 
@@ -56,6 +58,8 @@ try {
   showError("Could not save.");
 }
 ```
+
+**Code smell:** one `catch` covering operations with different safe outcomes.
 
 - Generic message: user can't act on it, support can't help, QA can't triage.
 - Distinct failure modes (`JSON.stringify`, `setItem`) collapsed into one outcome.
@@ -83,8 +87,6 @@ try {
 }
 ```
 
-**Code smell:** one `catch` covering operations with different safe outcomes.
-
 **Missing HTTP error differentiation**
 
 **Wrong:**
@@ -99,6 +101,8 @@ try {
 }
 showMessage("Loaded.");
 ```
+
+**Pattern:** `\bfetch\(` — verify `response.ok` is checked before the success path.
 
 **Right**:
 
@@ -116,8 +120,6 @@ if (!response.ok) {
 }
 ```
 
-**Pattern:** `\bfetch\(` — verify `response.ok` is checked before the success path.
-
 **Empty catch, no comment**
 
 **Wrong:**
@@ -125,6 +127,8 @@ if (!response.ok) {
 ```javascript
 catch (e) {}
 ```
+
+**Pattern:** `catch\s*\(\w*\)\s*\{\s*\}`
 
 Suppressed error with no explanation. Indistinguishable from a bug. Next developer adds handling that may alert the user about a background failure they never needed to see.
 
@@ -136,8 +140,6 @@ catch (anyError) {
   // App functions without persistence; user loses streak data only.
 }
 ```
-
-**Pattern:** `catch\s*\(\w*\)\s*\{\s*\}`
 
 #### Exceptions
 
