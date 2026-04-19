@@ -26,7 +26,7 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 **Messages are shared vocabulary.** Use plain, specific, [ubiquitous](#ubiquitous-language) language in error messages. Distinguish failure cases so users understand what happened, and so the team can assess and fix reported errors.
 
 - **User outcome** — what went wrong, in the app's language. Must be shown.
-- **Diagnostic label** — short precise error name, for accurate troubleshooting. Prefer `error.name` for caught JavaScript or Web API errors instead of hardcoding one possible error name. Examples: `JSON.parse: SyntaxError`, `JSON.stringify: TypeError`, `localStorage.setItem: QuotaExceededError`. May be shown after the user outcome.
+- **Diagnostic label** — short precise error name, for accurate troubleshooting. For caught errors, use the operation name plus the error object's `name`, such as `JSON.parse: ` + `parseError.name`. May be shown after the user outcome.
 - **Raw detail** — raw `error.message`, stack trace, engine text, object dumps, URLs, storage keys, request bodies, or private data. Must not be shown by default.
 
 Do not add error-handling abstraction the handler does not need.
@@ -35,13 +35,12 @@ Do not add error-handling abstraction the handler does not need.
 
 Correct, precise, brief error names may help users recognize what to try next or relay the issue to Support.
 
-For caught JavaScript or Web API errors, use [`error.name`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/name) or [`DOMException.name`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException/name) for the diagnostic label instead of hardcoding one possible error name.
+For reference: [`Error.prototype.name`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/name) and [`DOMException.name`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException/name).
 
-| Error name | Likely owner | Likely cause |
-| :--- | :--- | :--- |
-| `JSON.parse: SyntaxError` | Frontend/API dev | Data coming in or out is malformed. |
-| `JSON.stringify: TypeError` | Frontend dev | Data cannot be serialized. |
-| `localStorage.setItem: QuotaExceededError` | Frontend/browser storage | Browser storage quota is exceeded or unavailable. |
+| Situation | Diagnostic label |
+| :--- | :--- |
+| JSON parse failed | `JSON.parse: ` + `parseError.name` |
+| Browser storage write failed | `localStorage.setItem: ` + `storageWriteError.name` |
 
 #### Violations
 
@@ -86,13 +85,15 @@ try {
   localStorage.setItem(key, serialized);
 } catch (storageWriteError) {
   showError(
-    "Couldn't save flashcard: browser storage is unavailable: "
+    "Couldn't save flashcard: browser storage could not be written: "
       + storageWriteError.name
   );
 }
 ```
 
-**Pattern:** one `catch` around two or more fallible operations (`fetch`, parse, serialize, storage, `import`, init, transform, write).
+**Code smell:** one `catch` covering operations with different safe outcomes.
+
+**Missing HTTP error differentiation**
 
 **Wrong** (missing HTTP error differentiation):
 
