@@ -40,6 +40,7 @@ For reference: [`Error.prototype.name`](https://developer.mozilla.org/en-US/docs
 | Situation | Diagnostic label |
 | :--- | :--- |
 | JSON parse failed | `JSON.parse: ` + `parseError.name` |
+| JSON stringify failed | `JSON.stringify: ` + `serializeError.name` |
 | Browser storage write failed | `localStorage.setItem: ` + `storageWriteError.name` |
 
 #### Violations
@@ -76,7 +77,7 @@ try {
   serialized = JSON.stringify(data);
 } catch (serializeError) {
   showError(
-    "Couldn't save flashcard: flashcard data could not be prepared: "
+    "Couldn't save flashcard: data could not be serialized: "
       + serializeError.name
   );
   return;
@@ -85,24 +86,27 @@ try {
   localStorage.setItem(key, serialized);
 } catch (storageWriteError) {
   showError(
-    "Couldn't save flashcard: browser storage could not be written: "
+    "Couldn't save flashcard to browser storage: "
       + storageWriteError.name
   );
 }
 ```
 
-**Code smell:** one `catch` covering operations with different safe outcomes.
+**Code smell:** one `catch` covering operations with different safe outcomes. A code smell is a review candidate; confirm against context before fixing.
 
 **Missing HTTP error differentiation**
 
-**Wrong** (missing HTTP error differentiation):
+**Wrong:**
 
 ```javascript
+let response;
 try {
-  const response = await fetch(url);
+  response = await fetch(url);
 } catch (networkError) {
   showError("Network error — could not reach server.");
+  return;
 }
+renderResponse(response);
 ```
 
 **Right**:
@@ -121,7 +125,7 @@ if (!response.ok) {
 }
 ```
 
-**Pattern:** `fetch` without `response.ok` check
+**Pattern:** `\bfetch\(` — verify `response.ok` is checked before the success path.
 
 **Empty catch, no comment**
 
