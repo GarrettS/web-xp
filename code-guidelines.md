@@ -15,16 +15,17 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 
 #### Core Distinctions
 
-- *User-initiated* — the user clicked Save, submitted a form, requested data. Failure must be visible.
-- *Background enhancement* — UX improvement not required for user's current task. Don't alert user with background failure noise; explain the silent failure in a code-comment. Examples: eager state persistence or data preloads to enhance future interaction. This is often preferable to polyfills, which add code that soon becomes obsolete.
+- **User-initiated** — the user clicked Save, submitted a form, requested data. Failure must be visible.
+- **Background enhancement** — UX improvement not required for user's current task. Don't alert user with background failure noise; explain the silent failure in a code-comment. Examples: eager state persistence or data preloads to enhance future interaction. This is often preferable to polyfills, which add code that soon becomes obsolete.
 
 **Two categories of failure must be addressed:**
-- *Runtime failures* — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
-- *User errors* — invalid input, out-of-range values, malformed data. Validate, give clear feedback, and do not proceed with bad data.
 
-Test with empty, malformed, extreme, and hostile input. Try to trigger validation failures, storage failures, duplicate-state bugs, runtime errors, and crash paths. Prefer tests that force the app to distinguish user input errors from runtime/save errors. Record the result of each test.
+- **Runtime failures** — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
+- **User errors** — invalid input, out-of-range values, malformed data. Validate, give clear feedback, and do not proceed with bad data.
 
 **Messages are shared vocabulary.** Use plain, specific, [ubiquitous](#ubiquitous-language) language in error messages. Distinguish failure cases so users understand what happened, and so the team can assess and fix reported errors.
+
+Do not add error-handling abstraction the handler does not need.
 
 #### Violations
 
@@ -45,7 +46,7 @@ localStorage.setItem(key, JSON.stringify(data));
 try {
   localStorage.setItem(key, JSON.stringify(data));
 } catch (e) {
-  showError('Could not save.');
+  showError("Could not save.");
 }
 ```
 
@@ -59,28 +60,27 @@ let serialized;
 try {
   serialized = JSON.stringify(data);
 } catch (serializeError) {
-  showError('Couldn't save flashcard: saved card data is corrupt: ' + serializeError.message);
+  showError("Could not prepare " + key + " to save: " + serializeError.message);
   return;
 }
 try {
   localStorage.setItem(key, serialized);
 } catch (storageError) {
-  showError('Could not save ' + key + ': ' + storageError.message);
+  showError("Could not save " + key + ": " + storageError.message);
 }
 ```
 
-**Wrong** (catch-all):
+**Pattern:** one `catch` around two or more fallible operations (`fetch`, parse, serialize, storage, `import`, init, transform, write).
+
+**Wrong** (missing HTTP error differentiation):
 
 ```javascript
 try {
   const response = await fetch(url);
-} catch (err) {
-  showError('Something went wrong.');
+} catch (networkError) {
+  showError("Network error — could not reach server.");
 }
 ```
-
-- Generic message: user can't act on it, support can't help, QA can't triage.
-- Network failure not distinguished from HTTP failure.
 
 **Right**:
 
@@ -89,17 +89,16 @@ let response;
 try {
   response = await fetch(url);
 } catch (networkError) {
-  showError('Network error — could not reach server.');
+  showError("Network error — could not reach server.");
   return;
 }
 if (!response.ok) {
-  showError('Server returned ' + response.status + '.');
+  showError("Server returned " + response.status + ".");
   return;
 }
 ```
 
-**Pattern:** `localStorage\.(set|get)Item` outside try block
-**Pattern:** single `catch` around `fetch` + `.json()` or `.parse()`
+**Pattern:** `fetch` without `response.ok` check
 
 **Empty catch, no comment**
 
@@ -114,7 +113,7 @@ Suppressed error with no explanation. Indistinguishable from a bug. Next develop
 **Right:**
 
 ```javascript
-catch (storageError) {
+catch (anyError) {
   // Background save — not user-initiated.
   // App functions without persistence; user loses streak data only.
 }
@@ -126,19 +125,6 @@ catch (storageError) {
 
 - **Empty catch**: background operation with a degradation comment explaining what the user loses.
 - **Handled elsewhere**: delegated to a caller or callee that distinguishes error types.
-
-
-```javascript
-function trySave(progress) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  } catch (storageError) {
-    // Background save — not user-initiated, no alert.
-    // Quiz functions without persistence; user loses
-    // streak data only.
-  }
-}
-```
 
 #### Related Rules / Related Sections
 
@@ -244,10 +230,10 @@ Know the event target ([Minimize Traversal Scope](#minimize-traversal-scope)). U
 ❌ Per-element listeners in a build function — accumulate on reset, create N identical closures:
 ```javascript
 function buildList(items) {
-  ul.innerHTML = '';
+  ul.innerHTML = "";
   items.forEach((item) => {
-    const li = document.createElement('li');
-    li.addEventListener('click', () => handleItem(item));
+    const li = document.createElement("li");
+    li.addEventListener("click", () => handleItem(item));
     ul.appendChild(li);
   });
 }
@@ -256,10 +242,10 @@ function buildList(items) {
 ❌ Shared function, but still per-element — no accumulation, but N bindings for one concern:
 ```javascript
 function buildList(items) {
-  ul.innerHTML = '';
+  ul.innerHTML = "";
   items.forEach((item) => {
-    const li = document.createElement('li');
-    li.addEventListener('click', itemClickHandler);
+    const li = document.createElement("li");
+    li.addEventListener("click", itemClickHandler);
     ul.appendChild(li);
   });
 }
@@ -267,8 +253,8 @@ function buildList(items) {
 
 ✅ Delegation — one listener, attached once, handles all current and future children:
 ```javascript
-ul.addEventListener('click', (e) => {
-  const li = e.target.closest('.item');
+ul.addEventListener("click", (e) => {
+  const li = e.target.closest(".item");
   if (!li) return;
 
   handleItem(li);
@@ -312,7 +298,7 @@ Shared Key pairs with event delegation. The key is parsed from the event target'
 
 ```javascript
 const s = state.structures[id];          // data: O(1)
-const el = document.getElementById('anat-' + id); // DOM: O(1)
+const el = document.getElementById("anat-" + id); // DOM: O(1)
 ```
 
 **Lazy** — `navigation-tabs.js`: pool starts empty. Lazy init happens once, on demand — tab activation via delegation triggers `lazyInit(key)`:
@@ -334,14 +320,14 @@ To style a group of descendants, add a class to the nearest common ancestor. Def
 
 ❌ Toggling visibility on each element:
 ```javascript
-quizWrap.classList.add('hidden');
-scoreEl.classList.add('hidden');
-resultsEl.classList.remove('hidden');
+quizWrap.classList.add("hidden");
+scoreEl.classList.add("hidden");
+resultsEl.classList.remove("hidden");
 ```
 
 ✅ One class on the ancestor, CSS cascade w/nested rule does the rest:
 ```javascript
-section.classList.add('showing-results');
+section.classList.add("showing-results");
 ```
 ```css
 #section.showing-results {
@@ -372,23 +358,23 @@ When a chain of conditionals maps a value to an action, replace it with a keyed 
 
 ❌ Conditional chain:
 ```javascript
-if (id === 'submit') handleSubmit();
-else if (id === 'new-session') resetSession();
-else if (id === 'end-session') renderResults();
-else if (id === 'retake-missed') retakeMissed();
+if (id === "submit") handleSubmit();
+else if (id === "new-session") resetSession();
+else if (id === "end-session") renderResults();
+else if (id === "retake-missed") retakeMissed();
 ```
 
 ✅ Dispatch table — pairs naturally with event delegation:
 ```javascript
 const CLICK_DISPATCH = {
-  'equiv-submit': handleSubmit,
-  'equiv-new-session': resetSession,
-  'equiv-end-session': renderResults,
-  'equiv-retake-missed': retakeMissed
+  "equiv-submit": handleSubmit,
+  "equiv-new-session": resetSession,
+  "equiv-end-session": renderResults,
+  "equiv-retake-missed": retakeMissed
 };
 
-section.addEventListener('click', (e) => {
-  const target = e.target.closest('[id]');
+section.addEventListener("click", (e) => {
+  const target = e.target.closest("[id]");
   CLICK_DISPATCH[target?.id]?.();
 });
 ```
@@ -401,8 +387,8 @@ Inline callbacks follow the same rule. The listener is routing; the function is 
 
 ❌ Logic buried in callback:
 ```javascript
-el.addEventListener('click', (e) => {
-  const target = e.target.closest('.item');
+el.addEventListener("click", (e) => {
+  const target = e.target.closest(".item");
   if (!target) return;
   // ... 30 lines of processing ...
 });
@@ -410,8 +396,8 @@ el.addEventListener('click', (e) => {
 
 ✅ Callback delegates to named function:
 ```javascript
-el.addEventListener('click', (e) => {
-  const target = e.target.closest('.item');
+el.addEventListener("click", (e) => {
+  const target = e.target.closest(".item");
   if (!target) return;
 
   processItem(target);
@@ -519,22 +505,22 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
 
   ❌ Function recreated on every click:
   ```javascript
-  revealBtn.addEventListener('click', () => {
+  revealBtn.addEventListener("click", () => {
     const html = parts.map(
-      ([k, v]) => '<strong>' + k + ':</strong> ' + v
-    ).join('<br>');
+      ([k, v]) => "<strong>" + k + ":</strong> " + v
+    ).join("<br>");
   });
   ```
 
   ✅ Formatter defined once, referenced by name:
   ```javascript
   function formatKeyValue([k, v]) {
-    return '<strong>' + k + ':</strong> ' + v;
+    return "<strong>" + k + ":</strong> " + v;
   }
 
-  revealBtn.addEventListener('click', () => {
+  revealBtn.addEventListener("click", () => {
     const html = parts.map(formatKeyValue)
-      .join('<br>');
+      .join("<br>");
   });
   ```
 - **Naming conventions.** Constants: `UPPER_SNAKE_CASE`. Functions/variables: `camelCase`. Classes: `PascalCase`. Booleans prefixed: `is`/`has`/`does`/`can`. Event handler functions: `[object][EventName]Handler` (e.g. `itemClickHandler`, `formSubmitHandler`). Functions that process results but do not receive an event object are not handlers — name them by what they do (e.g. `validateInput`, `saveRecord`). Give each identifier a meaningful name from the project's ubiquitous language.
@@ -568,23 +554,23 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
 
   ❌ `+=` in a loop creates n intermediate strings:
   ```javascript
-  let html = '<ul>';
-  items.forEach((item) => { html += '<li>' + item + '</li>'; });
-  html += '</ul>';
+  let html = "<ul>";
+  items.forEach((item) => { html += "<li>" + item + "</li>"; });
+  html += "</ul>";
   ```
 
   ✅ Uniform items — join with delimiter (guard empty case):
   ```javascript
   if (items.length) {
-    el.innerHTML = '<ul><li>' + items.join('</li><li>') + '</li></ul>';
+    el.innerHTML = "<ul><li>" + items.join("</li><li>") + "</li></ul>";
   }
   ```
 
   ✅ Per-item attributes — map + join:
   ```javascript
   el.innerHTML = items.map((item) =>
-    '<div data-id="' + item.id + '">' + item.name + '</div>'
-  ).join('');
+    "<div data-id=\"" + item.id + "\">" + item.name + "</div>"
+  ).join("");
   ```
 - **Regular expressions.** Prefer simple patterns. Anchor where needed to avoid false matches. Test success and failure cases.
 
