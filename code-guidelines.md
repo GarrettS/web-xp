@@ -25,7 +25,22 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 
 **Messages are shared vocabulary.** Use plain, specific, [ubiquitous](#ubiquitous-language) language in error messages. Distinguish failure cases so users understand what happened, and so the team can assess and fix reported errors.
 
+- **User outcome** — what went wrong, in the app's language. Must be shown.
+- **Diagnostic label** — short precise error name, for accurate troubleshooting. Examples: `JSON.parse: SyntaxError`, `NetworkTimeout`, `UnauthorizedAccess`, `ValidationError`. May be shown after the user outcome.
+- **Raw detail** — raw `error.message`, stack trace, engine text, object dumps, URLs, storage keys, request bodies, or private data. Must not be shown by default.
+
 Do not add error-handling abstraction the handler does not need.
+
+#### Note: Diagnostic Labels
+
+Correct, precise, brief error names may help users recognize what to try next or relay the issue to Support.
+
+| Error name | Likely owner | Likely cause |
+| :--- | :--- | :--- |
+| `JSON.parse: SyntaxError` | Frontend/API dev | Data coming in or out is malformed. |
+| `ValidationError` | Frontend/UI | Input does not match expected schema. |
+| `UnauthorizedAccess` | Security/Identity | User auth state or permissions are wrong. |
+| `NetworkTimeout` | Infra/API/Frontend | Server load, connectivity problems, or unavailable endpoint. |
 
 #### Violations
 
@@ -60,13 +75,19 @@ let serialized;
 try {
   serialized = JSON.stringify(data);
 } catch (serializeError) {
-  showError("Could not prepare " + key + " to save: " + serializeError.message);
+  showError(
+    "Couldn't save flashcard: flashcard data could not be prepared: "
+      + serializeError.name
+  );
   return;
 }
 try {
   localStorage.setItem(key, serialized);
-} catch (storageError) {
-  showError("Could not save " + key + ": " + storageError.message);
+} catch (storageWriteError) {
+  showError(
+    "Couldn't save flashcard: browser storage is unavailable: "
+      + storageWriteError.name
+  );
 }
 ```
 
@@ -125,6 +146,7 @@ catch (anyError) {
 
 - **Empty catch**: background operation with a degradation comment explaining what the user loses.
 - **Handled elsewhere**: delegated to a caller or callee that distinguishes error types.
+- **Raw detail**: may appear only behind explicit disclosure such as `<details>`, and only when sanitized, bounded, and useful.
 
 #### Related Rules / Related Sections
 
