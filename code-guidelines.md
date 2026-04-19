@@ -26,17 +26,11 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 **Messages are shared vocabulary.** Use plain, specific, [ubiquitous](#ubiquitous-language) language in error messages. Distinguish failure cases so users understand what happened, and so the team can assess and fix reported errors.
 
 - **User outcome** — what went wrong, in the app's language. MUST be shown.
-- **Diagnostic label** — short precise error name, for accurate troubleshooting. MAY follow the user outcome with non-sensitive context such as a filename. Caught errors SHOULD use failed operation + `error.name`.
+- **Diagnostic label** — short precise error name, for accurate troubleshooting. MAY follow the user outcome with non-sensitive context such as a filename. Caught errors SHOULD use failed operation + [`error.name`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/name) or [`DOMException.name`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException/name).
 - **Raw detail** — raw `error.message`, stack trace, object dumps, or URLs. MUST NOT be shown by default.
 - **Secrets** — passwords, tokens, keys, and credentials. MUST NOT be shown.
 
 Do not add error-handling abstraction the handler does not need.
-
-#### Note: Diagnostic Labels
-
-Correct, precise, brief error names may help users recognize what to try next or relay the issue to Support.
-
-For reference: [`Error.prototype.name`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/name) and [`DOMException.name`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException/name).
 
 #### Violations
 
