@@ -13,21 +13,22 @@ These rules draw on Google’s [JavaScript](https://google.github.io/styleguide/
 
 **No uncaught errors. No silent failure paths. Every failure must resolve to a defined safe outcome.**
 
-#### Core Distinctions
+#### User-initiated vs. Background
 
 - **User-initiated** — the user clicked Save, submitted a form, requested data. Failure must be visible.
 - **Background enhancement** — UX improvement not required for user's current task. Don't alert user with background failure noise; explain the silent failure in a code-comment. Examples: eager state persistence or data preloads to enhance future interaction. This is often preferable to polyfills, which add code that soon becomes obsolete.
 
-**Two categories of failure must be addressed:**
+**Runtime vs User errors:**
 
 - **Runtime failures** — network errors, parse failures, storage quota exceeded, missing resources. Catch at the source. Do not let upstream failures cascade into downstream reference errors.
 - **User errors** — invalid input, out-of-range values, malformed data. Validate, give clear feedback, and do not proceed with bad data.
 
 **Messages are shared vocabulary.** Use plain, specific, [ubiquitous](#ubiquitous-language) language in error messages. Distinguish failure cases so users understand what happened, and so the team can assess and fix reported errors.
 
-- **User outcome** — what went wrong, in the app's language. Must be shown.
-- **Diagnostic label** — short precise error name, for accurate troubleshooting. For caught errors, use the failed operation plus the error object's `name`, such as `JSON.parse: ` + `parseError.name`. May be shown after the user outcome.
-- **Raw detail** — raw `error.message`, stack trace, engine text, object dumps, URLs, storage keys, request bodies, or private data. Must not be shown by default.
+- **User outcome** — what went wrong, in the app's language. MUST be shown.
+- **Diagnostic label** — short precise error name, for accurate troubleshooting. MAY follow the user outcome with non-sensitive context such as a filename. Caught errors SHOULD use failed operation + `error.name`.
+- **Raw detail** — raw `error.message`, stack trace, object dumps, or URLs. MUST NOT be shown by default.
+- **Secrets** — passwords, tokens, keys, and credentials. MUST NOT be shown.
 
 Do not add error-handling abstraction the handler does not need.
 
@@ -36,12 +37,6 @@ Do not add error-handling abstraction the handler does not need.
 Correct, precise, brief error names may help users recognize what to try next or relay the issue to Support.
 
 For reference: [`Error.prototype.name`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/name) and [`DOMException.name`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException/name).
-
-| Situation | Diagnostic label |
-| :--- | :--- |
-| JSON parse failed | `JSON.parse: ` + `parseError.name` |
-| JSON stringify failed | `JSON.stringify: ` + `serializeError.name` |
-| Browser storage write failed | `localStorage.setItem: ` + `storageWriteError.name` |
 
 #### Violations
 
