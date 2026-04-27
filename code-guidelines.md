@@ -73,17 +73,14 @@ try {
 } catch (serializeError) {
   showError(
     "Couldn't save flashcard: data could not be serialized: "
-      + serializeError.name
-  );
+      + serializeError.name);
   return;
 }
 try {
   localStorage.setItem(key, serialized);
 } catch (storageWriteError) {
   showError(
-    "Couldn't save flashcard to browser storage: "
-      + storageWriteError.name
-  );
+    "Couldn't save flashcard to browser storage: " + storageWriteError.name);
 }
 ```
 
@@ -292,48 +289,285 @@ For exclusive-active state (tabs, selections, panels): hold a reference to the c
 
 ### Shared Key
 
-When a data record and a DOM element represent the same entity, give them the same `id`. This single key indexes both — data by object property, DOM by `getElementById`, dispatch table by action route. Do not search either collection for a known key. This is the keyed form of [Minimize Traversal Scope](#minimize-traversal-scope): when the key is known, address directly instead of searching.
+#### Governing Statement
 
-- **Data format**: structure JSON as a keyed object (`{"item-foo": {...}}`) instead of an array of objects with `id` fields (`[{"id": "foo", ...}]`). When data is looked up by key, the source format should be keyed — no runtime indexing step needed.
-- **Naming**: use meaningful element IDs named from the project's [ubiquitous language](code-philosophy.md#good-names), following the [Shared Key naming pattern](code-philosophy.md#shared-key-why-ids-are-the-architecture).
+Use one string _key_ across associated lookups in data, DOM, and behavior.
 
-  Why: the same identifier should be visible in the browser inspector, searchable in the code, and understandable without translation.
+#### Rule
 
-- **Module ownership**: module-owned prefixes or caller-provided IDs keep identifiers unique. Dynamic elements use prefix + index (`order-item-0`, `search-result-3`). Widgets with multiple instances take an ID from the caller (`salon-calendar`, `deliveries-calendar`). Two elements with the same ID is a bug.
-- **DOM side**: use the namespaced key as the element's `id` attribute. Lookup is `getElementById(id)`. Related elements use convention-based suffixes (e.g. `id + "-detail"`), each directly addressable.
-- **One key across all layers**: the same string appears in JSON keys, element `id` attributes, SVG element `id` attributes, and JS lookups. No translation between layers.
-- **Access pattern (getById)**: event delegation derives the key from the target element's `id`, then addresses both data (`map[id]`) and DOM (`getElementById(id)`) directly. When construction is expensive, use create-on-first-access: `pool[id] || (pool[id] = create(id))`.
-- **Antipattern**: `.find(item => item.id === id)`, `querySelector('[data-id="' + id + '"]')` — linear scans for a known key.
-- **ID or class, not both.** When an element is a singleton addressed by `getElementById`, do not also give it a class that serves the same selector role. An `id` already uniquely selects the element in both CSS and JS. A class that duplicates it is a second name for the same thing — two selectors to maintain, two names a reader must reconcile.
+When code associates an object property and a DOM element, give them a shared meaningful key, typically `id`. The same string key can address data (`data[id]`), get an element (`document.getElementById(id)`), and route actions (`CLICK_DISPATCH[id]`). One key supports multiple direct lookups and [minimizes traversal](#minimize-traversal-scope).
 
-#### Eager vs Lazy Init
+#### Terms
 
-Shared Key pairs with event delegation. The key is parsed from the event target's ID and used for O(1) lookup. The difference is when the pool is populated:
+- **Shared Key** - the Web XP Pattern.
+- **key** - unique semantic key that names the entity or relationship.
+- **key slot** - the element-owned property or data-owned place where the key belongs.
+- **direct access** - addressing data, DOM, dispatch, relationship maps, or behavior by key instead of scanning.
 
-| Strategy | Pool | Trigger | When to use |
-|---|---|---|---|
-| **Eager** | Built at load time from data | Delegation parses key from target ID → `map[id]` | Full set needed upfront (quiz, shuffle, filter) |
-| **Lazy** | Empty; created on first access | Delegation triggers create-or-retrieve | Many possible instances, few touched (tabs, tree nodes, scrollable panels) |
+#### Module Ownership
 
-**Eager** — `anatomize.js`: JSON loads at init, keyed by structure ID. Delegated handlers parse the key from the target via regex and look up both sides in one step:
+A module owns the keys for the domain concept it implements. The DOM (including events), data, and behavior intermix at the module; Shared Key bridges them while each layer keeps its internals encapsulated.
 
-```javascript
-const s = state.structures[id];          // data: O(1)
-const el = document.getElementById("anat-" + id); // DOM: O(1)
+Other modules consume those keys; they do not define them. Module-owned prefixes — or caller-provided IDs for widgets with multiple instances (`salon-calendar`, `deliveries-calendar`) — keep keys unique. Two elements with the same ID is a bug.
+
+#### Legitimate Iteration
+
+Iteration is justified for rendering, ordering, filtering, or transforming collections, not to recover one already-known entity by key.
+
+#### Known Key
+
+For objects with unique identifiers (SKU, CUSIP, VIN, or any other UID), use the identifier as the key.
+
+In JSON, object property names should serve as unique keys when keyed lookup is wanted.
+
+Use `{ [key]: object }`, not `[ { id: key, ... } ]`. Searching an array for a matching `id` is O(n), which defeats
+Shared Key.
+
+**Code Smell**
+
+The code scans a list to recover an object whose identifier is already known.
+
+```js
+const question = QUESTIONS.find(question => question.id === questionId);
 ```
 
-**Lazy** — `navigation-tabs.js`: pool starts empty. Lazy init happens once, on demand — tab activation via delegation triggers `lazyInit(key)`:
+**Finding**
 
-```javascript
-function lazyInit(key) {
-  if (initialized.has(key)) return;
+Lookup for a specific thing implemented as repeated search instead of direct access by string key.
 
-  const entry = LAZY_INIT[key];
-  if (!entry) return;
-  initialized.add(key);
-  import(entry.path).then((m) => m.init());
-}
+**Trigger**
+
+```text
+.find(...) comparing an object identifier to a known identifier, or
+querySelector('[data-id="..."]') / [attr="..."] selectors recovering an entity by a known key
 ```
+
+**Resolution**
+
+Do not repeat `.find(...)` if the data have identifiers. Get them as an object keyed by identifier (ask backend, if needed). If that cannot happen, such as with siloed backend/frontend ownership, transform the list once, ideally on demand.
+
+**Preferred Shape**
+
+```js
+const question = QUESTIONS[questionId];
+```
+
+If you cannot change the data, convert it to a keyed object for repeated O(1) lookups:
+
+```js
+const QUESTIONS_BY_ID = Object.fromEntries(
+  QUESTIONS.map((question) => [question.id, question])
+);
+```
+
+**Investigation**
+
+- Are you looking for a specific thing?
+- What uniquely identifies it?
+- How can that identifying criteria be represented as a string key?
+- Can that key be carried instead of recovered by search?
+- Can the data source provide an object keyed by that string?
+
+#### Relationship Scan, Composite Key
+
+**Code Smell**
+
+The code knows the endpoint keys but scans a relationship list to find that relationship.
+
+```js
+const link = links.find((link) =>
+  link.from === fromId && link.to === toId);
+```
+
+**Trigger**
+
+```text
+.find(...) comparing from/to endpoint keys
+```
+
+**Finding**
+
+Lookup for a specific relationship is implemented as repeated search instead of direct access by string key.
+
+**Resolution**
+
+Use a composite key. If endpoint order should not matter, canonicalize it before lookup.
+
+**Preferred Shape**
+
+```js
+const link = linksByPair[canonicalPairKey(fromId, toId)];
+```
+
+**Investigation**
+
+- Are you looking for a specific relationship between two things?
+- What uniquely identifies that relationship?
+- Can that relationship be represented as a string key?
+- Should endpoint order change the key?
+
+#### Key Slots
+
+Use elements and attributes that fit the context. Do not shoehorn keys into `id`. A button's `value` may carry a key more directly than an `id` suffix.
+
+Use meaningful identifier tokens in element ids. For associated elements, use the same token with a suffix for each one's role so each id is unique, addressable, and identifiable to humans.
+
+For JavaScript objects, the key slot is the object property key.
+
+#### Element Key Slots
+
+- `id` when the DOM element itself needs stable identity.
+- `value` when a form-associated control carries the key for what it represents or acts on.
+- `<data value>` when visible content has a machine-readable entity key.
+- `name` when a form field contributes the payload key.
+- `data-*` when no more specific key slot fits.
+
+#### Forced Key
+
+**Code Smell**
+
+A key is fabricated to fit a slot, or stored in a slot whose semantics don't match the element's role.
+
+```html
+<button type="button" id="mq-result-save-q42">Save as Flashcard</button>
+```
+
+```js
+saveCard(button.id.replace('mq-result-save-', ''));
+```
+
+**Trigger**
+
+`.id.replace(` or templated id `` `<prefix>-${key}` `` paired with dispatch routing on the prefix.
+
+**Investigation**
+
+- Where does the key belong — `id`, `value`, `<data value>`, `name`, or `data-*`?
+- What is the element's role (DOM identity, form control, label, data carrier, payload)?
+
+**Finding**
+
+Either or both:
+
+- The key is stored in a slot that does not suit the element and the key.
+- The key is contrived just to force `id` through the DOM.
+
+**Resolution**
+
+Choose the element and key slot (property or attribute) whose meaning suits the key. Do not force the key into the wrong place just to move it through the DOM.
+
+```html
+<button type="button" value="q42">Save as Flashcard</button>
+```
+
+```js
+saveCard(button.value);
+```
+
+#### Misplaced Key
+
+**Code Smell**
+
+Collection is represented as an array of objects, each with its key as a property (such as id). Retrieval by that key requires an O(n) scan.
+
+```
+  "causalChains": [
+    { "id": "diaphragm-to-adt", "title": "...", "steps": [...] },
+    { "id": "outlet-to-padt", "title": "...", "steps": [...] }
+  ]
+```
+
+**Trigger**
+
+Source data shaped as `[{ id, ... }]`, often paired with `.find(item => item.id === key)` at consumer sites.
+
+**Investigation**
+
+- Is the collection accessed by key, by order, or both?
+- Is the data shape under app control, or externally supplied?
+- Does any consumer rely on iteration order, or only on keyed lookup?
+
+**Finding**
+
+The collection has app-owned keys but is shaped as an array, forcing O(n) scans for keyed access.
+
+**Resolution**
+
+Represent the collection as an object keyed by identifier; `{ [id]: ... }`, not `[ { id: ... } ]`.
+
+**Preferred Shape**
+
+```
+  "causalChains": {
+    "diaphragm-to-adt": { "title": "...", "steps": [...] },
+    "outlet-to-padt":   { "title": "...", "steps": [...] }
+  }
+```
+
+#### Array Position Instead of Key
+
+**Code Smell**
+
+DOM ids derived from array position.
+
+```js
+chainState[ci]
+el.id = `chain-${ci}`;
+```
+
+*HTML*
+
+```html
+<ul id="chain-2"></ul>
+```
+
+**Trigger**
+
+`state[index]` paired with DOM IDs using the same index.
+
+**Investigation**
+
+- Is the element `id` derived from array position?
+- What's the data access pattern? If the answer is "by position" or "in order", array is right and id is not needed.
+
+**Finding**
+
+The app key is present in the data, but state and DOM are addressed by array index instead.
+
+**Explanation**
+
+`ci` is array position; `id` is the app key, already in the data. The problem was using a positional stand-in for identity when the app key existed. The fix was to use the app key as the single identity across data, state, and DOM. The solution also added a Decorator with an `id` getter inside a Decorator Factory.
+
+**Resolution**
+
+Use the app key as the single identity. Use array position only for order.
+
+**Preferred Shape**
+
+```js
+chainState[chain.id]
+el.id = chain.id;
+```
+
+*HTML*
+
+```html
+<ul id="causal-chain-respiration"></ul>
+```
+
+**Boundary**
+
+If the data are still `[ { id, ... } ]`, this may also be Misplaced Key.
+
+#### Related Rules / Related Sections
+
+- **Minimize Traversal Scope** - when the key is known, address the target directly.
+- **Event Delegation** - delegated events often provide the element whose key slot resolves the key.
+- **Ubiquitous Language** - keys use app/domain language, not generated or positional handles.
+- **Dispatch Table** - action routing can use the same key for direct dispatch.
+- **Decorator** / **Decorator Factory** - consumes Shared Key when creating or retrieving one behavior object per keyed Element/UI object.
+- **Active Object** - may hold the currently active keyed element or object directly.
+- **Encapsulation** - limits what crosses the Shared Key contract.
 
 ### Ancestor Class for Batch Styles
 
