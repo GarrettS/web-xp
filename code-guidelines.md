@@ -665,7 +665,7 @@ When a boolean expression is complex, extract it into a named variable or functi
 
 ### Template and cloneNode
 
-When creating multiple similar elements in a loop, build one template element outside the loop with shared attributes and classes, then `cloneNode(false)` inside the loop and set only the per-instance values. Avoids redundant `createElement` / `setAttribute` / `classList.add` calls per iteration.
+When creating multiple similar elements in a loop, build one template element outside the loop with shared attributes and classes, then `cloneNode(false)` inside the loop and set only the per-instance values. Avoids redundant `createElement` / `setAttribute` / `classList.add` calls per iteration. Per-instance assignment should follow [Prefer properties over `setAttribute`](#javascript-1) — set typed properties directly and batch with `Object.assign`, falling back to `setAttribute` only for SVG / custom / unreflected ARIA attributes.
 
 ---
 
@@ -828,6 +828,55 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
   ).join("");
   ```
 - **Regular expressions.** Prefer simple patterns. Anchor where needed to avoid false matches. Test success and failure cases.
+- **Prefer properties over `setAttribute`.** Set DOM state through properties, not `setAttribute`. Properties take typed values directly — `disabled = true` instead of `setAttribute("disabled", "")`, `tabIndex = -1` instead of `setAttribute("tabindex", "-1")`. `setAttribute` is the fallback only when no property exists: custom attributes, most SVG attributes, and ARIA attributes whose property form is not in the supported browser baseline. For `data-*` set with a static name, use `dataset`; use `setAttribute` only when the data name is computed.
+
+  For multiple values on the same element, use `Object.assign`.
+
+  ❌ `setAttribute` per-property:
+  ```javascript
+  el.setAttribute("id", "save");
+  el.setAttribute("class", "btn primary");
+  el.setAttribute("disabled", "");
+  el.textContent = "Save";
+  el.setAttribute("data-action", "save");
+  ```
+
+  ✅ Properties + `Object.assign` + `dataset`:
+  ```javascript
+  Object.assign(el, {
+    id: "save",
+    className: "btn primary",
+    textContent: "Save",
+    disabled: true,
+  });
+  el.dataset.action = "save";
+  ```
+
+  When `setAttribute` is the right tool (SVG attributes, custom attributes) and multiple values are going on the same element, batch them via `Object.entries` instead of repeating the call:
+
+  ❌ Repeated `setAttribute`:
+  ```javascript
+  markerEl.setAttribute("id", markerId);
+  markerEl.setAttribute("markerWidth", "8");
+  markerEl.setAttribute("markerHeight", "6");
+  markerEl.setAttribute("refX", "8");
+  markerEl.setAttribute("refY", "3");
+  markerEl.setAttribute("orient", "auto");
+  ```
+
+  ✅ Property where it exists, `Object.entries` for the rest:
+  ```javascript
+  markerEl.id = markerId;
+  Object.entries({
+    markerWidth: "8",
+    markerHeight: "6",
+    refX: "8",
+    refY: "3",
+    orient: "auto",
+  }).forEach(([k, v]) => markerEl.setAttribute(k, v));
+  ```
+
+  This rule pairs with [Template and cloneNode](#template-and-clonenode): the per-instance assignment site after `cloneNode(false)` is exactly where the property-vs-`setAttribute` choice matters most.
 
 ---
 
