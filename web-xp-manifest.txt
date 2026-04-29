@@ -1,0 +1,14 @@
+# web-xp-manifest-v1
+/Users/garrettsmith/.agents/skills/web-xp-check/SKILL.md
+/Users/garrettsmith/.agents/skills/web-xp-off/SKILL.md
+/Users/garrettsmith/.agents/skills/web-xp-on/SKILL.md
+/Users/garrettsmith/.agents/skills/web-xp-review/SKILL.md
+/Users/garrettsmith/.agents/skills/web-xp/SKILL.md
+/Users/garrettsmith/.claude/skills/code-guidelines.md
+/Users/garrettsmith/.claude/skills/code-philosophy.md
+/Users/garrettsmith/.claude/skills/pre-commit-check.sh
+/Users/garrettsmith/.claude/skills/web-xp-check/SKILL.md
+/Users/garrettsmith/.claude/skills/web-xp-off/SKILL.md
+/Users/garrettsmith/.claude/skills/web-xp-on/SKILL.md
+/Users/garrettsmith/.claude/skills/web-xp-review/SKILL.md
+/Users/garrettsmith/.claude/skills/web-xp/SKILL.md
