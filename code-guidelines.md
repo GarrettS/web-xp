@@ -201,8 +201,6 @@ Examples:
 - `<ol>` + `<li>` instead of manual numbering spans
 - `:focus-within` instead of JS focus bookkeeping
 
-When the platform owns the behavior, let it. Augment the element if needed; do not replace it with parallel app state. Custom elements or lower-level primitives are justified only when the platform does not already provide the behavior.
-
 As a corollary, semantic structures usually reduce DOM size, parsing cost, and traversal scope. Fewer nodes is a result of choosing the right element, not the rule itself. When no HTML element owns the structure, see [Template and cloneNode](#template-and-clonenode).
 
 ### Directory Structure
@@ -702,7 +700,7 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
 
 ### CSS
 
-- Separate structure from domain styles (e.g., `layout.css` for shared primitives; `css/<domain>.css` for each module).
+- Separate global styles from module styles (e.g., `layout.css` with global variables, etc.; `css/<domain>.css` for each module).
 - Class and id selectors must have semantic meaning. `.redButton` is meaningless; `.errorAction` represents a state. See: [Use class with semantics in mind](https://www.w3.org/QA/Tips/goodclassnames). Use unambiguous names from the project's ubiquitous language: `activeTab`, `activeSubtab` — not `.active`.
 - Modular CSS: each file groups conceptually-related functionality, does one thing, and minimizes dependence on other CSS files.
 - All colors via CSS custom properties. Never hardcode hex or rgb in rules. Define custom properties on `:root` in the CSS file that owns the concept. If a dark mode override is needed, define it in `@media (prefers-color-scheme: dark)` in the same file.
