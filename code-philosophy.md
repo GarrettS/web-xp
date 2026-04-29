@@ -131,7 +131,7 @@ The edge is not the document. It is your ability to pair-program with an AI to m
 
 The guidelines contain principles, rules, defaults, and heuristics. They are not all the same kind of statement, and they do not all carry the same weight.
 
-- **Principles** govern judgment (Fail-Safe, Module Cohesion, DOM-Light). They are the reasons behind the rules.
+- **Principles** govern judgment (Fail-Safe, Module Cohesion, Semantic Markup). They are the reasons behind the rules.
 - **Rules** are specific and testable (`===` always, no `addEventListener` in repeatable functions, all colors via custom properties). They are followed unless a principle overrides them.
 - **Defaults** apply unless there is a stated reason not to ("favor source HTML," "prefer CSS over JS for state"). The word "prefer" or "avoid" signals a default.
 - **Heuristics** are context-dependent guidance (extract shared logic, decompose conditional). They require judgment about when to apply.

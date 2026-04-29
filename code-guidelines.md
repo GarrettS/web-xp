@@ -188,16 +188,22 @@ Do not search a broader part of the DOM than the task requires. When the element
 - **[Active Object](#active-object)** — the element is known; address it directly.
 - **[Event Delegation](#event-delegation)** — the ancestor is known; resolve within the event path.
 - **[Shared Key](#shared-key)** — the key is known; look up by ID, not by query.
-- **[DOM-Light](#dom-light)** — fewer nodes means shorter traversals.
+- **[Semantic Markup](#semantic-markup)** — let HTML and CSS own the behavior before adding JS structure or state.
 
-### DOM-Light
+### Semantic Markup
 
-Favor source HTML over JS-generated markup. Do not use JavaScript to solve what HTML already does natively. Examples:
+If the application is manually rendering, tracking, or syncing what an HTML element, attribute, or CSS feature already provides, the synchronization layer is the bug. Pick the element, attribute, or CSS feature that owns the behavior before writing code that would reproduce it.
+
+Examples:
 - `<form>` with `.reset()` instead of looping through inputs to clear them manually
 - `<button type="button">` instead of `<button>` with `preventDefault` to avoid submission
-- `<details>` instead of a `div` with JS toggle logic
+- `<details>` + `<summary>` instead of a `div` with JS toggle state
+- `<ol>` + `<li>` instead of manual numbering spans
+- `:focus-within` instead of JS focus bookkeeping
 
-Keep the DOM to the simplest semantic structure necessary — more markup means more bytes, more parsing, and a larger tree for scripts to traverse. When creating elements dynamically, use `createElement`.
+When the platform owns the behavior, let it. Augment the element if needed; do not replace it with parallel app state. Custom elements or lower-level primitives are justified only when the platform does not already provide the behavior.
+
+As a corollary, semantic structures usually reduce DOM size, parsing cost, and traversal scope. Fewer nodes is a result of choosing the right element, not the rule itself. When no HTML element owns the structure, see [Template and cloneNode](#template-and-clonenode).
 
 ### Directory Structure
 
@@ -665,7 +671,15 @@ When a boolean expression is complex, extract it into a named variable or functi
 
 ### Template and cloneNode
 
-When creating multiple similar elements in a loop, build one template element outside the loop with shared attributes and classes, then `cloneNode(false)` inside the loop and set only the per-instance values. Avoids redundant `createElement` / `setAttribute` / `classList.add` calls per iteration. Per-instance assignment should follow [Prefer properties over `setAttribute`](#javascript-1) — set typed properties directly and batch with `Object.assign`, falling back to `setAttribute` only for SVG / custom / unreflected ARIA attributes.
+Check [Semantic Markup](#semantic-markup) first: if HTML elements own the structure (for example `<details>` + `<summary>`, `<dialog>`, `<ol>` + `<li>`, or `<select>` + `<option>`), use them and stop.
+
+Otherwise, when a loop builds a fixed custom element structure, build the repeated shape once outside the loop and clone it per instance, setting only the per-instance values.
+
+"Loop" includes `for`, `while`, `for…of`, `for…in`, `.forEach`, `.map`, `.flatMap`, and `.reduce` when they build elements, plus recursive renderers called per node. Delegating the body to a named helper does not exempt the helper.
+
+Use `cloneNode(true)` when the repeated shape is a subtree worth deduping. Use `cloneNode(false)` when the repeated shape is a single element shell with multiple shared attributes or classes worth deduping. If the repeated shape is just one element with one class, the template does not earn its indirection.
+
+Avoid redundant `createElement` / `setAttribute` / `classList.add` calls per instance, but do not force the pattern where it adds more ceremony than it removes. For per-instance assignment, follow [Prefer properties over `setAttribute`](#javascript-1).
 
 ---
 
