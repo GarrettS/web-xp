@@ -597,17 +597,9 @@ section.classList.add("showing-results");
 }
 ```
 
-### Inline Styles in Scripts
-
-Avoid inline styles — use CSS classes. When dynamic inline styles cannot be avoided (e.g. computed positions), assign multiple values via `element.style.cssText` rather than setting individual `style` properties one at a time.
-
 ### CSS over JS for State Presentation
 
 Use CSS for visual state changes wherever possible. Prefer `:hover`, `:focus`, `:not(.class)`, and `pointer-events` over JS event handlers (`mouseenter`/`mouseleave`) and programmatic `disabled` toggling. If CSS can express the rule, JS should not be involved.
-
-### `hidden` Attribute for Visibility
-
-Use the native `hidden` attribute for show/hide toggling instead of `style.display`. It is semantic, works without knowing the element's display type, and is removable with `el.hidden = false`.
 
 ### Extract Shared Logic
 
@@ -668,18 +660,6 @@ el.addEventListener("click", (e) => {
 ### Decompose Conditional
 
 When a boolean expression is complex, extract it into a named variable or function that reads as intent. The name replaces the logic, making the condition's purpose obvious at the call site.
-
-### Template and cloneNode
-
-Check [Semantic Markup](#semantic-markup) first: if HTML elements own the structure (for example `<details>` + `<summary>`, `<dialog>`, `<ol>` + `<li>`, or `<select>` + `<option>`), use them and stop.
-
-Otherwise, when a loop builds a fixed custom element structure, build the repeated shape once outside the loop and clone it per instance, setting only the per-instance values.
-
-"Loop" includes `for`, `while`, `for…of`, `for…in`, `.forEach`, `.map`, `.flatMap`, and `.reduce` when they build elements, plus recursive renderers called per node. Delegating the body to a named helper does not exempt the helper.
-
-Use `cloneNode(true)` when the repeated shape is a subtree worth deduping. Use `cloneNode(false)` when the repeated shape is a single element shell with multiple shared attributes or classes worth deduping. If the repeated shape is just one element with one class, the template does not earn its indirection.
-
-Avoid redundant `createElement` / `setAttribute` / `classList.add` calls per instance, but do not force the pattern where it adds more ceremony than it removes. For per-instance assignment, follow [Prefer properties over `setAttribute`](#javascript-1).
 
 ---
 
@@ -816,7 +796,6 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
     // function body
   }
   ```
-- **DOM content.** `textContent` over `innerHTML`. Use `innerHTML` only when inserting HTML structure.
 - **Form submission.** No form submission on Enter unless that is the intended UX. Prevent default on `keydown` where needed.
 - **Strict equality.** `===` always. Do not use Boolean coercion on values that may be acceptably falsy (e.g., `if (e.pageX)`). Use `typeof`: `if (typeof e.pageX === 'number')`.
 - **String concatenation.** Do not `+=` in a loop — each iteration creates and discards an intermediate string. Use `.join()` for uniform items; use `.map()` + `.join('')` when each item needs distinct attributes.
@@ -842,55 +821,83 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
   ).join("");
   ```
 - **Regular expressions.** Prefer simple patterns. Anchor where needed to avoid false matches. Test success and failure cases.
-- **Prefer properties over `setAttribute`.** Set DOM state through properties, not `setAttribute`. Properties take typed values directly — `disabled = true` instead of `setAttribute("disabled", "")`, `tabIndex = -1` instead of `setAttribute("tabindex", "-1")`. `setAttribute` is the fallback only when no property exists: custom attributes, most SVG attributes, and ARIA attributes whose property form is not in the supported browser baseline. For `data-*` set with a static name, use `dataset`; use `setAttribute` only when the data name is computed.
+#### DOM
 
-  For multiple values on the same element, use `Object.assign`.
+Rules for working with DOM host objects through JavaScript bindings.
 
-  ❌ `setAttribute` per-property:
-  ```javascript
-  el.setAttribute("id", "save");
-  el.setAttribute("class", "btn primary");
-  el.setAttribute("disabled", "");
-  el.textContent = "Save";
-  el.setAttribute("data-action", "save");
-  ```
+##### Template and cloneNode
 
-  ✅ Properties + `Object.assign` + `dataset`:
-  ```javascript
-  Object.assign(el, {
-    id: "save",
-    className: "btn primary",
-    textContent: "Save",
-    disabled: true,
-  });
-  el.dataset.action = "save";
-  ```
+Check [Semantic Markup](#semantic-markup) first: if HTML elements own the structure (for example `<details>` + `<summary>`, `<dialog>`, `<ol>` + `<li>`, or `<select>` + `<option>`), use them and stop.
 
-  When `setAttribute` is the right tool (SVG attributes, custom attributes) and multiple values are going on the same element, batch them via `Object.entries` instead of repeating the call:
+Otherwise, when a loop builds a fixed custom element structure, build the repeated shape once outside the loop and clone it per instance, setting only the per-instance values.
 
-  ❌ Repeated `setAttribute`:
-  ```javascript
-  markerEl.setAttribute("id", markerId);
-  markerEl.setAttribute("markerWidth", "8");
-  markerEl.setAttribute("markerHeight", "6");
-  markerEl.setAttribute("refX", "8");
-  markerEl.setAttribute("refY", "3");
-  markerEl.setAttribute("orient", "auto");
-  ```
+"Loop" includes `for`, `while`, `for…of`, `for…in`, `.forEach`, `.map`, `.flatMap`, and `.reduce` when they build elements, plus recursive renderers called per node. Delegating the body to a named helper does not exempt the helper.
 
-  ✅ Property where it exists, `Object.entries` for the rest:
-  ```javascript
-  markerEl.id = markerId;
-  Object.entries({
-    markerWidth: "8",
-    markerHeight: "6",
-    refX: "8",
-    refY: "3",
-    orient: "auto",
-  }).forEach(([k, v]) => markerEl.setAttribute(k, v));
-  ```
+If the repeated shape is just one element with one class, the template does not earn its indirection. Avoid redundant `createElement` / `setAttribute` / `classList.add` calls per instance — but do not force the pattern where it adds more ceremony than it removes. For per-instance assignment, follow [Prefer Properties over setAttribute](#prefer-properties-over-setattribute).
 
-  This rule pairs with [Template and cloneNode](#template-and-clonenode): the per-instance assignment site after `cloneNode(false)` is exactly where the property-vs-`setAttribute` choice matters most.
+##### Inline Styles in Scripts
+
+Avoid inline styles — use CSS classes. When dynamic inline styles cannot be avoided (e.g. computed positions), assign multiple values via `element.style.cssText` rather than setting individual `style` properties one at a time.
+
+##### Hidden Attribute for Visibility
+
+Use the native `hidden` attribute for show/hide toggling instead of `style.display`. It is semantic, works without knowing the element's display type, and is removable with `el.hidden = false`.
+
+##### textContent over innerHTML
+
+Use `textContent` over `innerHTML`. Use `innerHTML` only when inserting HTML structure.
+
+##### Prefer Properties over setAttribute
+
+Set DOM state through properties, not `setAttribute`. Properties take typed values directly — `disabled = true` instead of `setAttribute("disabled", "")`, `tabIndex = -1` instead of `setAttribute("tabindex", "-1")`. `setAttribute` is the fallback only when no property exists: custom attributes, most SVG attributes, and ARIA attributes whose property form is not in the supported browser baseline. For `data-*` set with a static name, use `dataset`; use `setAttribute` only when the data name is computed.
+
+For multiple values on the same element, use `Object.assign`.
+
+❌ `setAttribute` per-property:
+```javascript
+el.setAttribute("id", "save");
+el.setAttribute("class", "btn primary");
+el.setAttribute("disabled", "");
+el.textContent = "Save";
+el.setAttribute("data-action", "save");
+```
+
+✅ Properties + `Object.assign` + `dataset`:
+```javascript
+Object.assign(el, {
+  id: "save",
+  className: "btn primary",
+  textContent: "Save",
+  disabled: true,
+});
+el.dataset.action = "save";
+```
+
+When `setAttribute` is the right tool (SVG attributes, custom attributes) and multiple values are going on the same element, batch them via `Object.entries` instead of repeating the call:
+
+❌ Repeated `setAttribute`:
+```javascript
+markerEl.setAttribute("id", markerId);
+markerEl.setAttribute("markerWidth", "8");
+markerEl.setAttribute("markerHeight", "6");
+markerEl.setAttribute("refX", "8");
+markerEl.setAttribute("refY", "3");
+markerEl.setAttribute("orient", "auto");
+```
+
+✅ Property where it exists, `Object.entries` for the rest:
+```javascript
+markerEl.id = markerId;
+Object.entries({
+  markerWidth: "8",
+  markerHeight: "6",
+  refX: "8",
+  refY: "3",
+  orient: "auto",
+}).forEach(([k, v]) => markerEl.setAttribute(k, v));
+```
+
+This rule pairs with [Template and cloneNode](#template-and-clonenode): the per-instance assignment site is where the property-vs-`setAttribute` choice matters most.
 
 ---
 
