@@ -1,5 +1,10 @@
 # Web XP
 
+[![License: MIT](https://img.shields.io/github/license/GarrettS/web-xp.svg)](LICENSE)
+[![Open issues](https://img.shields.io/github/issues/GarrettS/web-xp.svg)](https://github.com/GarrettS/web-xp/issues)
+[![Contributors](https://img.shields.io/github/contributors/GarrettS/web-xp.svg)](https://github.com/GarrettS/web-xp/graphs/contributors)
+[![Last commit](https://img.shields.io/github/last-commit/GarrettS/web-xp.svg)](https://github.com/GarrettS/web-xp/commits/main)
+
 ### AI-Assisted XP for Lean, Transparent Web Front-End
 
 Web XP gives you a shared doctrine, review workflow, and agent adapters for building on the web platform without losing architectural clarity as the project grows.
