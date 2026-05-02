@@ -68,7 +68,7 @@ Use the `Note:` tag inside an entry for explanatory text agents should skip duri
 
 1. **Open an issue.** Tag with `doctrine`. State the gap, the proposed change, and the case that motivated it. A real-world misapplication is the strongest motivation.
 2. **Discuss.** Doctrine is load-bearing — framing gets refined before any text lands.
-3. **Draft.** Drafts in progress can live in `internal/*-issue-draft.md` until the framing settles.
+3. **Draft.** Drafts in progress can live in `drafts/*-issue-draft.md` until the framing settles.
 4. **PR** once the issue is `ready`. Keep the PR focused on one entry. Edit `code-guidelines.md` for stated doctrine; edit `code-philosophy.md` for interpretive doctrine (until [#38](https://github.com/GarrettS/web-xp/issues/38) lands).
 5. **Propagation check.** Doctrine changes ripple. If your stated-doctrine change adds a term or shifts framing, check whether interpretive material, operational summaries, or skill prose need adjustment.
 

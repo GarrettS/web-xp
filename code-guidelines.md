@@ -211,9 +211,9 @@ Separate app code from dev tools. App code lives in designated directories by ty
 
 Use progressive enhancement sparingly, and generally avoid polyfills. Degrade gracefully; don't try hamfisted approaches to force it to work in all browsers.
 
-### Explicit Asset Lists
+### Asset Manifests
 
-When code enumerates project assets — precache manifests, build tool file lists, resource loaders — each entry must be individually justified by an app code reference. Dev tools and documentation are not app code; a reference from a dev tool does not justify inclusion in an asset list. Never glob-include a directory. An asset list is a contract: every entry is used by the running app, every app-used asset is listed. When files are added or removed, update asset lists in the same commit.
+When code enumerates assets the browser must fetch — service worker precache lists, `<link rel=preload>`, web app manifest `icons[]` — every entry must correspond to a runtime use, and every runtime asset the manifest is supposed to cover must be listed. Stale entries cause real failures: a precached asset whose source was removed will be served from cache by the fetch handler until the next service worker activation; a missing entry hits the network when the app expected an offline-ready response. Update manifests in the same commit as the asset change.
 
 ### Design Tokens
 

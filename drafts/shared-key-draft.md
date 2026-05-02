@@ -15,12 +15,6 @@ When code associates an object property and a DOM element, give them a shared me
 - **key slot** - the element-owned property or data-owned place where the key belongs.
 - **direct access** - addressing data, DOM, dispatch, relationship maps, or behavior by key instead of scanning.
 
-### Module Ownership
-
-A module owns the keys for the domain concept it implements. The DOM (including events), data, and behavior intermix at the module; Shared Key bridges them while each layer keeps its internals encapsulated.
-
-Other modules consume those keys; they do not define them. Module-owned prefixes — or caller-provided IDs for widgets with multiple instances (`salon-calendar`, `deliveries-calendar`) — keep keys unique. Two elements with the same ID is a bug.
-
 ### Legitimate Iteration
 
 Iteration is justified for rendering, ordering, filtering, or transforming collections, not to recover one already-known entity by key.
@@ -119,11 +113,15 @@ const link = linksByPair[canonicalPairKey(fromId, toId)];
 
 ### Key Slots
 
+Choose the carrier and the place on that carrier that fit the key. On the DOM side: the element and its property or attribute. On the data side: the object property key in keyed data.
+
 Use elements and attributes that fit the context. Do not shoehorn keys into `id`. A button's `value` may carry a key more directly than an `id` suffix.
 
 Use meaningful identifier tokens in element ids. For associated elements, use the same token with a suffix for each one's role so each id is unique, addressable, and identifiable to humans.
 
 For JavaScript objects, the key slot is the object property key.
+
+Put the key in an Element slot that fits semantically. If other modules will use it, make it convenient.
 
 ### Element Key Slots
 
