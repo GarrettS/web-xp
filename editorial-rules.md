@@ -22,17 +22,6 @@ Doctrine and repository artifacts:
 
 ---
 
-## Authoritative references
-
-- WHATWG
-- MDN
-- Google Developer Documentation Style Guide
-- Issue #56 (Enforce precise web platform language in agent-assisted doctrine contributions): spec-grounded terminology baseline (WHATWG, ECMA-262, W3C CSS, RFC 2119)
-
-Where authorities conflict, name the choice and the reason in the relevant rule section.
-
----
-
 ## Classification (normative)
 
 1. **Normative:** Mechanical rules. Apply the rule's stated action.
@@ -50,7 +39,7 @@ Each rule below states:
 - **Technical Standard:** Every word performs a function. Maximize information per syllable.
 - **Concise:** Omit restatement, summary lines, and negative constraints. Code over prose.
 - **Direct:** Use imperative mood and active voice. Name APIs and elements exactly. No paraphrasing.
-- **Accurate:** Use terms as defined in specs or Issue #56 (Enforce precise web platform language in agent-assisted doctrine contributions).
+- **Accurate:** Use terms as defined by the authorities in **Authoritative References**.
 - **Sound:** Accessible Precision — balance:
   - Technical Accuracy (exactness)
   - Completeness (edge cases)
@@ -62,6 +51,27 @@ Each rule below states:
 ## Format (normative)
 
 Each rule section pairs a Reject example with a Use example inside a blockquote.
+
+---
+
+## Authoritative References (normative)
+
+When about to use a web-platform term, consult the spec that defines it:
+
+- **Web platform:** WHATWG specs (HTML, DOM, URL, Fetch)
+- **JavaScript:** ECMA-262
+- **CSS:** W3C CSS specs
+- **General reference:** MDN
+
+**Pattern:** invented or imprecise terminology where a spec term exists.
+
+**Action:** flag; replace with the spec-defined term.
+
+> Reject: A `<details>` is an HTML expandable.
+>
+> Use: A `<details>` is a disclosure widget (WHATWG HTML, "The details element").
+
+Where authorities conflict, name the choice and the reason in the relevant rule section.
 
 ---
 
