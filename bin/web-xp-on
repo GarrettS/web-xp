@@ -10,7 +10,7 @@ END_MARKER='<!-- END WEB-XP -->'
 
 usage() {
   cat <<'EOF'
-Usage: web-xp-init [--preview] [claude|codex|all]
+Usage: web-xp-on [--preview] [claude|codex|all]
 
 Bootstrap Web XP project contracts in the current directory.
 
