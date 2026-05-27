@@ -257,6 +257,7 @@ RFC 2119 ALL-CAPS forms (MUST, SHOULD, MAY) are reserved for tight agent operati
 | material accuracy | domain-accurate naming |
 | materially accurate | named with domain terms |
 | narrower, broader, simpler, cleaner, stricter, tighter | name the axis and the property tested |
+| single source of truth | name the variable, its writer, and its readers |
 
 > Reject: `instanceof` is narrower.
 >
