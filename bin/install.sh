@@ -17,6 +17,7 @@ CODEX_SKILLS_DEST="${HOME}/.agents/skills"
 STANDARDS_FILES=(
   "code-guidelines.md"
   "code-philosophy.md"
+  "editorial-rules.md"
 )
 PRECOMMIT_SRC="${WEB_XP_DIR}/bin/pre-commit-check.sh"
 

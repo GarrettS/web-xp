@@ -25,6 +25,16 @@ teardown() {
   [ ! -e "$TMP_HOME/.claude/skills/web-xp-apply" ]
 }
 
+@test "installs standards files including editorial-rules" {
+  run env HOME="$TMP_HOME" WEB_XP_MANIFEST_PATH="$MANIFEST_PATH" bash "$INSTALL_SCRIPT"
+  [ "$status" -eq 0 ]
+
+  assert_file_exists "$TMP_HOME/.claude/skills/code-guidelines.md"
+  assert_file_exists "$TMP_HOME/.claude/skills/code-philosophy.md"
+  assert_file_exists "$TMP_HOME/.claude/skills/editorial-rules.md"
+  grep -Fx "$TMP_HOME/.claude/skills/editorial-rules.md" "$MANIFEST_PATH"
+}
+
 @test "replaces stale Web XP files on reinstall" {
   # Pre-seed a stale standards file and a stale skill dir
   mkdir -p "$TMP_HOME/.claude/skills/web-xp-check"

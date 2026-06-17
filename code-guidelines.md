@@ -904,6 +904,7 @@ This rule pairs with [Template and cloneNode](#template-and-clonenode): the per-
 Comments are a failure of the code to express itself. When one is necessary, it should justify its existence.
 
 - Comments explain *why*, not *what*. If the comment restates the code, delete it.
+- Comment prose follows the Editorial Rules (ER) in `editorial-rules.md`. Read them on demand when a comment needs more than a line.
 - Avoid comments likely to become obsolete. A comment that drifts from the code it describes is worse than no comment.
 - No decorative banner or landmark comments (`═══`, `───`, `****`, `/* ── Section ── */`). Use code structure — function names, module boundaries, blank lines — to communicate organization.
 - Avoid file header comments, except for necessary information that cannot be placed more locally.
