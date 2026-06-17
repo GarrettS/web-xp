@@ -1,4 +1,4 @@
-# Editorial Rules
+# Editorial Rules (ER)
 
 Editorial rules for doctrine and repository artifacts in Web XP.
 
@@ -6,9 +6,9 @@ Editorial rules for doctrine and repository artifacts in Web XP.
 
 ## Scope
 
-Doctrine and repository artifacts:
+**Covered prose** — the doctrine and repository prose these rules govern:
 
-- drafts
+- drafts, including prose drafted for the user to use (e.g. a suggested explanation of the code)
 - issues
 - issue comments
 - contributor docs
@@ -37,14 +37,25 @@ Each rule below states:
 ## Principles
 
 - **Technical Standard:** Every word performs a function. Maximize information per syllable.
-- **Concise:** Omit restatement, summary lines, and negative constraints. Code over prose.
+- **Concise:** Omit restatement, summary lines, and this-not-that framing. Code over prose. Say more with less. 
 - **Direct:** Use imperative mood and active voice. Name APIs and elements exactly. No paraphrasing.
 - **Accurate:** Use terms as defined by the authorities in **Authoritative References**.
+- **Code First:** Document clear and coherent code. If the code should be adjusted for clarification, do that first.
 - **Sound:** Accessible Precision — balance:
   - Technical Accuracy (exactness)
   - Completeness (edge cases)
   - Human accessibility (readability and utility)
 - **Laconic:** Avoid globals. Scope locally.
+
+---
+
+## Application (normative)
+
+Before sharing a draft, review it against these rules and revise. Cut filler. Read, write, review, revise, repeat — and think.
+
+On revision, when applying feedback — any correction or new information — ask whether it matches the paragraph's topic. Do not cram it into the paragraph if that would reduce cohesion or comprehensibility; find the section where it belongs and add it there, or create one if none exists.
+
+Enforce normative rules yourself. Do not pass known violations to the reviewer for approval. Applying `must`-level rules is mechanical, like `a === b`, and needs no sign-off. Accept and auto-accept will pass mechanical violations through, so the author is the only check. Reserve the reviewer for what judgment decides: clarity, coherence, and the patterns marked Judgment.
 
 ---
 
@@ -89,7 +100,7 @@ Where authorities conflict, name the choice and the reason in the relevant rule 
 
 ## Instructional Leakage (judgment)
 
-Instructional Leakage is meta content about the work, written into an artifact whose job is to *be* the work, not describe it.
+Instructional Leakage (IL) is meta content about the work, written into artifacts whose job is to *be* the work, not describe it.
 
 **Categories** include but are not limited to:
 
@@ -171,7 +182,7 @@ Omit acceptance criteria that describe prose formatting instead of delivery.
 
 ### Rule Location vs. Governed Artifact
 
-Do not conflate the file where a rule lives with the artifact it governs.
+Do not conflate the file that states a rule with the artifact it governs.
 
 > Reject: The priming applies to `CODEX.md`.
 >
@@ -198,10 +209,34 @@ Reference sections by name. Do not paraphrase or duplicate their content.
 | surface | file, API, DOM, command, UI, adapter path |
 | seam | module boundary, API boundary, extraction point |
 | framing | rule boundary, issue scope, claim |
+| ecosystem | use proper terminology; this software; nothing ecological about it | 
 
 > Reject: Source data shaped as `[{ id, ... }]`, often paired with `.find(...)`.
 >
 > Use: Trigger: keyed lookup over array records that contain `id`.
+
+---
+
+## Lives (normative)
+
+Nothing lives. Code, files, content, and logic do not "live" anywhere.
+
+**Pattern:** `lives` / `lives in` (or other life verbs) stating where code, a file, or content is located.
+
+**Action:** flag; replace with one of:
+
+- the mechanism — name what the code does and the API that does it
+- an explanation — when "lives" leads into a code block or sits where the code should be explained, explain the code
+- a pointer — `see [document/section]`
+- a plain location verb — `is in`, `is defined in`, `the appendix covers`
+
+> Reject: The transition code lives in `startTransition`.
+>
+> Use: To smooth the transition, call `startTransition`.
+
+> Reject: The per-feature deep dives live in the appendix.
+>
+> Use: See the appendix for per-feature deep dives.
 
 ---
 
@@ -332,12 +367,19 @@ Empty intensifiers add emphasis without information.
 
 ## Prose Mechanics (normative)
 
-Doctrine and rule prose uses:
+Prose uses two registers. Decide per sentence by subject and verb:
 
-- imperative mood
+- **Normative** — instructs. Implied second-person subject, command verb: "Use `Array.isArray`", "Avoid globals". Imperative mood.
+- **Descriptive** — describes the system. Third-person subject (the code, the handler, the browser), finite verb stating behavior: "The handler reads `event.target`", "The list reorders only on drop". Declarative, present tense, third person; no second person.
+
+**Test:** subjectless base-form verb ("Use `Array.isArray`") → normative; third-person subject + finite verb ("The handler reads `event.target`") → descriptive.
+
+Both registers use:
+
 - active voice
-- present tense for runtime behavior
-- no first person; second person only in contributor instructions
+- present tense
+- exact technical nouns
+- no first person; second person only in normative contributor instructions
 - punctuation outside quotation marks unless part of the literal string (Web XP follows WHATWG, Wikipedia, and Linux-kernel style here, departing from the Google Developer Documentation Style Guide)
 
 **Pattern:** prose that violates any of the above.
@@ -363,3 +405,68 @@ Doctrine and rule prose uses:
 > Reject: Set the role to "button."
 >
 > Use: Set the role to "button".
+
+
+## Quantifier Scope (normative)
+
+Match each determiner to its claim's scope.
+
+Claims about every member of a class take the bare plural ("Nouns name things") or a distributive universal (`each`/`every`/`any`). The singular indefinite article does not state class claims.
+
+**Pattern:** singular determiner — emphatic (`a single`, `one`), specific (`the X`), or generic (`a`/`an`) — where the claim it modifies is universal.
+
+**Action:** flag; rewrite as a bare plural or a distributive universal.
+
+**Test:** if the claim is universal and "which one?" reads as a sensible question, the determiner is too specific.
+
+> Reject: A single artifact carries both registers.
+>
+> Use: Documents carry both registers.
+
+
+## Slop, Codeslop & Gobbledygook
+
+Agents typically begin with a paragraph label offset by a colon where a topic sentence would go. Example: 
+
+"Billy likes sports: he runs, plays basketball, and swims"
+
+Avoid this pattern.
+
+### Coherence (judgment)
+
+Each paragraph leads with its point, then develops it. Two failures break it — subject-shifting and trailing off.
+
+#### Subject-shifting
+
+**Pattern:** paragraph that conflates a second subject into the point it states.
+
+**Action:** flag; move the second subject to its own paragraph.
+
+> Reject: `getBoundingClientRect()` returns zeros on elements with `display: none`, and the panel also caches its scroll position.
+>
+> Use: `getBoundingClientRect()` returns zeros on elements with `display: none`. Measure after they are shown.
+
+#### Trailing off
+
+**Pattern:** paragraph that continues past its point, ending on subordinate or filler material.
+
+**Action:** flag; cut the trailing material; close on the sentence that completes the point.
+
+> Reject: `getBoundingClientRect()` returns zeros on elements with `display: none`. This is one of several rendering quirks worth keeping in mind.
+>
+> Use: `getBoundingClientRect()` returns zeros on elements with `display: none`. Positions read before they are shown are stale.
+
+### Codeslop
+AI code slop is AI-generated code that borrows framework paradigms and terms (noun, verb, metaphor), and manifests in code, comments, and communications.
+
+| Reject | Use |
+|---|---|
+| `routes` (events) | `handles`, `dispatches` |
+| `mounts` | `appends`, `inserts` |
+| `hydrate` | builds from data |
+| `lifecycle` | construction; one-time init |
+| `primitive` | the class (identifier + construct) |
+| `domain layer` | the module; the file |
+| `data model` | the class; the decorator |
+| `row` (for an `<li>`) | `item` |
+
