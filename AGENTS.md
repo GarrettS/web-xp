@@ -1,10 +1,10 @@
-# Codex — Web XP Project Contract
+# Web XP — Project Contract
 
 Read this file first on every task.
 
 ## On every session
 
-If the task involves JS, HTML, or CSS, read `code-guidelines.md` and `code-philosophy.md` before writing or reviewing code.
+If the task involves JS, HTML, or CSS, read `code-guidelines.md` and `code-philosophy.md` before writing or reviewing code. The `web-xp` skill performs these reads.
 
 ## Issue engagement
 
@@ -89,7 +89,11 @@ evidence.
 
 ## Standards files
 
-Canonical sources live at repo root (`code-guidelines.md`, `code-philosophy.md`, `bin/pre-commit-check.sh`) and in `adapters/codex/` for Codex adapter source. Edit the canonical source, not generated outputs.
+Canonical doctrine sources at repo root: `code-guidelines.md`, `code-philosophy.md`, `editorial-rules.md`, `bin/pre-commit-check.sh`.
+
+Adapter sources: `adapters/shared-base/skills/` (shared skill sources), `adapters/claude/` (Claude adapter packaging), `adapters/codex/` (Codex adapter packaging). Always edit the shared/canonical source, never generated adapter output.
+
+`.claude/skills/` is gitignored — populated by `bin/install.sh` at install time, not tracked.
 
 ## Before every commit
 
@@ -98,6 +102,7 @@ Most commits (markdown, docs, contracts, MAINTAINERS.md): review the diff agains
 Conditional checks:
 
 - When changing `adapters/shared-base/`: run `bash tools/check-web-xp-sync.sh` to rebuild generated adapter outputs.
+- When changing doctrine (`code-guidelines.md`, `code-philosophy.md`): run the `web-xp-check` skill for a doctrine audit.
 - When changing scripts in `bin/` or `tools/`: run `bash test/run-unit.sh`.
 
 Note: `bin/pre-commit-check.sh` is the user-facing script distributed to user projects via `bin/web-xp-on`. Do not run it on this repo.
@@ -106,12 +111,15 @@ Note: `bin/pre-commit-check.sh` is the user-facing script distributed to user pr
 
 When collaborating with another agent, use the shared-file protocol in `tools/AGENT-HANDOFF.md`.
 
-`check` and `chk` mean: read `/tmp/web-xp-agent-handoff/claude-to-codex.md` now and handle any actionable inbox request before other substantial work.
+Each agent reads its own inbox and writes its own outbox:
 
-If the inbox contains an actionable request, do that inbox work before any other substantial task and before replying elsewhere.
+- **Claude:** reads `/tmp/web-xp-agent-handoff/codex-to-claude.md`, writes `/tmp/web-xp-agent-handoff/claude-to-codex.md`.
+- **Codex:** reads `/tmp/web-xp-agent-handoff/claude-to-codex.md`, writes `/tmp/web-xp-agent-handoff/codex-to-claude.md`.
 
-Before substantial work and before replying:
-1. Read `/tmp/web-xp-agent-handoff/claude-to-codex.md` (your inbox).
-2. Write to `/tmp/web-xp-agent-handoff/codex-to-claude.md` (your outbox).
-3. Do not read `/tmp/web-xp-agent-handoff/codex-to-claude.md` for incoming messages.
-4. Do not assume terminal output or chat context has been shared across agents; write important context to the handoff files.
+Before substantial work and before replying: read the inbox; write to the outbox; don't assume terminal output or chat context has been shared.
+
+When the human says **check** or **chk**: read the inbox immediately and handle actionable inbox work before other substantial work.
+
+## Edit tool
+
+When changing multiple locations in the same file, use one edit call with an `old_string` span that covers all change sites. Never send parallel edit calls to the same file.

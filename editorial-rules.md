@@ -13,10 +13,7 @@ Editorial rules for doctrine and repository artifacts in Web XP.
 - issue comments
 - contributor docs
 - maintainer docs
-- contributor agent files:
-  - `CLAUDE.md`
-  - `CODEX.md`
-  - `AGENTS.md`
+- contributor agent file: `AGENTS.md`
 - Architectural Design docs
 - PRDs
 
@@ -184,9 +181,9 @@ Omit acceptance criteria that describe prose formatting instead of delivery.
 
 Do not conflate the file that states a rule with the artifact it governs.
 
-> Reject: The priming applies to `CODEX.md`.
+> Reject: The priming applies to `AGENTS.md`.
 >
-> Use: The priming in `CODEX.md` applies to issue drafts and doctrine.
+> Use: The priming in `AGENTS.md` applies to issue drafts and doctrine.
 
 ### Section Restatement
 
