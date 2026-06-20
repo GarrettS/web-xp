@@ -1,6 +1,6 @@
 ---
 name: web-xp-review
-description: 'Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.'
+description: 'Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`AGENTS.md`, `CLAUDE.md`, or `CODEX.md`) exists in the project.'
 ---
 
 # Web XP Review — Evaluate Code and Apply Approved Fixes
@@ -23,7 +23,7 @@ Review code the user provides against the Web XP standards. Unlike `web-xp-check
 
 ## Activation
 
-Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`AGENTS.md`, `CLAUDE.md`, or `CODEX.md`) exists in the project.
 
 ## Procedure
 

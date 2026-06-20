@@ -1,6 +1,6 @@
 ---
 name: web-xp-check
-description: 'Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.'
+description: 'Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`AGENTS.md`, `CLAUDE.md`, or `CODEX.md`) exists in the project.'
 ---
 
 # Web XP Check — Read-Only Audit
@@ -21,7 +21,7 @@ Audit the current diff against the Web XP standards. Report findings. Do not edi
 
 ## Activation
 
-Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`CODEX.md` or `CLAUDE.md`) exists in the project.
+Activate when explicitly invoked by name. Auto-activate only if a Web XP project contract (`AGENTS.md`, `CLAUDE.md`, or `CODEX.md`) exists in the project.
 
 ## Procedure
 
