@@ -27,6 +27,10 @@ On completion (work landed and committed), close the issue and delete temporary 
 
 **Duplicate avoidance.** Before filing an issue or posting a comment, search the tracker for existing duplicates. Issues, comments, files — same rule: search before adding. If a duplicate is found, reference the existing artifact rather than creating another.
 
+## Editorial Gate
+
+`editorial-rules.md` governs covered prose — its Scope lists the covered artifacts (this contract included), its Application states the passes. Apply it while drafting or revising a covered artifact, and before publishing one.
+
 ## Contextual Gatekeeper
 
 Treat corrective commentary as functional input. Use it to transform the
