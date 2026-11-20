@@ -196,6 +196,8 @@ If the application is manually rendering, tracking, or syncing what an HTML elem
 
 Examples:
 - `<form>` with `.reset()` instead of looping through inputs to clear them manually
+- `<fieldset disabled>` instead of looping through controls to set `disabled` on each
+- `inert` on a subtree instead of looping descendants to set `tabindex`, `pointer-events`, or `aria-hidden`
 - `<button type="button">` instead of `<button>` with `preventDefault` to avoid submission
 - `<details>` + `<summary>` instead of a `div` with JS toggle state
 - `<ol>` + `<li>` instead of manual numbering spans
@@ -840,6 +842,14 @@ Avoid inline styles — use CSS classes. When dynamic inline styles cannot be av
 ##### Hidden Attribute for Visibility
 
 Use the native `hidden` attribute for show/hide toggling instead of `style.display`. It is semantic, works without knowing the element's display type, and is removable with `el.hidden = false`.
+
+##### Toggling a Group of Controls
+
+`<fieldset disabled>` disables its descendant form controls, except those inside its first `<legend>` child. Toggle the group with `fieldset.disabled = true`/`false` and read it back as the state, instead of looping to set `el.disabled` on each. `readonly` has no such owner — set it per `<input>`/`<textarea>`. See [Semantic Markup](#semantic-markup).
+
+##### Toggling Interaction on a Subtree
+
+`inert` on a subtree root toggles interaction for the whole subtree — focus order, pointer, accessibility tree. Set or remove it instead of looping to set `tabindex`, `pointer-events`, or `aria-hidden` on descendants. See [Semantic Markup](#semantic-markup).
 
 ##### textContent over innerHTML
 
