@@ -845,7 +845,7 @@ Use the native `hidden` attribute for show/hide toggling instead of `style.displ
 
 ##### Toggling a Group of Controls
 
-`<fieldset disabled>` disables its descendant form controls, except those inside its first `<legend>` child. Toggle the group with `fieldset.disabled = true`/`false` and read it back as the state, instead of looping to set `el.disabled` on each. `readonly` has no such owner — set it per `<input>`/`<textarea>`. See [Semantic Markup](#semantic-markup).
+`<fieldset disabled>` disables its descendant form controls, except those inside its first `<legend>` child. Toggle the group with `fieldset.disabled = true`/`false` and read it back as the state, instead of looping to set `el.disabled` on each. `<fieldset readonly>` is proposed, not yet shipped (as of 2026-11) — set `readonly` per `<input>`/`<textarea>`. See [Semantic Markup](#semantic-markup).
 
 ##### Toggling Interaction on a Subtree
 
