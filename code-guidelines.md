@@ -839,17 +839,17 @@ If the repeated shape is just one element with one class, the template does not 
 
 Avoid inline styles — use CSS classes. When dynamic inline styles cannot be avoided (e.g. computed positions), assign multiple values via `element.style.cssText` rather than setting individual `style` properties one at a time.
 
-##### Hidden Attribute for Visibility
+##### Toggling State on a Subtree
 
-Use the native `hidden` attribute for show/hide toggling instead of `style.display`. It is semantic, works without knowing the element's display type, and is removable with `el.hidden = false`.
+Set a native attribute on a subtree root and the platform cascades that state to the whole subtree. Toggle it on the root and read it back as the state — don't loop descendants.
 
-##### Toggling a Group of Controls
+- `hidden` — rendering; instead of toggling `style.display`.
+- `<fieldset disabled>` — disabled state of descendant form controls (except those inside its first `<legend>` child); instead of looping to set `el.disabled` on each.
+- `inert` — interaction (focus, pointer, accessibility tree); instead of looping to set `tabindex`, `pointer-events`, or `aria-hidden`.
 
-`<fieldset disabled>` disables its descendant form controls, except those inside its first `<legend>` child. Toggle the group with `fieldset.disabled = true`/`false` and read it back as the state, instead of looping to set `el.disabled` on each. `<fieldset readonly>` is proposed, not yet shipped (as of 2026-11) — set `readonly` per `<input>`/`<textarea>`. See [Semantic Markup](#semantic-markup).
+`readonly` is per `<input>`/`<textarea>`, not subtree-cascadable; `<fieldset readonly>` is proposed, unshipped (as of 2026-11).
 
-##### Toggling Interaction on a Subtree
-
-`inert` on a subtree root toggles interaction for the whole subtree — focus order, pointer, accessibility tree. Set or remove it instead of looping to set `tabindex`, `pointer-events`, or `aria-hidden` on descendants. See [Semantic Markup](#semantic-markup).
+See [Semantic Markup](#semantic-markup).
 
 ##### textContent over innerHTML
 
