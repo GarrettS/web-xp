@@ -433,6 +433,11 @@ Avoid this pattern.
 
 Each paragraph leads with its point, then develops it. Two failures break it — subject-shifting and trailing off.
 
+Example:
+"Pressing a step lifts a copy that follows the pointer, an insertion bar marks where it will land, the copy's number updates to the slot it would take, and a fully correct chain pulses top to bottom."
+
+Problem: describes a game by welding two of its features — 1. drag'n'drop, and 2. successful completion — into one sentence, placing drag'n'drop in the topic marker position with animation and conjoining it with animation. The result reads as if the completion animation occurs during the drag.
+
 #### Subject-shifting
 
 **Pattern:** paragraph that conflates a second subject into the point it states.
