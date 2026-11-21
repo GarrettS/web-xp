@@ -205,6 +205,8 @@ Examples:
 
 As a corollary, semantic structures usually reduce DOM size, parsing cost, and traversal scope. Fewer nodes is a result of choosing the right element, not the rule itself. When no HTML element owns the structure, see [Template and cloneNode](#template-and-clonenode).
 
+**Scrutinize JavaScript attached to form controls.** When a native form element, attribute, method, or event performs the behavior, use it instead of recreating it — a `<form>` with `requestSubmit()` and the `submit` event for submission, the `change`/`input` events for value changes, the constraint attributes (`required`, `pattern`, `type`, `min`/`max`/`step`, `minlength`/`maxlength`) with `setCustomValidity()` and the `invalid` event for validation, and so on. Flag controls with `control.form === null` and let the review decide whether a form would replace the JavaScript; a hand-written check duplicating a supported native constraint is the validation trigger.
+
 ### Directory Structure
 
 Separate app code from dev tools. App code lives in designated directories by type (scripts, styles, data, assets). Dev tools live in their own directory, not mixed with app code. The project root contains only files that must be there (entry HTML, files with browser scope constraints) and project documentation.
