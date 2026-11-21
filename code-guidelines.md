@@ -849,7 +849,7 @@ Set a native attribute on a subtree root and the platform cascades that state to
 - `<fieldset disabled>` — disabled state of descendant form controls (except those inside its first `<legend>` child); instead of looping to set `el.disabled` on each.
 - `inert` — makes a subtree unavailable: focus, hit-testing, editing, text selection, and exposure to accessibility APIs; instead of approximating it with `tabindex`, `pointer-events`, and `aria-hidden`, which don't cover the same ground.
 
-Removing `inert` locally does not override an inert ancestor, but a modal dialog opened with `showModal()` escapes ancestor inertness unless itself inert.
+Removing `inert` locally does not override an inert ancestor, but a modal dialog opened with `showModal()` escapes ancestor inertness.
 
 `readonly` (JS: `readOnly`) is per control — `<textarea>` and the input types that support it — not subtree-cascadable; `<fieldset readonly>` is proposed, unshipped (as of 2026-11).
 
