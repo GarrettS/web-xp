@@ -207,6 +207,8 @@ As a corollary, semantic structures usually reduce DOM size, parsing cost, and t
 
 **Scrutinize JavaScript attached to form controls.** When a native form element, attribute, method, or event performs the behavior, use it instead of recreating it — a `<form>` with `requestSubmit()` and the `submit` event for submission, the `change`/`input` events for value changes, the constraint attributes (`required`, `pattern`, `type`, `min`/`max`/`step`, `minlength`/`maxlength`) with `setCustomValidity()` and the `invalid` event for validation, and so on. Flag controls with `control.form === null` and let the review decide whether a form would replace the JavaScript; a hand-written check duplicating a supported native constraint is the validation trigger.
 
+**Native checkboxes and radio buttons own selection state.** Use `<input type="checkbox">` for independent on/off values and `<input type="radio">` for mutually exclusive choices. Radio buttons that share a `name` (`name="intensity"` on each option) form one group, so the browser enforces the single choice and submits it under that key. Do not recreate this with buttons, classes, and ARIA.
+
 ### Directory Structure
 
 Separate app code from dev tools. App code lives in designated directories by type (scripts, styles, data, assets). Dev tools live in their own directory, not mixed with app code. The project root contains only files that must be there (entry HTML, files with browser scope constraints) and project documentation.
@@ -429,6 +431,10 @@ For JavaScript objects, the key slot is the object property key.
 - `<data value>` when visible content has a machine-readable entity key.
 - `name` when a form field contributes the payload key.
 - `data-*` when no more specific key slot fits.
+
+#### Native Key-Slot Review
+
+Flag `data-*` used to carry identity, field names, actions, or state. Check whether `id`, `name`, `value`, a native attribute or property, or an existing object reference already owns that meaning. Retain `data-*` only when its purpose remains clear after that check.
 
 #### Forced Key
 
