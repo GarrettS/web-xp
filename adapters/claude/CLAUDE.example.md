@@ -16,11 +16,13 @@ Apply the standard to the new code you write for the user's request. Do not refa
 
 `editorial-rules.md` in your Web XP install is the prose styleguide. Read it on demand and apply it to covered prose (its Scope lists what counts), including prose you draft for the user to use (e.g. "you can explain the code like this: …").
 
-## Before every commit
+## Before delivery or commit
 
 1. Run `bash ~/.web-xp/bin/pre-commit-check.sh` — catches mechanical violations.
-2. Review the diff against Patterns and Fail-Safe in `code-guidelines.md` from your Web XP install.
+2. Review the diff against all applicable rules in `code-guidelines.md` from your Web XP install, including rules without automated checks.
 3. Verify covered prose in the diff against the ER.
+
+Correct violations introduced by the work before presenting it as complete. Required corrections are part of the authorized implementation.
 
 ## Claude Code
 
