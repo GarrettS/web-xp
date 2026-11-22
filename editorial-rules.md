@@ -79,6 +79,8 @@ When about to use a web-platform term, consult the spec that defines it:
 >
 > Use: A `<details>` is a disclosure widget (WHATWG HTML, "The details element").
 
+Before drafting, identify what each technical term refers to and verify that its established meaning applies in context. When a term misidentifies the subject, correct the identification and revise claims that depend on it. Do not invent definitions to preserve the wording.
+
 Where authorities conflict, name the choice and the reason in the relevant rule section.
 
 ---

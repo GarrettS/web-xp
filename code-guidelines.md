@@ -176,6 +176,30 @@ Mismatch between domain language and code language is a defect. It inserts a tra
 - **[Shared Key](#shared-key)** — use the same domain terms in data keys, DOM IDs, and lookups.
 - **[Module Cohesion](#module-cohesion)** — use domain terms in module names and file names.
 - **[Good Names](code-philosophy.md#good-names)** — interpretive guidance on material-accuracy naming and grepability.
+- **[Precise Terminology](#precise-terminology)** — a name must be correct for what the construct is; consistency does not override correctness.
+
+### Precise Terminology
+
+#### Governing Statement
+
+Use established platform and domain meanings when reasoning about code, planning changes, naming constructs, and explaining behavior. Identify the actual construct and its domain role before choosing a term, and base what follows on that identification. Do not reserve or ban words by tag: `row` names a table row, a grid row, or a database row — use the established meaning of whichever construct is in hand.
+
+#### Two Vocabularies
+
+Correct names draw from the right vocabulary, used accurately:
+
+- **Platform terms** — the established term for the actual construct in context. An `<input>` is an input or form control, not a "cell"; a form field is not a "row". Borrowing table terms (`row`, `cell`) for form constructs misnames them.
+- **Domain language** — the source for names, classes, and identifiers (see [Ubiquitous Language](#ubiquitous-language)).
+
+The platform term identifies the construct; the domain term names the instance. Neither substitutes for the other, and a class takes the domain name, never a borrowed platform term (`.cell` on an input, `.row` on a `<div>`).
+
+#### Correctness Over Inherited Consistency
+
+Terms learned from other code, documentation, or prior work are still wrong when they misname the construct. Surrounding code that calls a `<div>` a "row" does not make it one. [Ubiquitous Language](#ubiquitous-language) governs consistency with the project's vocabulary; this rule governs correctness, and correctness wins — a consistently-used wrong term is still wrong.
+
+#### Scope and Enforcement
+
+Identification happens in reasoning, before naming or explanation, and stays internal; surface it only to disambiguate. Resolve uncertainty about the construct before making claims that depend upon it.
 
 ### Module Cohesion
 
@@ -197,6 +221,7 @@ If the application is manually rendering, tracking, or syncing what an HTML elem
 Examples:
 - `<form>` with `.reset()` instead of looping through inputs to clear them manually
 - `<fieldset disabled>` instead of looping through controls to set `disabled` on each
+- `<fieldset>` to group related controls, instead of a `<div>`
 - `inert` on a subtree instead of looping descendants to set `tabindex`, `pointer-events`, or `aria-hidden`
 - `<button type="button">` instead of `<button>` with `preventDefault` to avoid submission
 - `<details>` + `<summary>` instead of a `div` with JS toggle state
