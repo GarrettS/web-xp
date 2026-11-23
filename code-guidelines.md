@@ -207,7 +207,7 @@ Each module owns one domain concept. Name the module after what it does: `quiz.j
 
 ### Touched-Construct Ownership
 
-When modifying a construct — a function, a component, a selector block, a module — bring that construct into conformance with this standard, not only the lines you changed. Editing a construct makes you responsible for it, so a changed line left inside a nonconforming function is a half-corrected function. Scope this to the construct you touched: a one-line edit does not oblige you to rework the rest of the file, and constructs you did not touch remain out of scope for the change. Keep the cleanup safe and proportionate — a rename, an extraction, a dead branch; when a construct needs more than that, file a separate issue and keep the diff focused instead of enlarging it.
+When modifying a construct — a function, a component, a selector block — bring that construct into conformance with this standard, not only the lines you changed. Editing a construct makes you responsible for it, so a changed line left inside a nonconforming function is a half-corrected function. Scope this to the construct you touched: a one-line edit does not oblige you to rework the rest of the file, and constructs you did not touch remain out of scope for the change. Keep the cleanup safe and proportionate — a rename, an extraction, a dead branch; when a construct needs more than that, file a separate issue and keep the diff focused instead of enlarging it.
 
 ### Minimize Traversal Scope
 
