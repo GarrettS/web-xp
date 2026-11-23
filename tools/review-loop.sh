@@ -1,80 +1,60 @@
 #!/usr/bin/env bash
 #
-# review-loop.sh — the cross-agent review loop, run without a human relay.
+# review-loop.sh — the cross-agent review, run without a human relay.
 #
-# One agent (Codex) reviews a branch's diff against the Web XP standard and
-# returns findings as JSON. The other agent (Claude) reads the code around each
-# finding, applies the fix, and commits. The loop repeats until the reviewer
-# returns no findings and a mechanical check passes, or a round cap is reached,
-# then it hands back to you. You run it once instead of relaying messages
-# between the two agents by hand.
+# Codex reviews a branch's diff against the Web XP standard and returns findings
+# as JSON. Two passes run each time:
+#   - a GENERAL pass over the whole diff against the whole standard;
+#   - a NAMING pass that pulls every class name the diff adds out of the text,
+#     then judges only those names, so a class-name sweep happens even when
+#     heavier architectural findings would otherwise crowd it out.
+# The two results are merged, printed, and written to a file.
 #
-# Each round runs two reviewers. A GENERAL pass reviews the whole diff against
-# the whole standard. A NAMING pass pulls every class name the diff adds out of
-# the text, then judges only those names — so the class-name sweep happens every
-# round even when heavier architectural findings would otherwise crowd it out.
-# A real dogfood run showed the general pass alone silently skipped generic
-# names (.inp, .muted, .inline-value) that were sitting in the added lines; the
-# naming pass exists to close that hole.
+# It is REVIEW ONLY. It does not edit, stage, commit, or check out anything. It
+# produces the findings and hands them back — fixing is done interactively, with
+# Claude reading the code and the person in the loop, because naming the right
+# domain concept takes judgment the review cannot make for you.
 #
-# What it is and is not. It contains violations after they are generated. It
-# does NOT make the author write conforming code in the first place, and a clean
-# review is not by itself proof of conformance. Use it as an extra check, not as
-# the completion gate.
+# (The name is historical: the "loop" was the manual relay between the two
+#  agents. This script removes that relay; it no longer iterates.)
 #
 # Usage:
-#   tools/review-loop.sh <branch> [base-branch] [max-rounds]
+#   tools/review-loop.sh <branch> [base-branch]
 #
-# Needs on PATH: git, jq, the `codex` CLI, the `claude` CLI.
+# Output: prints the findings, and writes them as a JSON array to
+# $REVIEW_LOOP_OUT (default ./review-findings.json) for Claude to read.
+#
+# Needs on PATH: git, jq, the `codex` CLI.
 # Needs the standard installed at ~/.web-xp/code-guidelines.md (run install.sh).
 #
-# Spots that depend on how each CLI behaves in your install are marked VERIFY.
-# Test on a throwaway branch before trusting it unattended.
+# The codex invocation depends on how codex behaves in your install; it is
+# marked VERIFY below.
 #
 set -euo pipefail
 
-branch="${1:?usage: review-loop.sh <branch> [base-branch] [max-rounds]}"
+branch="${1:?usage: review-loop.sh <branch> [base-branch]}"
 base="${2:-main}"
-max_rounds="${3:-3}"
 
 standard="${WEB_XP_CG:-$HOME/.web-xp/code-guidelines.md}"
+out="${REVIEW_LOOP_OUT:-review-findings.json}"
 
-# Optional mechanical gate, run before the loop reports "clean" — the project's
-# own tests or Web XP pre-commit check. Empty skips it (with a printed note).
-check_cmd="${REVIEW_LOOP_CHECK:-}"
-
-# VERIFY: acceptEdits auto-applies file edits but may still stop on the git
-# commit. For a fully unattended run, set CLAUDE_FLAGS=--dangerously-skip-permissions
-# — only on a branch you are willing to let it change without asking.
-claude_flags="${CLAUDE_FLAGS:---permission-mode acceptEdits}"
-
-# Temp files: the merged findings the fixer sees, the general pass output, the
-# raw naming verdicts, the naming findings derived from them, and the diff both
-# passes read.
-findings="$(mktemp)"
+# Temp files: the general pass output, the raw naming verdicts, the naming
+# findings derived from them, and the diff both passes read. The merged result
+# is written to $out and kept.
 general="$(mktemp)"
 naming_raw="$(mktemp)"
 naming_findings="$(mktemp)"
 diff_file="$(mktemp)"
-trap 'rm -f "$findings" "$general" "$naming_raw" "$naming_findings" "$diff_file"' EXIT
+trap 'rm -f "$general" "$naming_raw" "$naming_findings" "$diff_file"' EXIT
 
-# Fail early and plainly if a prerequisite is missing.
-for tool in git jq codex claude; do
+# Fail early and plainly if a prerequisite is missing. No `claude` — this script
+# does not fix anything.
+for tool in git jq codex; do
   command -v "$tool" >/dev/null || { echo "missing required tool: $tool"; exit 2; }
 done
 [ -f "$standard" ] || { echo "standard not found: $standard (run install.sh)"; exit 2; }
 git rev-parse --verify "$branch" >/dev/null 2>&1 || { echo "no such branch: $branch"; exit 2; }
-
-# The loop commits on the branch, so the working tree must start and stay empty
-# — no unstaged, staged, or untracked changes. Otherwise they ride into the
-# fixer's commits or get diffed as the branch's own work.
-require_clean_tree() {
-  [ -z "$(git status --porcelain)" ] \
-    || { echo "working tree not clean (unstaged, staged, or untracked changes) — commit, stash, or remove them first"; exit 2; }
-}
-require_clean_tree
-
-git checkout "$branch" >/dev/null 2>&1
+git rev-parse --verify "$base" >/dev/null 2>&1 || { echo "no such base: $base"; exit 2; }
 
 # A usable result is a JSON array whose every element carries the five fields
 # with the right types. Length alone does not prove that, and an empty or
@@ -136,82 +116,35 @@ ${names}" < /dev/null
   echo "  naming pass: $(jq 'length' "$naming_findings" 2>/dev/null || echo 0) name(s) flagged"
 }
 
-run_review() {
-  echo "── codex reviewing ${base}...${branch} ──"
-  git diff "${base}...${branch}" > "$diff_file"
+# --- review ---
+echo "── codex reviewing ${base}...${branch} ──"
+git diff "${base}...${branch}" > "$diff_file"
 
-  # General pass: the whole standard, over the whole diff.
-  echo "[]" > "$general"
-  # VERIFY: --skip-git-repo-check -s workspace-write let codex write the file in
-  # testing; confirm on your install that it emits only JSON into that file.
-  codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Review the unified diff in ${diff_file} against \
+# General pass: the whole standard, over the whole diff.
+echo "[]" > "$general"
+# VERIFY: --skip-git-repo-check -s workspace-write let codex write the file in
+# testing; confirm on your install that it emits only JSON into that file.
+codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Review the unified diff in ${diff_file} against \
 that standard. Flag only added or changed lines, but read the full diff for \
 context. Write ONLY a JSON array to ${general}. Each element: \
 {\"file\":\"\",\"line\":0,\"rule\":\"\",\"problem\":\"\",\"fix\":\"\"}. Use [] \
 when there are no violations. Put nothing else in that file." < /dev/null
-  valid_findings "$general" \
-    || { echo "general reviewer did not return valid findings JSON — handing back to you"; exit 3; }
+valid_findings "$general" \
+  || { echo "general reviewer did not return valid findings JSON — handing back to you"; exit 3; }
 
-  # Naming pass, then merge both into the findings the fixer sees.
-  run_naming_pass
-  jq -s '.[0] + .[1]' "$general" "$naming_findings" > "$findings"
-}
+# Naming pass, then merge both into the findings file.
+run_naming_pass
+jq -s '.[0] + .[1]' "$general" "$naming_findings" > "$out"
 
-run_fix() {
-  echo "${1} finding(s):"
-  jq -r '.[] | "  \(.file):\(.line) [\(.rule)] \(.problem)"' "$findings"
-  # Fixer. Claude reads the code around each finding, applies the fix, and
-  # commits. For a naming finding it reads the component — the markup and the
-  # JS/CSS that reference the name — so it names the domain concept the element
-  # represents and updates every reference, rather than swapping one generic
-  # name for another or renaming a selector while leaving its callers behind.
-  claude -p "On git branch ${branch} in this repo, apply these Web XP review \
-findings, then commit. Findings: $(cat "$findings"). For each finding, read the \
-markup and code around it before editing. For a naming finding, name the domain \
-concept the element represents — read the component's HTML and the JS and CSS \
-that reference the name to choose it — and update every reference to the old \
-name; do not replace one generic, widget, or layout name with another, and drop \
-the class if no domain concept fits. A fix may require editing dependent markup, \
-CSS, or JS beyond the line named. Commit with a message listing the rules \
-fixed." ${claude_flags} < /dev/null
-  git checkout "$branch" >/dev/null 2>&1
-  require_clean_tree   # the fixer's own commit must leave the tree clean
-}
-
-# Run the project's mechanical gate if one is set. A clean review is not proof
-# of conformance on its own; this is the second half of "ready".
-run_check() {
-  [ -n "$check_cmd" ] \
-    || { echo "no mechanical check set (REVIEW_LOOP_CHECK) — skipping; a clean review alone is not proof of conformance"; return 0; }
-  echo "── running mechanical check: ${check_cmd} ──"
-  bash -c "$check_cmd" || { echo "mechanical check failed — handing back to you"; exit 4; }
-}
-
-# Review; if clean, confirm with the mechanical check and finish; else fix.
-for (( round = 1; round <= max_rounds; round++ )); do
-  echo "── round $round ──"
-  run_review
-  count="$(jq 'length' "$findings")"
-
-  if [ "$count" -eq 0 ]; then
-    run_check
-    echo "✓ clean review and check passed after ${round} round(s) — ready for your review"
-    exit 0
-  fi
-
-  run_fix "$count"
-done
-
-# Cap reached. The last thing that ran was a fixer round, so review once more:
-# the final state, not the pre-fix findings, is what we report.
-echo "── final review after ${max_rounds} rounds ──"
-run_review
-count="$(jq 'length' "$findings")"
+count="$(jq 'length' "$out")"
 if [ "$count" -eq 0 ]; then
-  run_check
-  echo "✓ clean on the final review after ${max_rounds} rounds — ready for your review"
+  echo "✓ clean — no findings"
   exit 0
 fi
-echo "✗ still ${count} finding(s) after ${max_rounds} rounds — handing back to you"
-jq -r '.[] | "  \(.file):\(.line) [\(.rule)] \(.problem)"' "$findings"
-exit 1
+
+echo
+echo "${count} finding(s) — written to ${out}:"
+jq -r '.[] | "  \(.file):\(.line) [\(.rule)] \(.problem)"' "$out"
+echo
+echo "Review only — nothing was edited or committed. Hand ${out} to Claude to fix interactively."
+exit 0
