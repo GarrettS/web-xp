@@ -64,5 +64,5 @@ For full pattern definitions, read `code-guidelines.md`. For reasoning and examp
 - If you notice pre-existing violations outside the requested scope, ask whether to fix them now, list them, or leave them.
 - Use `code-philosophy.md` to explain reasoning, not to invent rules.
 - When the standards conflict with a request, state the tension and ask.
-- Before commit, remind the user to run the adapter's Web XP pre-commit check path.
+- Before delivery or commit, run the adapter's Web XP pre-commit check command and follow the project contract's completion requirements.
 - **Review Workflow Loop** — read `review-loop` in the project overlay (`prd/project.md`); unless it is `off`, and when the `codex` CLI is available, an independent cross-agent pre-review is available. Offer to run it at the review step (before delivery) with `~/.web-xp/tools/review-loop.sh <branch>`; it returns findings as JSON to fix interactively. See `~/.web-xp/tools/review-loop.md`.
