@@ -205,6 +205,10 @@ Identification happens in reasoning, before naming or explanation, and stays int
 
 Each module owns one domain concept. Name the module after what it does: `quiz.js`, `flashcards.js`, `navigation.js`. If the name describes a role instead of a domain concept, it is a junk drawer — `utils.js`, `helpers.js`, `tools.js`, `misc.js`, `common.js` are common examples, but any name that could apply to any project instead of *this* project violates the principle. If a function does not belong in an existing module, create a new module with a specific name. When a module grows to cover multiple concerns, split it.
 
+### Touched-Construct Ownership
+
+When modifying a construct — a function, a component, a selector block, a module — bring that construct into conformance with this standard, not only the lines you changed. Editing a construct makes you responsible for it, so a changed line left inside a nonconforming function is a half-corrected function. Scope this to the construct you touched: a one-line edit does not oblige you to rework the rest of the file, and constructs you did not touch remain out of scope for the change. Keep the cleanup safe and proportionate — a rename, an extraction, a dead branch; when a construct needs more than that, file a separate issue and keep the diff focused instead of enlarging it.
+
 ### Minimize Traversal Scope
 
 Do not search a broader part of the DOM than the task requires. When the element, ancestor, or key is already known, address it directly instead of scanning. When search is necessary, constrain it to the smallest subtree or event path that can contain the answer.
