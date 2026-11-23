@@ -199,3 +199,41 @@ case "$mode" in
     exit 1
     ;;
 esac
+
+# Report the Review Workflow Loop status for this project after a contract write.
+if [ "$preview" -eq 0 ]; then
+  case "$mode" in
+    all|claude|codex)
+      # Capability: the loop needs codex, jq, and the installed standard.
+      rl_missing=""
+      command -v codex >/dev/null 2>&1 || rl_missing="codex"
+      command -v jq >/dev/null 2>&1 || rl_missing="${rl_missing:+$rl_missing, }jq"
+      [ -f "$HOME/.web-xp/code-guidelines.md" ] || rl_missing="${rl_missing:+$rl_missing, }standard"
+      # Preference: `review-loop: on|off|auto` in the project overlay; default auto.
+      rl_pref="auto"
+      if [ -f prd/project.md ]; then
+        rl_found="$(grep -ioE 'review-loop:[[:space:]]*(on|off|auto)' prd/project.md | head -1 | grep -ioE '(on|off|auto)$' || true)"
+        [ -n "$rl_found" ] && rl_pref="$(printf '%s' "$rl_found" | tr '[:upper:]' '[:lower:]')"
+      fi
+      case "$rl_pref" in
+        off)
+          echo "Review Workflow Loop: off (prd/project.md)"
+          ;;
+        on)
+          if [ -n "$rl_missing" ]; then
+            echo "Review Workflow Loop: on, but unavailable — missing $rl_missing"
+          else
+            echo "Review Workflow Loop: enabled (on)"
+          fi
+          ;;
+        *)
+          if [ -n "$rl_missing" ]; then
+            echo "Review Workflow Loop: unavailable — missing $rl_missing (install to enable)"
+          else
+            echo "Review Workflow Loop: enabled (auto — codex, jq, standard detected)"
+          fi
+          ;;
+      esac
+      ;;
+  esac
+fi
