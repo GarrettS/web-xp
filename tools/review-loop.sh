@@ -115,8 +115,9 @@ run_naming_pass() {
   [ -n "$names" ] || { echo "  naming pass: no class names added"; return 0; }
   echo "  naming pass: judging $(printf '%s\n' "$names" | grep -c .) class name(s)"
   : > "$naming_raw"
-  # VERIFY: that `codex exec` can write that file and emits only JSON into it.
-  codex exec "Read ${standard}. Below are class names added in one diff, one per \
+  # VERIFY: --skip-git-repo-check -s workspace-write let codex write the file in
+  # testing; confirm on your install that it emits only JSON into that file.
+  codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Below are class names added in one diff, one per \
 line. Judge EACH name on its own against that standard's rule on semantic class \
 and id selectors: flag names that describe appearance, a layout box, a visual \
 rank, the widget the element already is, or that abbreviate the element type; a \
@@ -141,8 +142,9 @@ run_review() {
 
   # General pass: the whole standard, over the whole diff.
   echo "[]" > "$general"
-  # VERIFY: that `codex exec` can write that file and emits only JSON into it.
-  codex exec "Read ${standard}. Review the unified diff in ${diff_file} against \
+  # VERIFY: --skip-git-repo-check -s workspace-write let codex write the file in
+  # testing; confirm on your install that it emits only JSON into that file.
+  codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Review the unified diff in ${diff_file} against \
 that standard. Flag only added or changed lines, but read the full diff for \
 context. Write ONLY a JSON array to ${general}. Each element: \
 {\"file\":\"\",\"line\":0,\"rule\":\"\",\"problem\":\"\",\"fix\":\"\"}. Use [] \
