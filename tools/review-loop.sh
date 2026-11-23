@@ -91,7 +91,7 @@ extract_class_names() {
 run_naming_pass() {
   echo "[]" > "$naming_findings"
   local names
-  names="$(extract_class_names "$diff_file")"
+  names="$(extract_class_names "$diff_file")" || true
   [ -n "$names" ] || { echo "  naming pass: no class names added"; return 0; }
   echo "  naming pass: judging $(printf '%s\n' "$names" | grep -c .) class name(s)"
   : > "$naming_raw"
@@ -105,7 +105,7 @@ name must carry the domain concept; state and modifier names such as editing, \
 invalid, or busy are acceptable. Write ONLY a JSON array to ${naming_raw}; each \
 element {\"name\":\"\",\"verdict\":\"flag\" or \"keep\",\"reason\":\"\"}. Put \
 nothing else in that file. Names:
-${names}" < /dev/null
+${names}" < /dev/null || true
   jq '[.[] | select(.verdict == "flag") | {
         file: "", line: 0,
         rule: "CSS — Semantic class and id selectors",
@@ -128,7 +128,7 @@ codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Review th
 that standard. Flag only added or changed lines, but read the full diff for \
 context. Write ONLY a JSON array to ${general}. Each element: \
 {\"file\":\"\",\"line\":0,\"rule\":\"\",\"problem\":\"\",\"fix\":\"\"}. Use [] \
-when there are no violations. Put nothing else in that file." < /dev/null
+when there are no violations. Put nothing else in that file." < /dev/null || true
 valid_findings "$general" \
   || { echo "general reviewer did not return valid findings JSON — handing back to you"; exit 3; }
 
