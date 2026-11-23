@@ -174,6 +174,18 @@ That removes the Web XP-managed block from `CLAUDE.md` and `CODEX.md` in the cur
 ~/.web-xp/bin/uninstall.sh
 ```
 
+## Review Workflow Loop
+
+This optional loop dispatches pre-review from Claude to Codex before you approve the work:
+
+- **Claude** writes and edits against the standard (`code-guidelines.md`), including Touched-Construct Ownership on any construct it modifies.
+- **Codex** reviews the diff as an independent reviewer — a general pass over the whole diff plus a dedicated class-name pass — and returns findings. It does not write the code it reviews.
+- **You** hold the final approve/reject gate and arbitrate contested calls.
+
+The cycle is review → interactive fix → re-review, repeated until Codex is clean or the leftovers are ones you choose to keep. `tools/review-loop.sh` automates the Codex side: point it at a branch and it writes the findings as JSON for fixing to happen interactively. See [tools/review-loop.md](tools/review-loop.md) for prerequisites (including `jq`), usage, and the pipeline.
+
+**Enabling it.** The loop is *capable* when `codex` and `jq` are installed. Set `review-loop: on | off | auto` in your project overlay (`prd/project.md`) to control it; the default `auto` enables it whenever those tools are present. `web-xp-on` reports the resolved status per project — `enabled`, `off`, or `unavailable`.
+
 ## Architecture
 
 Web XP uses an adapter pattern: one standard, nearly the same interface across agents. Claude uses `/web-xp-check`, Codex uses `web-xp-check` — the behavior and output differ, but the skills are the same.
