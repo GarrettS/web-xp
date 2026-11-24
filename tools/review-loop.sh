@@ -97,6 +97,9 @@ run_naming_pass() {
   : > "$naming_raw"
   # VERIFY: --skip-git-repo-check -s workspace-write let codex write the file in
   # testing; confirm on your install that it emits only JSON into that file.
+  # Codex streams its whole reasoning to stdout; this script never reads that —
+  # it reads only the JSON file Codex writes — so send the stream to the hidden
+  # log instead of the user's screen.
   codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Below are class names added in one diff, one per \
 line. Judge EACH name on its own against that standard's rule on semantic class \
 and id selectors: flag names that describe appearance, a layout box, a visual \
@@ -105,46 +108,103 @@ name must carry the domain concept; state and modifier names such as editing, \
 invalid, or busy are acceptable. Write ONLY a JSON array to ${naming_raw}; each \
 element {\"name\":\"\",\"verdict\":\"flag\" or \"keep\",\"reason\":\"\"}. Put \
 nothing else in that file. Names:
-${names}" < /dev/null || true
+${names}" < /dev/null >> "$codex_log" 2>&1 || true
   jq '[.[] | select(.verdict == "flag") | {
         file: "", line: 0,
         rule: "CSS — Semantic class and id selectors",
         problem: ("class `" + .name + "` is generic, presentational, or restates the element type: " + .reason),
         fix: ("Name the domain concept that `" + .name + "` represents and update every reference, or drop the class and style the element or attribute.")
       }]' "$naming_raw" > "$naming_findings" 2>/dev/null \
-    || { echo "  naming pass: judge did not return valid JSON — skipping naming findings"; echo "[]" > "$naming_findings"; }
+    || { echo "  naming pass: judge did not return valid JSON — skipping naming findings (see ${codex_log})"; echo "[]" > "$naming_findings"; }
   echo "  naming pass: $(jq 'length' "$naming_findings" 2>/dev/null || echo 0) name(s) flagged"
 }
 
 # --- review ---
-echo "── codex reviewing ${base}...${branch} ──"
-git diff "${base}...${branch}" > "$diff_file"
+
+# Round tracking + state, shared with the Stop hook (review-stop-hook.sh). These
+# three files in the git dir record which working-tree diff Codex last reviewed,
+# how many findings it had, and the round number. The hook reads them to decide
+# whether Claude may finish its turn. The hash is computed the same way in both
+# places so they agree on what "the same changes" means.
+gitdir="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
+round_file="${gitdir}/.web-xp-review-round"
+hash_file="${gitdir}/.web-xp-review-hash"
+findings_file="${gitdir}/.web-xp-review-findings"
+resp_file="${gitdir}/.web-xp-review-responses.md"
+ask_marker="${gitdir}/.web-xp-review-ask-user"
+
+# Codex's streamed reasoning goes here, not to the user's screen. Overwritten
+# each run; only consulted when a pass returns invalid JSON.
+codex_log="${gitdir}/.web-xp-codex-last.log"
+: > "$codex_log" 2>/dev/null || codex_log=/dev/null
+
+prev_round="$(cat "$round_file" 2>/dev/null || echo 0)"
+[ "$prev_round" -ge 0 ] 2>/dev/null || prev_round=0
+round=$((prev_round + 1))
+
+echo "── Handoff to Codex · round ${round} — reviewing your uncommitted changes against ${base} ──"
+git diff "$(git merge-base "${base}" HEAD)" > "$diff_file"
+diff_hash="$(git hash-object "$diff_file" 2>/dev/null || echo none)"
+
+# Discussion context fed to Codex alongside the diff:
+#   - the maintainer's settled decisions (prd/review-exclusions.md), so Codex
+#     stops re-raising questions the user has already closed;
+#   - Claude's responses to the last round's findings (resp_file), so a dispute
+#     or a request to explain a trigger is answered inside the loop, not through
+#     a side channel.
+context=""
+if [ -f prd/review-exclusions.md ]; then
+  echo "  feeding Codex the maintainer's review-exclusions ledger"
+  context="${context}
+The maintainer has decided the following are out of scope and must NOT be flagged (each with its reason). Do not raise these again:
+$(cat prd/review-exclusions.md)
+"
+fi
+if [ -f "$resp_file" ]; then
+  echo "  feeding Codex Claude's responses from the last round"
+  context="${context}
+In a prior round you raised findings. Claude has responded below. Re-review the current diff accordingly: if you accept a response, do not re-raise that finding; if you still disagree, raise it again and address Claude's point; if Claude asks how a problem is reached, put a concrete accidental-trigger scenario in that finding's \"trigger\" field.
+$(cat "$resp_file")
+"
+fi
 
 # General pass: the whole standard, over the whole diff.
 echo "[]" > "$general"
-# VERIFY: --skip-git-repo-check -s workspace-write let codex write the file in
-# testing; confirm on your install that it emits only JSON into that file.
 codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Review the unified diff in ${diff_file} against \
 that standard. Flag only added or changed lines, but read the full diff for \
-context. Write ONLY a JSON array to ${general}. Each element: \
-{\"file\":\"\",\"line\":0,\"rule\":\"\",\"problem\":\"\",\"fix\":\"\"}. Use [] \
-when there are no violations. Put nothing else in that file." < /dev/null || true
+context.
+${context}
+Write ONLY a JSON array to ${general}. Each element: \
+{\"file\":\"\",\"line\":0,\"rule\":\"\",\"problem\":\"\",\"fix\":\"\",\"trigger\":\"\"}. \
+In \"trigger\", when a finding's seriousness depends on how it is reached, describe \
+how it could happen in normal use, especially by accident; use \"\" for a clear-cut \
+rule violation. Use [] when there are no violations. Put nothing else in that file." < /dev/null >> "$codex_log" 2>&1 || true
 valid_findings "$general" \
-  || { echo "general reviewer did not return valid findings JSON — handing back to you"; exit 3; }
+  || { echo "general reviewer did not return valid findings JSON — handing back to you (see ${codex_log})"; exit 3; }
 
 # Naming pass, then merge both into the findings file.
 run_naming_pass
 jq -s '.[0] + .[1]' "$general" "$naming_findings" > "$out"
 
 count="$(jq 'length' "$out")"
+
+# Record what Codex reviewed so the hook can gate Claude's finish on it.
+echo "$round"     > "$round_file"     2>/dev/null || true
+echo "$diff_hash" > "$hash_file"      2>/dev/null || true
+echo "$count"     > "$findings_file"  2>/dev/null || true
+
 if [ "$count" -eq 0 ]; then
-  echo "✓ clean — no findings"
+  echo "── Codex round ${round} response: clean — no findings ──"
+  echo "Codex is satisfied. If you are confident the work meets the requirement, present it to the user."
   exit 0
 fi
 
 echo
-echo "${count} finding(s) — written to ${out}:"
-jq -r '.[] | "  \(.file):\(.line) [\(.rule)] \(.problem)"' "$out"
+echo "── Codex round ${round} response: ${count} finding(s) ──"
+jq -r '.[] | "  \(.file):\(.line) [\(.rule)] \(.problem)" + (if (.trigger // "") != "" then "\n      how it happens: " + .trigger else "" end)' "$out"
 echo
-echo "Review only — nothing was edited or committed. Hand ${out} to Claude to fix interactively."
+echo "Next steps:"
+echo "  - Fix each finding you agree with, then run this script again (round $((round + 1)))."
+echo "  - To dispute a finding, or to ask how it is triggered, write your reasoning to ${resp_file} and re-run; Codex will reconsider and, if asked, describe the accidental-trigger scenario."
+echo "  - For a finding whose answer depends on the use-case or product intent, do not fix or dismiss it yourself: describe how it could happen by accident, then create ${ask_marker} and stop to ask the user. Record their decision and the reason in prd/review-exclusions.md."
 exit 0

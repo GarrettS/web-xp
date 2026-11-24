@@ -144,7 +144,69 @@ for skill_path in "$CODEX_SKILLS_SRC"/*; do
 done
 rm -rf "${CODEX_SKILLS_DEST}/web-xp-init" "${CODEX_SKILLS_DEST}/web-xp-remove" "${CODEX_SKILLS_DEST}/web-xp-apply"
 
+# Record the installed commit and date next to the installed standard, so agents
+# can see the standard's real currency. WEB_XP_VERSION is a release label, not a
+# content date, and must not be read as one.
+install_info="${CLAUDE_SKILLS_DEST}/.web-xp-install-info"
+{
+  if git -C "$WEB_XP_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+    printf 'installed-commit: %s\n' "$(git -C "$WEB_XP_DIR" rev-parse --short HEAD 2>/dev/null)"
+    printf 'installed-commit-date: %s\n' "$(git -C "$WEB_XP_DIR" log -1 --format=%ci 2>/dev/null)"
+  fi
+  printf 'installed-at: %s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')"
+} > "$install_info" 2>/dev/null || true
+append_manifest_path "$install_info"
+
 write_manifest
 
 echo "Claude skills installed to ${CLAUDE_SKILLS_DEST}"
 echo "Codex skills installed to ${CODEX_SKILLS_DEST}"
+
+# --- Review Workflow Loop Stop hook ---
+# Register the Stop hook in Claude settings so the loop is enforced. Idempotent,
+# backs the settings file up first, and only registers when the hook script is
+# actually present — so a registration can never point at a missing file and
+# error on every turn.
+CLAUDE_SETTINGS="${HOME}/.claude/settings.json"
+STOP_HOOK_SCRIPT="${HOME}/.web-xp/tools/review-stop-hook.sh"
+STOP_HOOK_CMD="bash ${STOP_HOOK_SCRIPT}"
+
+register_stop_hook() {
+  local settings="$CLAUDE_SETTINGS" cmd="$STOP_HOOK_CMD" tmp
+  if [ ! -f "$STOP_HOOK_SCRIPT" ]; then
+    echo "note: ${STOP_HOOK_SCRIPT} not found — skipping hook registration (clone Web XP to ~/.web-xp)."
+    return 0
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "note: jq not found — add the review Stop hook to ${settings} by hand (see tools/review-loop.md)."
+    return 0
+  fi
+  mkdir -p "$(dirname "$settings")"
+  [ -f "$settings" ] || printf '{}\n' > "$settings"
+  if jq -e --arg c "$cmd" '[.hooks.Stop[]?.hooks[]?.command] | index($c) != null' "$settings" >/dev/null 2>&1; then
+    echo "Review Stop hook already registered in ${settings}"
+    return 0
+  fi
+  tmp="$(mktemp)"
+  if jq --arg c "$cmd" '.hooks.Stop = ((.hooks.Stop // []) + [{hooks: [{type: "command", command: $c}]}])' "$settings" > "$tmp"; then
+    cp "$settings" "${settings}.web-xp-backup"
+    mv "$tmp" "$settings"
+    echo "Registered the Web XP review Stop hook in ${settings} (backup: ${settings}.web-xp-backup)"
+  else
+    rm -f "$tmp"
+    echo "warning: could not register the review Stop hook in ${settings}; add it by hand (see tools/review-loop.md)." >&2
+  fi
+  return 0
+}
+
+register_stop_hook
+
+# Report whether the loop can actually run, so a fresh install is not a mystery.
+if command -v codex >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  echo "Review Workflow Loop: active (codex and jq found)."
+else
+  loop_missing=""
+  command -v codex >/dev/null 2>&1 || loop_missing="codex"
+  command -v jq >/dev/null 2>&1 || loop_missing="${loop_missing:+$loop_missing, }jq"
+  echo "Review Workflow Loop: dormant until you install: ${loop_missing}. The Stop hook stays a silent no-op until then."
+fi

@@ -33,6 +33,8 @@ These are not review checks. They are the lens you design through.
 2. Read `code-philosophy.md`.
 3. Apply the standard as constraints for the rest of the session.
 
+The installed standard is current as of the Web XP clone's HEAD; `.web-xp-install-info` beside the installed standard records the exact commit and date. Do not judge the standard's age from `WEB_XP_VERSION` — it is a release label, not a content date.
+
 ## Working summary
 
 ### Design Principles
@@ -60,4 +62,10 @@ For full pattern definitions, read `code-guidelines.md`. For reasoning and examp
 - Use `code-philosophy.md` to explain reasoning, not to invent rules.
 - When the standards conflict with a request, state the tension and ask.
 - Before delivery or commit, run the adapter's Web XP pre-commit check command and follow the project contract's completion requirements.
-- **Review Workflow Loop** — read `review-loop` in the project overlay (`prd/project.md`); unless it is `off`, and when the `codex` CLI is available, an independent cross-agent pre-review is available. Offer to run it at the review step (before delivery) with `~/.web-xp/tools/review-loop.sh <branch>`; it returns findings as JSON to fix interactively. See `~/.web-xp/tools/review-loop.md`.
+- **Review Workflow Loop** — when `review-loop` is not `off` in the project overlay (`prd/project.md`) and `codex` is available, run it before presenting your work:
+  1. `bash ~/.web-xp/tools/review-loop.sh HEAD <base>` — hand your uncommitted changes to Codex.
+  2. Per finding: fix it if you agree (the user approves as usual); or dispute it / ask how it is triggered by writing to the review-responses file the loop names; or, if the answer depends on the use-case, describe how it could happen by accident, stop and ask the user, and record the decision in `prd/review-exclusions.md`.
+  3. Re-run; repeat the per-finding handling until Codex returns none.
+  4. Exit when Codex is clean and you are confident (present it), or when your confidence is not high enough (stop and ask the user).
+
+  A Stop hook enforces this when installed. See `~/.web-xp/tools/review-loop.md`.

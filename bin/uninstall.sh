@@ -103,6 +103,32 @@ else
   remove_matches "$CLAUDE_SKILLS_GLOB"
   remove_matches "$CODEX_SKILLS_GLOB"
 fi
+# Remove the Review Workflow Loop Stop hook from Claude settings, so a deleted
+# install does not leave a hook that errors every turn. Keeps other hooks.
+CLAUDE_SETTINGS="${HOME}/.claude/settings.json"
+STOP_HOOK_CMD="bash ${HOME}/.web-xp/tools/review-stop-hook.sh"
+
+unregister_stop_hook() {
+  local settings="$CLAUDE_SETTINGS" cmd="$STOP_HOOK_CMD" tmp
+  command -v jq >/dev/null 2>&1 || return 0
+  [ -f "$settings" ] || return 0
+  tmp="$(mktemp)"
+  if jq --arg c "$cmd" '
+      if (.hooks.Stop | type) == "array" then
+        .hooks.Stop |= ( map(.hooks |= map(select(.command != $c))) | map(select((.hooks | length) > 0)) )
+        | (if (.hooks.Stop | length) == 0 then del(.hooks.Stop) else . end)
+        | (if (.hooks | length) == 0 then del(.hooks) else . end)
+      else . end
+    ' "$settings" > "$tmp"; then
+    mv "$tmp" "$settings"
+  else
+    rm -f "$tmp"
+  fi
+  return 0
+}
+
+unregister_stop_hook
+
 rm -rf "$WEB_XP_DIR"
 
 echo "Web XP was removed from this machine."
