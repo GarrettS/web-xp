@@ -54,20 +54,18 @@ lives elsewhere.
 ## Usage
 
 ```bash
-tools/review-loop.sh <branch> [base-branch]
+tools/review-loop.sh
 ```
-
-- `<branch>` — pass `HEAD`.
-- `[base-branch]` — what to diff against; defaults to `main`.
 
 ```bash
 cd <your-repo>
-bash ~/.web-xp/tools/review-loop.sh HEAD main
+bash ~/.web-xp/tools/review-loop.sh
 ```
 
-It reviews the diff from the merge-base of `<base>` to your working tree, so it
-includes your uncommitted changes (staged and unstaged). It prints the findings
-and also writes them to `REVIEW_LOOP_OUT` (default `./review-findings.json`).
+It reviews `git diff HEAD` — your uncommitted changes (staged and unstaged)
+relative to the current commit. Any arguments are ignored. It prints the
+findings and also writes them to `REVIEW_LOOP_OUT` (default
+`./review-findings.json`).
 
 ## Pipeline
 
@@ -77,12 +75,12 @@ preconditions → diff working tree → general pass ─┐
 ```
 
 1. **Preconditions.** Verify `git`/`jq`/`codex` are present, the standard file
-   exists, and both `<branch>` and `<base>` resolve. Any failure exits `2`.
-2. **Diff.** `git diff $(git merge-base <base> HEAD)` — the merge-base to the
-   working tree, so uncommitted changes are included — into a temp file both
-   passes read. The diff is hashed and the hash, round number, and finding count
-   are recorded in the git directory (see [State](#state)) so the Stop hook can
-   tell whether the current changes have a clean review.
+   exists, and `HEAD` resolves. Any failure exits `2`.
+2. **Diff.** `git diff HEAD` — your uncommitted changes relative to the current
+   commit — into a temp file both passes read. The diff is hashed and the hash,
+   round number, and finding count are recorded in the git directory (see
+   [State](#state)) so the Stop hook can tell whether the current changes have a
+   clean review.
 3. **General pass.** `codex` reads the standard and reviews the whole diff,
    flagging only added/changed lines. It is also given the maintainer's
    exclusions ledger and Claude's responses from the last round (see
@@ -148,10 +146,8 @@ tells Claude to ask the user rather than loop forever). Register it in
 "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "bash ~/.web-xp/tools/review-stop-hook.sh" } ] } ] }
 ```
 
-The hook uses `main` as the base; edit the `base=` line in the script if your
-branch merges elsewhere. It stays silent (allows the stop) outside a Web XP
-project, when `codex`/`jq` are missing, or when `review-loop: off` is set in the
-project overlay.
+It stays silent (allows the stop) outside a Web XP project, when `codex`/`jq`
+are missing, or when `review-loop: off` is set in the project overlay.
 
 ## Output
 
@@ -174,6 +170,10 @@ fixer locates references by name.
   than guess.
 
 ## Design
+
+`review-loop-design.md` is the design spec: purpose, what the loop reviews, the
+flow, enforcement, discussion channels, the dual exit, and the failure modes the
+design prevents. The points below are the script-level consequences of it.
 
 - **The script has no side effects** — no checkout, no commit — so it can be
   re-run freely. Iteration is `review → fix or dispute → re-run`; the Stop hook,
