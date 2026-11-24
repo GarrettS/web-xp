@@ -171,10 +171,6 @@ fixer locates references by name.
 
 ## Design
 
-`review-loop-design.md` is the design spec: purpose, what the loop reviews, the
-flow, enforcement, discussion channels, the dual exit, and the failure modes the
-design prevents. The points below are the script-level consequences of it.
-
 - **The script has no side effects** — no checkout, no commit — so it can be
   re-run freely. Iteration is `review → fix or dispute → re-run`; the Stop hook,
   not the script, drives it.
