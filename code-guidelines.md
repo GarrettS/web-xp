@@ -288,7 +288,7 @@ Know the event target ([Minimize Traversal Scope](#minimize-traversal-scope)). U
 ```javascript
 function buildList(items) {
   ul.innerHTML = "";
-  items.forEach((item) => {
+  items.forEach(item => {
     const li = document.createElement("li");
     li.addEventListener("click", () => handleItem(item));
     ul.appendChild(li);
@@ -300,7 +300,7 @@ function buildList(items) {
 ```javascript
 function buildList(items) {
   ul.innerHTML = "";
-  items.forEach((item) => {
+  items.forEach(item => {
     const li = document.createElement("li");
     li.addEventListener("click", itemClickHandler);
     ul.appendChild(li);
@@ -310,7 +310,7 @@ function buildList(items) {
 
 ✅ Delegation — one listener, attached once, handles all current and future children:
 ```javascript
-ul.addEventListener("click", (e) => {
+ul.addEventListener("click", e => {
   const li = e.target.closest(".item");
   if (!li) return;
 
@@ -395,7 +395,7 @@ If you cannot change the data, convert it to a keyed object for repeated O(1) lo
 
 ```js
 const QUESTIONS_BY_ID = Object.fromEntries(
-  QUESTIONS.map((question) => [question.id, question])
+  QUESTIONS.map(question => [question.id, question])
 );
 ```
 
@@ -414,7 +414,7 @@ const QUESTIONS_BY_ID = Object.fromEntries(
 The code knows the endpoint keys but scans a relationship list to find that relationship.
 
 ```js
-const link = links.find((link) =>
+const link = links.find(link =>
   link.from === fromId && link.to === toId);
 ```
 
@@ -663,7 +663,7 @@ const CLICK_DISPATCH = {
   "equiv-retake-missed": retakeMissed
 };
 
-section.addEventListener("click", (e) => {
+section.addEventListener("click", e => {
   const target = e.target.closest("[id]");
   CLICK_DISPATCH[target?.id]?.();
 });
@@ -677,7 +677,7 @@ Inline callbacks follow the same rule. The listener is routing; the function is 
 
 ❌ Logic buried in callback:
 ```javascript
-el.addEventListener("click", (e) => {
+el.addEventListener("click", e => {
   const target = e.target.closest(".item");
   if (!target) return;
   // ... 30 lines of processing ...
@@ -686,7 +686,7 @@ el.addEventListener("click", (e) => {
 
 ✅ Callback delegates to named function:
 ```javascript
-el.addEventListener("click", (e) => {
+el.addEventListener("click", e => {
   const target = e.target.closest(".item");
   if (!target) return;
 
@@ -722,6 +722,7 @@ When a boolean expression is complex, extract it into a named variable or functi
 
 - Semicolons explicit. Do not rely on ASI. Restricted productions (`return`, `throw`, `break`, `continue`, postfix `++`/`--`): the expression must start on the same line as the keyword. Do not add a semicolon after a function declaration, block, switch, or try/catch — a semicolon there is an empty statement.
 - Use template literals for large multi-line HTML/SVG builders. Use concatenation for short one-liners.
+- Arrow functions: omit the parentheses around a single parameter (`x => x.id`). Keep them for zero, multiple, and destructured parameters (`() => true`, `(a, b) => a + b`, `({ id }) => id`).
 
 ---
 
@@ -835,12 +836,45 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
   ```
 - **Form submission.** No form submission on Enter unless that is the intended UX. Prevent default on `keydown` where needed.
 - **Strict equality.** `===` always. Do not use Boolean coercion on values that may be acceptably falsy (e.g., `if (e.pageX)`). Use `typeof`: `if (typeof e.pageX === 'number')`.
+- **Concise native syntax.** Use the concise native form instead of its verbose equivalent where it does not reduce clarity.
+
+  ❌ Verbose:
+  ```javascript
+  const name = user && user.profile && user.profile.name;
+  const limit = settings.limit !== undefined && settings.limit !== null
+    ? settings.limit
+    : 50;
+  if (state.title === undefined || state.title === null) {
+    state.title = "Untitled";
+  }
+  const ids = items.map(item => { return item.id; });
+  const point = { x: x, y: y };
+  if (count > 0) {
+    return true;
+  }
+  return false;
+  ```
+
+  ✅ Concise:
+  ```javascript
+  const name = user?.profile?.name;
+  const limit = settings.limit ?? 50;
+  state.title ??= "Untitled";
+  const ids = items.map(item => item.id);
+  const point = { x, y };
+  return count > 0;
+  ```
+
+  - `a ??= b` assigns only when `a` is `null` or `undefined`. Use `a ||= b` only when every falsy value of `a` (`0`, `""`, `false`, `NaN`) should take the fallback; otherwise `??=`, consistent with the Strict equality rule against coercing acceptably-falsy values.
+  - A concise arrow body stays subject to the Function allocation rule on repeated paths.
+  - Pass an options object with destructured defaults instead of a long positional parameter list or boolean flags: `function configure({ timeout = 500, retries = 2 } = {})` (see [Functions](#functions)).
+  - For lookup, state toggling, branching, and control flow, use [Shared Key](#shared-key), [Active Object](#active-object), [Event Delegation](#event-delegation), and [Dispatch Table](#dispatch-table), with a guard clause, instead of an ad-hoc scan or nested conditional.
 - **String concatenation.** Do not `+=` in a loop — each iteration creates and discards an intermediate string. Use `.join()` for uniform items; use `.map()` + `.join('')` when each item needs distinct attributes.
 
   ❌ `+=` in a loop creates n intermediate strings:
   ```javascript
   let html = "<ul>";
-  items.forEach((item) => { html += "<li>" + item + "</li>"; });
+  items.forEach(item => { html += "<li>" + item + "</li>"; });
   html += "</ul>";
   ```
 
@@ -853,7 +887,7 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
 
   ✅ Per-item attributes — map + join:
   ```javascript
-  el.innerHTML = items.map((item) =>
+  el.innerHTML = items.map(item =>
     "<div data-id=\"" + item.id + "\">" + item.name + "</div>"
   ).join("");
   ```
