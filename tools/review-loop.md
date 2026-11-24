@@ -1,8 +1,9 @@
 # `review-loop.sh` — Web XP cross-agent review
 
 Runs an independent reviewer (Codex) over your **uncommitted change** — `git
-diff HEAD` (tracked, staged and unstaged) plus any untracked new code files —
-against the Web XP standard, in two passes, and writes the findings as JSON. The
+diff HEAD` (tracked, staged and unstaged) plus any untracked app-code files, test
+code excluded — against the Web XP standard, in two passes, and writes the
+findings as JSON. The
 script itself changes nothing in your code — no edit, stage, commit, or
 checkout. It produces findings; you fix the ones you agree with and run it again.
 
@@ -67,7 +68,8 @@ bash ~/.web-xp/tools/review-loop.sh
 ```
 
 It reviews your uncommitted change — `git diff HEAD` (tracked, staged and
-unstaged) plus untracked new code files — relative to the current commit. Any
+unstaged) plus untracked app-code files, test code excluded — relative to the
+current commit. Any
 arguments are ignored. It prints the findings and also writes them to
 `REVIEW_LOOP_OUT` (default `./review-findings.json`).
 
@@ -81,9 +83,11 @@ preconditions → build change (diff + new files) → general pass ─┐
 1. **Preconditions.** Verify `git`/`jq`/`codex` are present, the standard file
    and `review-diff.sh` exist, and `HEAD` resolves. Any failure exits `2`.
 2. **Build the change.** `review-diff.sh` assembles what both passes read:
-   `git diff HEAD` plus each untracked, non-ignored code file rendered as an
+   `git diff HEAD` plus each untracked, non-ignored app-code file rendered as an
    addition (names are listed NUL-delimited, so unicode and odd names are
-   included exactly). It is hashed from its raw bytes
+   included exactly). Scope — app code, with test code excluded — is decided in
+   one place, `review-scope.sh`, which the builder, the hook, and the loop all run
+   through, so they never disagree. It is hashed from its raw bytes
    (`git hash-object --no-filters --stdin`), and the hash, round number, and
    finding count are recorded in the git directory (see [State](#state)) so the
    Stop hook can tell whether the current change has a clean review. The hook
@@ -198,7 +202,8 @@ fixer locates references by name.
   re-run freely. Iteration is `review → fix, dispute, or defer → re-run`; the
   Stop hook, not the script, drives it.
 - **Scoped to the change, judged by construct.** The change is `git diff HEAD`
-  plus untracked new files; committing settled work is what removes it from scope
+  plus untracked new files, narrowed to app code (test code is excluded and gets a
+  separate review approach); committing settled work is what removes it from scope
   (the commit is the scope boundary). Within the change, a touched construct is
   judged as a whole (Touched-Construct Ownership), not only its changed lines,
   while untouched constructs and the rest of a file stay out of scope.

@@ -41,11 +41,13 @@
 set -euo pipefail
 shopt -s nocasematch
 
-# Sibling scripts: the shared change-set builder (review-diff.sh), located by
-# this script's own directory so it works however the script is invoked. The
-# Stop hook builds the change the same way, so the two agree on the hash.
+# Sibling scripts, located by this script's own directory so they work however
+# the script is invoked: the shared change-set builder (review-diff.sh) and the
+# shared scope filter (review-scope.sh). The Stop hook uses the same two, so they
+# agree on the change, its hash, and which files are in scope.
 script_dir="$(cd "${0%/*}" 2>/dev/null && pwd)"
 diff_builder="${script_dir}/review-diff.sh"
+scope_filter="${script_dir}/review-scope.sh"
 
 standard="${WEB_XP_CG:-$HOME/.web-xp/code-guidelines.md}"
 out="${REVIEW_LOOP_OUT:-review-findings.json}"
@@ -169,15 +171,15 @@ bash "$diff_builder" > "$diff_file" || { echo "could not build the change set (g
 # disagree because of input filters (e.g. core.autocrlf).
 diff_hash="$(git hash-object --no-filters --stdin < "$diff_file")" || { echo "could not hash the change — handing back to you"; exit 2; }
 
-# The code files the change touches — tracked changes plus untracked new files,
-# listed NUL-delimited so odd names stay exact. Codex reads each in full to judge
-# a touched construct as a whole.
-{ git diff --name-only -z HEAD 2>/dev/null; git ls-files --others --exclude-standard -z 2>/dev/null; } > "$touched_tmp"
+# The in-scope app-code files the change touches — tracked changes plus new
+# files, test code excluded — through the shared scope filter so this list, the
+# hook's gate, and the change set all agree. Codex reads each in full to judge a
+# touched construct as a whole.
+{ git diff --name-only -z HEAD 2>/dev/null; git ls-files --others --exclude-standard -z 2>/dev/null; } \
+  | bash "$scope_filter" > "$touched_tmp"
 touched_files=""
 while IFS= read -r -d '' f; do
-  case "$f" in
-    *.js|*.mjs|*.ts|*.html|*.css) touched_files="${touched_files}${f}"$'\n' ;;
-  esac
+  touched_files="${touched_files}${f}"$'\n'
 done < "$touched_tmp"
 touched_files="$(printf '%s' "$touched_files" | sort -u)"
 
