@@ -25,6 +25,18 @@ NC='\033[0m'
 
 EXCLUDES="node_modules|\.git|pre-commit-check\.sh|code-guidelines\.md"
 
+# Skip gitignored paths. Scratch and generated files (e.g. drafts/, build
+# output) can hold base64 or other content that trips the greppable checks and
+# floods the output. List the ignored entries (whole ignored dirs collapsed to
+# a single entry), escape regex metacharacters, and fold them into the exclude
+# list every check already filters on. No-op outside a git work tree.
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  IGNORED=$(git ls-files --others --ignored --exclude-standard --directory 2>/dev/null \
+    | sed 's#[^a-zA-Z0-9_/-]#\\&#g' \
+    | paste -sd '|' - || true)
+  [ -n "$IGNORED" ] && EXCLUDES="$EXCLUDES|$IGNORED"
+fi
+
 # $4 (optional): "overridable" — if set, a comment on the line above
 # the match downgrades the hit from FAIL to WARN. A comment means the
 # developer documented why the exception exists. Recognized comment
@@ -341,10 +353,53 @@ check "CSS missing space after colon" \
   '^\s+[a-z-]+:[^ /]' \
   '*.css'
 
-check "Hardcoded hex color  [only valid inside :root definitions]" \
-  '#[0-9a-fA-F]{3,8}' \
-  '*.css' \
-  overridable
+# Hex belongs in a --token: #hex custom-property definition (the :root palette);
+# hardcoding it in an ordinary rule is the violation. Drop custom-property lines,
+# then apply the documented-exception override (a comment on the line above a
+# remaining hit downgrades it from FAIL to WARN), matching check()'s behavior.
+HEX_LABEL="Hardcoded hex color  [define it as a :root custom property]"
+HEX_HITS=$(grep -rn --include='*.css' -E '#[0-9a-fA-F]{3,8}' . 2>/dev/null \
+  | grep -Ev "$EXCLUDES" \
+  | grep -Ev ':[0-9]+:[[:space:]]*--[A-Za-z0-9_-]+[[:space:]]*:' \
+  || true)
+
+if [ -z "$HEX_HITS" ]; then
+  echo -e "${GREEN}PASS${NC}  $HEX_LABEL"
+else
+  HEX_FAIL="" HEX_WARN=""
+  while IFS= read -r hit; do
+    hfile=$(echo "$hit" | cut -d: -f1)
+    hline=$(echo "$hit" | cut -d: -f2)
+    if [ "$hline" -gt 1 ]; then
+      hprev=$(sed -n "$((hline - 1))p" "$hfile" 2>/dev/null || true)
+    else
+      hprev=""
+    fi
+    if echo "$hprev" | grep -qE '<!--|//|/\*'; then
+      HEX_WARN="${HEX_WARN}${hit}
+"
+    else
+      HEX_FAIL="${HEX_FAIL}${hit}
+"
+    fi
+  done <<< "$HEX_HITS"
+
+  if [ -n "$HEX_FAIL" ]; then
+    echo -e "${RED}FAIL${NC}  $HEX_LABEL"
+    echo "$HEX_FAIL" | head -20
+    echo ""
+    FAIL=1
+  fi
+  if [ -n "$HEX_WARN" ]; then
+    echo -e "${YELLOW}WARN${NC}  $HEX_LABEL  [commented exception]"
+    echo "$HEX_WARN" | head -20
+    echo ""
+    WARN_COUNT=$((WARN_COUNT + 1))
+  fi
+  if [ -z "$HEX_FAIL" ] && [ -z "$HEX_WARN" ]; then
+    echo -e "${GREEN}PASS${NC}  $HEX_LABEL"
+  fi
+fi
 
 check "Fixed px font-size  [use clamp() custom property]" \
   'font-size:\s*[0-9]+px' \
