@@ -87,3 +87,12 @@ EOF
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }
+
+@test "install records the real installed commit in .web-xp-install-info" {
+  run_install
+  [ "$status" -eq 0 ]
+  info="$TMP_HOME/.claude/skills/.web-xp-install-info"
+  assert_file_exists "$info"
+  grep -q '^installed-commit: ' "$info"
+  grep -q '^installed-commit-date: ' "$info"
+}

@@ -33,6 +33,8 @@ These are not review checks. They are the lens you design through.
 2. Read `code-philosophy.md`.
 3. Apply the standard as constraints for the rest of the session.
 
+The installed standard is current as of the Web XP clone's HEAD; `.web-xp-install-info` beside the installed standard records the exact commit and date. Do not judge the standard's age from `WEB_XP_VERSION` — it is a release label, not a content date.
+
 ## Working summary
 
 ### Design Principles

@@ -144,6 +144,19 @@ for skill_path in "$CODEX_SKILLS_SRC"/*; do
 done
 rm -rf "${CODEX_SKILLS_DEST}/web-xp-init" "${CODEX_SKILLS_DEST}/web-xp-remove" "${CODEX_SKILLS_DEST}/web-xp-apply"
 
+# Record the installed commit and date next to the installed standard, so agents
+# can see the standard's real currency. WEB_XP_VERSION is a release label, not a
+# content date, and must not be read as one.
+install_info="${CLAUDE_SKILLS_DEST}/.web-xp-install-info"
+{
+  if git -C "$WEB_XP_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+    printf 'installed-commit: %s\n' "$(git -C "$WEB_XP_DIR" rev-parse --short HEAD 2>/dev/null)"
+    printf 'installed-commit-date: %s\n' "$(git -C "$WEB_XP_DIR" log -1 --format=%ci 2>/dev/null)"
+  fi
+  printf 'installed-at: %s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')"
+} > "$install_info" 2>/dev/null || true
+append_manifest_path "$install_info"
+
 write_manifest
 
 echo "Claude skills installed to ${CLAUDE_SKILLS_DEST}"
