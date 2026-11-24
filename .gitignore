@@ -7,6 +7,9 @@
 # Local settings
 .claude/settings.local.json
 
+# Per-machine install manifest (written locally by install.sh, not tracked)
+/web-xp-manifest.txt
+
 # dev-relay state
 .dev-relay/
 
