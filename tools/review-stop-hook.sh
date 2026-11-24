@@ -3,11 +3,16 @@
 # review-stop-hook.sh — Claude Code Stop hook for the Web XP Review Workflow Loop.
 #
 # This hook does NOT run Codex. It is a gate. When Claude tries to finish a turn
-# with uncommitted code changes, it checks whether Codex has given those exact
-# changes a clean review (recorded by review-loop.sh in the git dir). If not, it
-# blocks the stop and tells Claude to run the review loop itself and summarize
-# the result — so the handoff, Codex's response, and Claude's fixes all happen
-# visibly in the conversation instead of silently inside this hook.
+# with uncommitted code changes — tracked or new — it checks whether Codex has
+# given those exact changes a clean review (recorded by review-loop.sh in the
+# git dir). If not, it blocks the stop and tells Claude to run the review loop
+# itself and summarize the result — so the handoff, Codex's response, and
+# Claude's fixes all happen visibly in the conversation instead of silently
+# inside this hook.
+#
+# Fail-safe: on any error it cannot resolve — missing tools, an unbuildable
+# change, state it cannot persist — it stays silent and ALLOWS the stop rather
+# than trapping the turn.
 #
 # Claude can leave the loop three ways:
 #   - a clean Codex review of the current changes (the hook allows the stop);
@@ -16,6 +21,12 @@
 #   - a block cap, so an unfixable or contested finding cannot trap it.
 #
 set -uo pipefail
+
+# Sibling change-set builder, located by this script's own directory (pure bash,
+# no external `dirname`). review-loop.sh builds the change the same way, so the
+# hash here matches the one it recorded.
+script_dir="$(cd "${0%/*}" 2>/dev/null && pwd)"
+diff_builder="${script_dir}/review-diff.sh"
 
 # Stop-hook input arrives as JSON on stdin; we need the project cwd.
 input="$(cat 2>/dev/null || true)"
@@ -27,9 +38,23 @@ cd "$cwd" 2>/dev/null || exit 0
 [ -f AGENTS.md ] || [ -f CLAUDE.md ] || [ -f CODEX.md ] || exit 0
 command -v codex >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || exit 0
 [ -f "$HOME/.web-xp/code-guidelines.md" ] || exit 0
+[ -f "$diff_builder" ] || exit 0
 if [ -f prd/project.md ] && grep -iqE 'review-loop:[[:space:]]*off' prd/project.md; then exit 0; fi
-# Any uncommitted tracked code changes (staged or unstaged) to review?
-git diff --name-only HEAD 2>/dev/null | grep -qiE '\.(js|mjs|ts|html|css)$' || exit 0
+
+# Any uncommitted code changes to review — tracked changes or untracked new
+# files? List NUL-delimited (exact for non-ASCII and odd names) into a temp file
+# so a git failure is not read as "no changes", and stop at the first code file.
+shopt -s nocasematch
+changes_tmp="$(mktemp 2>/dev/null)" || exit 0
+{ git diff --name-only -z HEAD 2>/dev/null; git ls-files --others --exclude-standard -z 2>/dev/null; } > "$changes_tmp" 2>/dev/null
+have_code=0
+while IFS= read -r -d '' f; do
+  case "$f" in
+    *.js|*.mjs|*.ts|*.html|*.css) have_code=1; break ;;
+  esac
+done < "$changes_tmp"
+rm -f "$changes_tmp" 2>/dev/null
+[ "$have_code" -eq 1 ] || exit 0
 
 gitdir="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
 round_file="${gitdir}/.web-xp-review-round"
@@ -39,13 +64,17 @@ blocks_file="${gitdir}/.web-xp-review-blocks"
 resp_file="${gitdir}/.web-xp-review-responses.md"
 ask_marker="${gitdir}/.web-xp-review-ask-user"
 
-clear_state() { rm -f "$round_file" "$hash_file" "$findings_file" "$blocks_file" "$resp_file"; }
+clear_state() { rm -f "$round_file" "$hash_file" "$findings_file" "$blocks_file" "$resp_file" 2>/dev/null; }
 
 # Claude is deferring a finding to the user. Let it pause, once per marker.
-if [ -f "$ask_marker" ]; then rm -f "$ask_marker"; exit 0; fi
+if [ -f "$ask_marker" ]; then rm -f "$ask_marker" 2>/dev/null; exit 0; fi
 
-# The diff Codex would review right now — git diff HEAD, exactly as review-loop.sh.
-current_hash="$(git diff HEAD 2>/dev/null | git hash-object --stdin 2>/dev/null || echo none)"
+# The change Codex would review right now — built exactly as review-loop.sh does
+# (git diff HEAD plus untracked new code files), via review-diff.sh, and hashed
+# the same way (raw bytes). On any build or hash error, stay silent (allow).
+current_hash="$(bash "$diff_builder" 2>/dev/null | git hash-object --no-filters --stdin 2>/dev/null)"
+cs_rc=$?
+[ "$cs_rc" -eq 0 ] && [ -n "$current_hash" ] || exit 0
 
 reviewed_hash="$(cat "$hash_file" 2>/dev/null || echo none)"
 findings="$(cat "$findings_file" 2>/dev/null || echo -1)"
@@ -63,9 +92,10 @@ if [ "$reviewed_hash" = "$current_hash" ] && [ "$findings" = "0" ]; then
   exit 0
 fi
 
-# Otherwise block, and tell Claude exactly what to do.
+# Otherwise block, and tell Claude exactly what to do. If the block counter
+# cannot be persisted, allow the stop rather than block forever below the cap.
 blocks=$((blocks + 1))
-echo "$blocks" > "$blocks_file"
+echo "$blocks" > "$blocks_file" 2>/dev/null || exit 0
 
 cmd="bash ~/.web-xp/tools/review-loop.sh"
 how="Options for a finding you do not simply fix: to dispute it or ask how it is triggered, write your reasoning to ${resp_file} and re-run the loop (Codex reconsiders). For a finding whose answer depends on the use-case or product intent, do not fix or dismiss it yourself — describe how it could happen by accident, then create ${ask_marker} and stop to ask the user, and record their decision in prd/review-exclusions.md."
