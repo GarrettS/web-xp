@@ -178,7 +178,7 @@ register_stop_hook() {
     return 0
   fi
   if ! command -v jq >/dev/null 2>&1; then
-    echo "note: jq not found — add the review Stop hook to ${settings} by hand (see tools/review-loop.md)."
+    echo "note: jq not found — add the review Stop hook to ${settings} by hand (see tools/code-loop.md)."
     return 0
   fi
   mkdir -p "$(dirname "$settings")"
@@ -194,7 +194,7 @@ register_stop_hook() {
     echo "Registered the Web XP review Stop hook in ${settings} (backup: ${settings}.web-xp-backup)"
   else
     rm -f "$tmp"
-    echo "warning: could not register the review Stop hook in ${settings}; add it by hand (see tools/review-loop.md)." >&2
+    echo "warning: could not register the review Stop hook in ${settings}; add it by hand (see tools/code-loop.md)." >&2
   fi
   return 0
 }

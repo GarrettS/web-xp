@@ -2,7 +2,7 @@
 
 This states the design of the Review Workflow Loop: what it is for, what it
 reviews, the flow, where it is enforced, how disputes are settled, and when the
-work may be presented. `review-loop.md` is the usage and reference doc.
+work may be presented. `code-loop.md` is the usage and reference doc.
 
 ## Purpose
 
@@ -106,7 +106,7 @@ hash.
 ## Flow
 
 1. Claude writes the code for the user's task.
-2. Before presenting, Claude runs `bash ~/.web-xp/tools/review-loop.sh`. Codex
+2. Before presenting, Claude runs `bash ~/.web-xp/tools/code-loop.sh`. Codex
    reviews the change and returns findings as JSON.
 3. For each finding, Claude does one of:
    - fixes it — the user approves the change through their normal approval flow;
@@ -140,7 +140,7 @@ A Claude Code Stop hook (`review-stop-hook.sh`) enforces the loop at turn-end.
 It runs no review itself; it is a gate. When Claude tries to end a turn with
 uncommitted code changes — tracked or new — in a Web XP project, the hook checks
 whether Codex has given those exact changes a clean review (recorded by
-`review-loop.sh` in the git directory). If not, it blocks the stop and tells
+`code-loop.sh` in the git directory). If not, it blocks the stop and tells
 Claude to run the loop and report the result in the conversation.
 
 Claude leaves the loop three ways:

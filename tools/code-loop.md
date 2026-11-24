@@ -1,4 +1,4 @@
-# `review-loop.sh` — Web XP cross-agent review
+# `code-loop.sh` — Web XP cross-agent review
 
 Runs an independent reviewer (Codex) over your **uncommitted change** — `git
 diff HEAD` (tracked, staged and unstaged) plus any untracked app-code files, test
@@ -10,7 +10,7 @@ checkout. It produces findings; you fix the ones you agree with and run it again
 The review is a loop: review → fix, dispute, or defer → re-run, until Codex is
 clean or a finding needs the user to decide. A Claude Code Stop hook
 (`review-stop-hook.sh`) can enforce the loop so it is not skipped — see
-[Stop hook](#stop-hook). `review-loop-design.md` is the design spec behind the
+[Stop hook](#stop-hook). `code-loop-design.md` is the design spec behind the
 tool (purpose, scope, flow, enforcement, discussion channels, the dual exit, and
 what it guarantees).
 
@@ -59,12 +59,12 @@ lives elsewhere.
 ## Usage
 
 ```bash
-tools/review-loop.sh
+tools/code-loop.sh
 ```
 
 ```bash
 cd <your-repo>
-bash ~/.web-xp/tools/review-loop.sh
+bash ~/.web-xp/tools/code-loop.sh
 ```
 
 It reviews your uncommitted change — `git diff HEAD` (tracked, staged and

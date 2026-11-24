@@ -4,7 +4,7 @@
 #
 # This hook does NOT run Codex. It is a gate. When Claude tries to finish a turn
 # with uncommitted code changes — tracked or new — it checks whether Codex has
-# given those exact changes a clean review (recorded by review-loop.sh in the
+# given those exact changes a clean review (recorded by code-loop.sh in the
 # git dir). If not, it blocks the stop and tells Claude to run the review loop
 # itself and summarize the result — so the handoff, Codex's response, and
 # Claude's fixes all happen visibly in the conversation instead of silently
@@ -24,7 +24,7 @@ set -uo pipefail
 
 # Sibling scripts, located by this script's own directory (pure bash, no external
 # `dirname`): the change-set builder (review-diff.sh) and the scope filter
-# (review-scope.sh). review-loop.sh uses the same two, so the hash here matches
+# (review-scope.sh). code-loop.sh uses the same two, so the hash here matches
 # the one it recorded and the two agree on which files are in scope.
 script_dir="$(cd "${0%/*}" 2>/dev/null && pwd)"
 diff_builder="${script_dir}/review-diff.sh"
@@ -69,7 +69,7 @@ clear_state() { rm -f "$round_file" "$hash_file" "$findings_file" "$blocks_file"
 # Claude is deferring a finding to the user. Let it pause, once per marker.
 if [ -f "$ask_marker" ]; then rm -f "$ask_marker" 2>/dev/null; exit 0; fi
 
-# The change Codex would review right now — built exactly as review-loop.sh does
+# The change Codex would review right now — built exactly as code-loop.sh does
 # (git diff HEAD plus untracked new code files), via review-diff.sh, and hashed
 # the same way (raw bytes). On any build or hash error, stay silent (allow).
 current_hash="$(bash "$diff_builder" 2>/dev/null | git hash-object --no-filters --stdin 2>/dev/null)"
@@ -97,7 +97,7 @@ fi
 blocks=$((blocks + 1))
 echo "$blocks" > "$blocks_file" 2>/dev/null || exit 0
 
-cmd="bash ~/.web-xp/tools/review-loop.sh"
+cmd="bash ~/.web-xp/tools/code-loop.sh"
 how="Options for a finding you do not simply fix: to dispute it or ask how it is triggered, write your reasoning to ${resp_file} and re-run the loop (Codex reconsiders). For a finding whose answer depends on the use-case or product intent, do not fix or dismiss it yourself — describe how it could happen by accident, then create ${ask_marker} and stop to ask the user, and record their decision in prd/review-exclusions.md."
 
 if [ "$reviewed_hash" != "$current_hash" ]; then

@@ -182,7 +182,7 @@ This optional loop dispatches pre-review from Claude to Codex before you approve
 - **Codex** reviews the diff as an independent reviewer — a general pass over the whole diff plus a dedicated class-name pass — and returns findings. It does not write the code it reviews.
 - **You** hold the final approve/reject gate and arbitrate contested calls.
 
-The cycle is review → interactive fix → re-review, repeated until Codex is clean or the leftovers are ones you choose to keep. `tools/review-loop.sh` automates the Codex side: point it at a branch and it writes the findings as JSON for fixing to happen interactively. See [tools/review-loop.md](tools/review-loop.md) for prerequisites (including `jq`), usage, and the pipeline.
+The cycle is review → interactive fix → re-review, repeated until Codex is clean or the leftovers are ones you choose to keep. `tools/code-loop.sh` automates the Codex side: point it at a branch and it writes the findings as JSON for fixing to happen interactively. See [tools/code-loop.md](tools/code-loop.md) for prerequisites (including `jq`), usage, and the pipeline.
 
 **Enabling it.** The loop is *capable* when `codex` and `jq` are installed. Set `review-loop: on | off | auto` in your project overlay (`prd/project.md`) to control it; the default `auto` enables it whenever those tools are present. `web-xp-on` reports the resolved status per project — `enabled`, `off`, or `unavailable`.
 
