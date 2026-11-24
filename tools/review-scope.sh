@@ -5,7 +5,7 @@
 # Reads a NUL-delimited list of paths on stdin and writes, NUL-delimited to
 # stdout, just the ones in scope. One place makes this decision so the change-set
 # builder (review-diff.sh), the Stop hook's gate (review-stop-hook.sh), and the
-# loop's touched-file list (review-loop.sh) can never disagree about scope.
+# loop's touched-file list (code-loop.sh) can never disagree about scope.
 #
 # In scope: app code — files ending .js .mjs .ts .html .css.
 #

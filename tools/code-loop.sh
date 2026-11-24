@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# review-loop.sh — the cross-agent review, run without a human relay.
+# code-loop.sh — the cross-agent review, run without a human relay.
 #
 # Codex reviews your uncommitted change — `git diff HEAD` (tracked, staged and
 # unstaged) plus any untracked new code files — against the Web XP standard and
@@ -24,7 +24,7 @@
 #  agents. This script removes that relay; it no longer iterates.)
 #
 # Usage:
-#   tools/review-loop.sh
+#   tools/code-loop.sh
 #
 # Reviews your uncommitted change — `git diff HEAD` plus untracked new code
 # files — relative to the current commit. Any arguments are ignored.

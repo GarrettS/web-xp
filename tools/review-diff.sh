@@ -5,8 +5,8 @@
 # The change is the in-scope part of `git diff HEAD` (tracked, staged and
 # unstaged) plus every in-scope untracked, non-ignored file, rendered as an
 # added file. "In scope" is decided by review-scope.sh — app code, with test
-# code excluded — so this builder, review-stop-hook.sh, and review-loop.sh all
-# agree on what "the change" is. review-loop.sh and review-stop-hook.sh both
+# code excluded — so this builder, review-stop-hook.sh, and code-loop.sh all
+# agree on what "the change" is. code-loop.sh and review-stop-hook.sh both
 # build the change by running THIS script, so the hash each takes of it agrees
 # on what "the same change" means. Run it with the repository as the current
 # directory.
