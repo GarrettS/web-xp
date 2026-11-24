@@ -191,7 +191,7 @@ Correct names draw from the right vocabulary, used accurately:
 - **Platform terms** — the established term for the actual construct in context. An `<input>` is an input or form control, not a "cell"; a form field is not a "row". Borrowing table terms (`row`, `cell`) for form constructs misnames them.
 - **Domain language** — the source for names, classes, and identifiers (see [Ubiquitous Language](#ubiquitous-language)).
 
-The platform term identifies the construct; the domain term names the instance. Neither substitutes for the other, and a class takes the domain name, never a borrowed platform term (`.cell` on an input, `.row` on a `<div>`).
+The platform term identifies the construct; the domain term names the instance. Neither substitutes for the other, and a class takes the domain name, never a borrowed platform term (`.cell` on an input, `.row` on a `<div>`). (See also: [Selector Redundancy](#selector-redundancy))
 
 #### Correctness Over Inherited Consistency
 
@@ -773,6 +773,10 @@ Semantic and behavioral rules. Where these overlap with the baseline authorities
   ```css
   .card > span:nth-child(2) { color: var(--text-dim); }
   ```
+
+#### Selector Redundancy
+
+A class or id that only restates an element (`tr.row`, `button.btn`) or its layout (`.med-row`, `#med-row`) adds nothing. Select by element and container (`.diet tr`, `.meds > button`); add one only when they can't, named from the domain.
 
 ### JavaScript
 
