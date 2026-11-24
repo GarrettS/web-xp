@@ -26,9 +26,17 @@ What the loop is for:
 ## What it reviews
 
 The change is `git diff HEAD` — the working tree compared to the current commit,
-staged and unstaged, including untracked files that are not ignored. For a
-branch, that is the diff on the branch's worktree HEAD. It is not a diff against
-`main` or a merge-base.
+staged and unstaged, plus untracked files that are not ignored, narrowed to app
+code. For a branch, that is the diff on the branch's worktree HEAD. It is not a
+diff against `main` or a merge-base.
+
+App code is the files the standard governs: `.js`, `.mjs`, `.ts`, `.html`,
+`.css`. Test code is out of scope — it gets a separate review approach, so the
+loop does not judge it, and a turn that touches only test code does not trigger
+it. A path is test code when it has a test directory anywhere in it (`test*/`,
+`__tests__/`, `spec/`, `e2e/`) or its file name is `*.test.*` or `*.spec.*`. One
+place — `review-scope.sh`, which `review-diff.sh`, the hook, and the loop all run
+through — decides this, so they never disagree about what is in scope.
 
 ### The commit is the scope boundary
 
@@ -85,13 +93,15 @@ again. Committing the settled change takes it out of scope for good.
 
 ### Untracked and scratch files
 
-New files the change adds are in scope: the review renders each untracked,
-non-ignored file as an addition, and the hook's gate and its "same changes"
-check count untracked files too. This is done without staging — the review does
-not mutate the user's index. A scratch or ad hoc file left in the tree is
-therefore reviewed like anything else, which forces the choice the standard
-already requires: make it a real test in the test directory, or delete it. No
-dead code.
+New app-code files the change adds are in scope: the review renders each
+untracked, non-ignored app-code file as an addition, and the hook's gate and its
+"same changes" check count them too. This is done without staging — the review
+does not mutate the user's index. A scratch or ad hoc app-code file left in the
+tree is therefore reviewed like anything else, which forces the choice the
+standard already requires: make it a real test — which moves it into a test
+directory and out of this loop's scope — or delete it. No dead code. Non-code
+files and test code are not rendered, so they neither get judged nor change the
+hash.
 
 ## Flow
 
