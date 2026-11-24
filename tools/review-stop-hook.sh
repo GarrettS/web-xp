@@ -22,11 +22,13 @@
 #
 set -uo pipefail
 
-# Sibling change-set builder, located by this script's own directory (pure bash,
-# no external `dirname`). review-loop.sh builds the change the same way, so the
-# hash here matches the one it recorded.
+# Sibling scripts, located by this script's own directory (pure bash, no external
+# `dirname`): the change-set builder (review-diff.sh) and the scope filter
+# (review-scope.sh). review-loop.sh uses the same two, so the hash here matches
+# the one it recorded and the two agree on which files are in scope.
 script_dir="$(cd "${0%/*}" 2>/dev/null && pwd)"
 diff_builder="${script_dir}/review-diff.sh"
+scope_filter="${script_dir}/review-scope.sh"
 
 # Stop-hook input arrives as JSON on stdin; we need the project cwd.
 input="$(cat 2>/dev/null || true)"
@@ -39,20 +41,18 @@ cd "$cwd" 2>/dev/null || exit 0
 command -v codex >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || exit 0
 [ -f "$HOME/.web-xp/code-guidelines.md" ] || exit 0
 [ -f "$diff_builder" ] || exit 0
+[ -f "$scope_filter" ] || exit 0
 if [ -f prd/project.md ] && grep -iqE 'review-loop:[[:space:]]*off' prd/project.md; then exit 0; fi
 
-# Any uncommitted code changes to review — tracked changes or untracked new
-# files? List NUL-delimited (exact for non-ASCII and odd names) into a temp file
-# so a git failure is not read as "no changes", and stop at the first code file.
-shopt -s nocasematch
+# Any in-scope app-code change to review — tracked or new, test code excluded by
+# the shared scope filter? Build the list through it (the same filter the loop
+# uses) into a temp file so a git failure is not read as "no changes". If the
+# list is empty there is nothing to gate on.
 changes_tmp="$(mktemp 2>/dev/null)" || exit 0
-{ git diff --name-only -z HEAD 2>/dev/null; git ls-files --others --exclude-standard -z 2>/dev/null; } > "$changes_tmp" 2>/dev/null
+{ git diff --name-only -z HEAD 2>/dev/null; git ls-files --others --exclude-standard -z 2>/dev/null; } \
+  | bash "$scope_filter" > "$changes_tmp" 2>/dev/null
 have_code=0
-while IFS= read -r -d '' f; do
-  case "$f" in
-    *.js|*.mjs|*.ts|*.html|*.css) have_code=1; break ;;
-  esac
-done < "$changes_tmp"
+[ -s "$changes_tmp" ] && have_code=1
 rm -f "$changes_tmp" 2>/dev/null
 [ "$have_code" -eq 1 ] || exit 0
 
