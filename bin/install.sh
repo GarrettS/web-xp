@@ -148,3 +148,36 @@ write_manifest
 
 echo "Claude skills installed to ${CLAUDE_SKILLS_DEST}"
 echo "Codex skills installed to ${CODEX_SKILLS_DEST}"
+
+# --- Review Workflow Loop Stop hook ---
+# Register the Stop hook in Claude settings so the loop is enforced. Idempotent,
+# backs the settings file up first. The hook no-ops unless codex + jq are present
+# in a Web XP project, so registering it on a machine without codex is harmless.
+CLAUDE_SETTINGS="${HOME}/.claude/settings.json"
+STOP_HOOK_CMD="bash ${HOME}/.web-xp/tools/review-stop-hook.sh"
+
+register_stop_hook() {
+  local settings="$CLAUDE_SETTINGS" cmd="$STOP_HOOK_CMD" tmp
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "note: jq not found — add the review Stop hook to ${settings} by hand (see tools/review-loop.md)."
+    return 0
+  fi
+  mkdir -p "$(dirname "$settings")"
+  [ -f "$settings" ] || printf '{}\n' > "$settings"
+  if jq -e --arg c "$cmd" '[.hooks.Stop[]?.hooks[]?.command] | index($c) != null' "$settings" >/dev/null 2>&1; then
+    echo "Review Stop hook already registered in ${settings}"
+    return 0
+  fi
+  tmp="$(mktemp)"
+  if jq --arg c "$cmd" '.hooks.Stop = ((.hooks.Stop // []) + [{hooks: [{type: "command", command: $c}]}])' "$settings" > "$tmp"; then
+    cp "$settings" "${settings}.web-xp-backup"
+    mv "$tmp" "$settings"
+    echo "Registered the Web XP review Stop hook in ${settings} (backup: ${settings}.web-xp-backup)"
+  else
+    rm -f "$tmp"
+    echo "warning: could not register the review Stop hook in ${settings}; add it by hand (see tools/review-loop.md)." >&2
+  fi
+  return 0
+}
+
+register_stop_hook

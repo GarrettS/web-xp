@@ -200,5 +200,8 @@ fixer locates references by name.
   cannot yet be excluded; the naming pass still flags it.
 - **codex sandbox flags** (`--skip-git-repo-check -s workspace-write`) are
   install-dependent and marked `VERIFY` in the source.
-- **`install.sh` does not register the Stop hook** or deploy `tools/`. Set the
-  hook up by hand (above) for now.
+- **The Stop hook is global.** `install.sh` registers it in
+  `~/.claude/settings.json` (idempotent, backing the file up first; it prints a
+  manual step instead when `jq` is absent), and `uninstall.sh` removes it. It
+  fires in every project but no-ops outside a Web XP project and when
+  `codex`/`jq` are missing, so it never runs a review where it should not.
