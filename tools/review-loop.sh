@@ -2,8 +2,8 @@
 #
 # review-loop.sh — the cross-agent review, run without a human relay.
 #
-# Codex reviews a branch's diff against the Web XP standard and returns findings
-# as JSON. Two passes run each time:
+# Codex reviews your uncommitted changes (git diff HEAD) against the Web XP
+# standard and returns findings as JSON. Two passes run each time:
 #   - a GENERAL pass over the whole diff against the whole standard;
 #   - a NAMING pass that pulls every class name the diff adds out of the text,
 #     then judges only those names, so a class-name sweep happens even when
@@ -19,7 +19,10 @@
 #  agents. This script removes that relay; it no longer iterates.)
 #
 # Usage:
-#   tools/review-loop.sh <branch> [base-branch]
+#   tools/review-loop.sh
+#
+# Reviews `git diff HEAD` — the change you are working on, uncommitted, relative
+# to the current commit. Any arguments are ignored.
 #
 # Output: prints the findings, and writes them as a JSON array to
 # $REVIEW_LOOP_OUT (default ./review-findings.json) for Claude to read.
@@ -31,9 +34,6 @@
 # marked VERIFY below.
 #
 set -euo pipefail
-
-branch="${1:?usage: review-loop.sh <branch> [base-branch]}"
-base="${2:-main}"
 
 standard="${WEB_XP_CG:-$HOME/.web-xp/code-guidelines.md}"
 out="${REVIEW_LOOP_OUT:-review-findings.json}"
@@ -53,8 +53,7 @@ for tool in git jq codex; do
   command -v "$tool" >/dev/null || { echo "missing required tool: $tool"; exit 2; }
 done
 [ -f "$standard" ] || { echo "standard not found: $standard (run install.sh)"; exit 2; }
-git rev-parse --verify "$branch" >/dev/null 2>&1 || { echo "no such branch: $branch"; exit 2; }
-git rev-parse --verify "$base" >/dev/null 2>&1 || { echo "no such base: $base"; exit 2; }
+git rev-parse --verify HEAD >/dev/null 2>&1 || { echo "no commit to diff against (HEAD is unborn)"; exit 2; }
 
 # A usable result is a JSON array whose every element carries the five fields
 # with the right types. Length alone does not prove that, and an empty or
@@ -142,8 +141,8 @@ prev_round="$(cat "$round_file" 2>/dev/null || echo 0)"
 [ "$prev_round" -ge 0 ] 2>/dev/null || prev_round=0
 round=$((prev_round + 1))
 
-echo "── Handoff to Codex · round ${round} — reviewing your uncommitted changes against ${base} ──"
-git diff "$(git merge-base "${base}" HEAD)" > "$diff_file"
+echo "── Handoff to Codex · round ${round} — reviewing your uncommitted changes (git diff HEAD) ──"
+git diff HEAD > "$diff_file"
 diff_hash="$(git hash-object "$diff_file" 2>/dev/null || echo none)"
 
 # Discussion context fed to Codex alongside the diff:

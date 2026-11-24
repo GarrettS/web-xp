@@ -20,7 +20,7 @@ Apply the standard to the new code you write for the user's request. Do not refa
 2. Review the diff against all applicable rules in `code-guidelines.md` from your Web XP install, including rules without automated checks.
 3. Verify covered prose in the diff against the ER.
 4. **Run the Review Workflow Loop** when it is enabled (`review-loop` is not `off` in the project overlay) and the `codex` CLI is available. Before presenting your work:
-   1. Run `bash ~/.web-xp/tools/review-loop.sh HEAD <base>` (`<base>` is the branch you will merge into, usually `main`) to hand your uncommitted changes to Codex.
+   1. Run `bash ~/.web-xp/tools/review-loop.sh` to hand your uncommitted changes (`git diff HEAD`) to Codex.
    2. For each finding Codex returns:
       - **If you agree** — fix it. The user approves the change through their normal approval flow.
       - **Else if you think it is wrong, or need to know how it is triggered** — write your reasoning to the review-responses file named in the loop's output; Codex reconsiders next round.

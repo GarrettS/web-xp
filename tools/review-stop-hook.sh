@@ -23,10 +23,6 @@ cwd="$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null || true)"
 [ -n "$cwd" ] || cwd="$PWD"
 cd "$cwd" 2>/dev/null || exit 0
 
-# Branch Claude merges into. MUST match the base Claude passes to review-loop.sh,
-# or the two will hash different diffs and never agree the review is current.
-base="main"
-
 # --- gates: stay silent (allow the stop) unless everything lines up ---
 [ -f AGENTS.md ] || [ -f CLAUDE.md ] || [ -f CODEX.md ] || exit 0
 command -v codex >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || exit 0
@@ -48,8 +44,8 @@ clear_state() { rm -f "$round_file" "$hash_file" "$findings_file" "$blocks_file"
 # Claude is deferring a finding to the user. Let it pause, once per marker.
 if [ -f "$ask_marker" ]; then rm -f "$ask_marker"; exit 0; fi
 
-# The diff Codex would review right now — computed exactly as review-loop.sh does.
-current_hash="$(git diff "$(git merge-base "${base}" HEAD 2>/dev/null)" 2>/dev/null | git hash-object --stdin 2>/dev/null || echo none)"
+# The diff Codex would review right now — git diff HEAD, exactly as review-loop.sh.
+current_hash="$(git diff HEAD 2>/dev/null | git hash-object --stdin 2>/dev/null || echo none)"
 
 reviewed_hash="$(cat "$hash_file" 2>/dev/null || echo none)"
 findings="$(cat "$findings_file" 2>/dev/null || echo -1)"
@@ -71,7 +67,7 @@ fi
 blocks=$((blocks + 1))
 echo "$blocks" > "$blocks_file"
 
-cmd="bash ~/.web-xp/tools/review-loop.sh HEAD ${base}"
+cmd="bash ~/.web-xp/tools/review-loop.sh"
 how="Options for a finding you do not simply fix: to dispute it or ask how it is triggered, write your reasoning to ${resp_file} and re-run the loop (Codex reconsiders). For a finding whose answer depends on the use-case or product intent, do not fix or dismiss it yourself — describe how it could happen by accident, then create ${ask_marker} and stop to ask the user, and record their decision in prd/review-exclusions.md."
 
 if [ "$reviewed_hash" != "$current_hash" ]; then

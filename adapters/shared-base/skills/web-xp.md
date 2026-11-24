@@ -63,7 +63,7 @@ For full pattern definitions, read `code-guidelines.md`. For reasoning and examp
 - When the standards conflict with a request, state the tension and ask.
 - Before delivery or commit, run the adapter's Web XP pre-commit check command and follow the project contract's completion requirements.
 - **Review Workflow Loop** — when `review-loop` is not `off` in the project overlay (`prd/project.md`) and `codex` is available, run it before presenting your work:
-  1. `bash ~/.web-xp/tools/review-loop.sh HEAD <base>` — hand your uncommitted changes to Codex.
+  1. `bash ~/.web-xp/tools/review-loop.sh` — hand your uncommitted changes (`git diff HEAD`) to Codex.
   2. Per finding: fix it if you agree (the user approves as usual); or dispute it / ask how it is triggered by writing to the review-responses file the loop names; or, if the answer depends on the use-case, describe how it could happen by accident, stop and ask the user, and record the decision in `prd/review-exclusions.md`.
   3. Re-run; repeat the per-finding handling until Codex returns none.
   4. Exit when Codex is clean and you are confident (present it), or when your confidence is not high enough (stop and ask the user).
