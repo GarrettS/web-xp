@@ -1,13 +1,14 @@
 # `review-loop.sh` — Web XP cross-agent review
 
-A review-only tool. It runs an independent reviewer (Codex) over a branch's diff
-against the Web XP standard, in two passes, and writes the findings as JSON. It
-does **not** edit, stage, commit, or iterate — it produces findings and hands
-them back. Fixing is done interactively, where naming the right domain concept
-takes judgment the review cannot make.
+Runs an independent reviewer (Codex) over your **uncommitted working changes**
+against the Web XP standard, in two passes, and writes the findings as JSON. The
+script itself changes nothing in your code — no edit, stage, commit, or
+checkout. It produces findings; you fix the ones you agree with and run it again.
 
-(The name is historical: the "loop" was the manual relay between the two agents.
-This script removes that relay; it no longer iterates.)
+The review is a loop: review → fix or dispute → re-run, until Codex is clean or
+a finding needs the user to decide. A Claude Code Stop hook
+(`review-stop-hook.sh`) can enforce the loop so it is not skipped — see
+[Stop hook](#stop-hook).
 
 ## Prerequisites
 
@@ -56,34 +57,37 @@ lives elsewhere.
 tools/review-loop.sh <branch> [base-branch]
 ```
 
-- `<branch>` — the ref to review (`HEAD` for the current branch).
+- `<branch>` — pass `HEAD`.
 - `[base-branch]` — what to diff against; defaults to `main`.
 
 ```bash
-# review the current branch against main, findings to ~/review-findings.json
 cd <your-repo>
-REVIEW_LOOP_OUT=~/review-findings.json bash review-loop.sh HEAD main
+bash ~/.web-xp/tools/review-loop.sh HEAD main
 ```
 
-It prints the findings and writes them to `REVIEW_LOOP_OUT` (default
-`./review-findings.json`). It computes the diff from refs and makes no change to
-the working tree — so it tolerates a dirty tree and does not care which branch
-is checked out. No worktree or clean tree is required.
+It reviews the diff from the merge-base of `<base>` to your working tree, so it
+includes your uncommitted changes (staged and unstaged). It prints the findings
+and also writes them to `REVIEW_LOOP_OUT` (default `./review-findings.json`).
 
 ## Pipeline
 
 ```
-preconditions → diff → general pass ─┐
-                     → naming pass ──┴→ merge → write + print → exit
+preconditions → diff working tree → general pass ─┐
+                                   → naming pass ──┴→ merge → write + print → exit
 ```
 
 1. **Preconditions.** Verify `git`/`jq`/`codex` are present, the standard file
    exists, and both `<branch>` and `<base>` resolve. Any failure exits `2`.
-2. **Diff.** Compute `git diff <base>...<branch>` (three-dot: changes on the
-   branch since it diverged from base) into a temp file both passes read.
+2. **Diff.** `git diff $(git merge-base <base> HEAD)` — the merge-base to the
+   working tree, so uncommitted changes are included — into a temp file both
+   passes read. The diff is hashed and the hash, round number, and finding count
+   are recorded in the git directory (see [State](#state)) so the Stop hook can
+   tell whether the current changes have a clean review.
 3. **General pass.** `codex` reads the standard and reviews the whole diff,
-   flagging only added/changed lines, and writes a JSON array of findings. The
-   result is schema-validated; invalid JSON exits `3`.
+   flagging only added/changed lines. It is also given the maintainer's
+   exclusions ledger and Claude's responses from the last round (see
+   [Discussion](#discussion)). It writes a JSON array of findings; the result is
+   schema-validated and invalid JSON exits `3`.
 4. **Naming pass** (detect → judge):
    - *Detect (deterministic):* a text extractor pulls every class name the diff
      **adds** — CSS selectors (`.name`), and the strings in `class="…"`,
@@ -93,19 +97,74 @@ preconditions → diff → general pass ─┐
      the `flag` verdicts become findings.
 5. **Merge.** General findings + naming findings are concatenated and written to
    the output file.
-6. **Report.** Print a one-line summary per finding (or `clean` if empty), then
-   exit `0`. Nothing is edited.
+6. **Report.** Print the round number, a line per finding (with its accidental-
+   trigger scenario when present), and the next-step options; or `clean` if
+   empty. Exit `0`. Nothing is edited.
+
+## Discussion
+
+Findings are not only fixed or silently ignored. The loop carries the exchange
+with the reviewer, so a dispute or an out-of-scope decision is resolved in one
+place instead of a side channel:
+
+- **Dispute, or ask how a finding is triggered.** Write your reasoning to the
+  review-responses file (`<git-dir>/.web-xp-review-responses.md`) and re-run. The
+  next round feeds it to Codex, which either withdraws the finding or — if you
+  asked how it is reached — fills in the finding's `trigger` field with a
+  concrete accidental scenario so you can judge it.
+- **Settled decisions.** A finding whose answer depends on the use-case or
+  product intent is for the user to decide, not either agent. Record the decision
+  and its reason in `prd/review-exclusions.md`. The loop feeds that ledger to
+  Codex on every run, so a closed question is not re-raised. (Only the general
+  pass reads the ledger today; see [Limitations](#limitations).)
+- **Stop to ask the user.** When a finding needs the user, create
+  `<git-dir>/.web-xp-review-ask-user`. The Stop hook then lets the turn end so
+  Claude can ask, instead of blocking until Codex is clean.
+
+## State
+
+The loop records these in the git directory (inside `.git/`, never committed):
+
+- `.web-xp-review-round` — the round number.
+- `.web-xp-review-hash` — the hash of the diff Codex last reviewed.
+- `.web-xp-review-findings` — the finding count from that review.
+- `.web-xp-review-responses.md` — your responses to findings (you write this).
+- `.web-xp-review-ask-user` — the marker that lets the turn end to ask the user.
+- `.web-xp-codex-last.log` — Codex's streamed reasoning, kept off-screen;
+  consulted only when a pass returns invalid JSON.
+
+## Stop hook
+
+`review-stop-hook.sh` is a Claude Code Stop hook. It runs no review itself — it
+is a gate. When Claude tries to finish a turn with uncommitted code changes in a
+Web XP project, it checks the state above; if the current changes do not have a
+clean Codex review, it blocks the stop and tells Claude to run this loop and
+summarize the result. Claude leaves the loop by a clean review, by stopping to
+ask the user (the ask-user marker), or by a block cap after a few rounds (which
+tells Claude to ask the user rather than loop forever). Register it in
+`~/.claude/settings.json`:
+
+```json
+"hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "bash ~/.web-xp/tools/review-stop-hook.sh" } ] } ] }
+```
+
+The hook uses `main` as the base; edit the `base=` line in the script if your
+branch merges elsewhere. It stays silent (allows the stop) outside a Web XP
+project, when `codex`/`jq` are missing, or when `review-loop: off` is set in the
+project overlay.
 
 ## Output
 
 A JSON array of findings. Each:
 
 ```json
-{ "file": "string", "line": 0, "rule": "string", "problem": "string", "fix": "string" }
+{ "file": "string", "line": 0, "rule": "string", "problem": "string", "fix": "string", "trigger": "string" }
 ```
 
-Naming findings carry `file: ""`, `line: 0` — the class name is in `problem`;
-the fixer locates references by name.
+`trigger` describes how the problem is reached, especially by accident, when the
+finding's seriousness depends on that; it is `""` for a clear-cut rule violation.
+Naming findings carry `file: ""`, `line: 0` — the class name is in `problem`; the
+fixer locates references by name.
 
 ## Exit codes
 
@@ -116,37 +175,30 @@ the fixer locates references by name.
 
 ## Design
 
-- **Review-only / pure function.** No checkout, no commit, no side effects — so
-  it can be re-run freely. Iteration lives *outside* the tool:
-  `review → interactive fix → re-run`. Keeping fixing out avoids a headless
-  process botching the naming call and committing blind, and sidesteps the
-  permission wall a non-interactive fixer hits.
+- **The script has no side effects** — no checkout, no commit — so it can be
+  re-run freely. Iteration is `review → fix or dispute → re-run`; the Stop hook,
+  not the script, drives it.
 - **Diff-scoped.** Only added/changed lines are judged. Pre-existing violations
   below the diff waterline are out of scope by design.
 - **Two passes, because naming is a *systematic* blind spot.** The free-form
-  general pass reliably drops class-name violations when heavier findings
-  compete for attention (observed on a real diff: `.inp`, `.muted`,
-  `.inline-value` sat in the added lines and went unflagged). The dedicated
-  enumerate-then-judge naming pass guarantees the sweep.
+  general pass reliably drops class-name violations when heavier findings compete
+  for attention (observed on a real diff: `.inp`, `.muted`, `.inline-value` sat
+  in the added lines and went unflagged). The dedicated enumerate-then-judge
+  naming pass guarantees the sweep.
 
 ## Limitations
 
-- **Not a completion gate.** A clean result is not proof of conformance.
+- **Not a completion gate on its own.** A clean result is not proof of
+  conformance.
 - **The general pass is stochastic** — different runs surface different findings.
   For higher recall, run it several times and union; the naming pass is
   near-deterministic and needs no resampling.
 - **The naming extractor is text, not a parser** — it over-extracts at the
   margins (harmless; the judge filters) and does not see class names built by
   string concatenation.
+- **Only the general pass reads the exclusions ledger.** A class-name decision
+  cannot yet be excluded; the naming pass still flags it.
 - **codex sandbox flags** (`--skip-git-repo-check -s workspace-write`) are
   install-dependent and marked `VERIFY` in the source.
-
-## Where it fits
-
-The tool is the automated half of the Codex↔Claude review: it replaces the
-manual relay of running the reviewer and copying findings back. The interactive
-Claude consumes `review-findings.json`, reports to the person, and fixes with
-them in the loop. Contested findings — the reviewer flags something the author
-judges correct — are negotiated through the Codex↔Claude handoff channel
-(`/tmp/web-xp-agent-handoff/`), with the person arbitrating; once an accepted
-finding is committed, diff-scoping drops it from later reviews.
+- **`install.sh` does not register the Stop hook** or deploy `tools/`. Set the
+  hook up by hand (above) for now.
