@@ -8,6 +8,10 @@ setup() {
   TMP_HOME="$(mktemp -d)"
   MANIFEST_PATH="$TMP_HOME/web-xp-manifest.txt"
   HOOK_CMD="bash $TMP_HOME/.web-xp/tools/review-stop-hook.sh"
+  # Simulate the clone layout install.sh expects at ~/.web-xp, so the
+  # registration guard (hook script must exist) is satisfied.
+  mkdir -p "$TMP_HOME/.web-xp/tools"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$TMP_HOME/.web-xp/tools/review-stop-hook.sh"
 }
 
 teardown() {

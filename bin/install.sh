@@ -164,13 +164,19 @@ echo "Codex skills installed to ${CODEX_SKILLS_DEST}"
 
 # --- Review Workflow Loop Stop hook ---
 # Register the Stop hook in Claude settings so the loop is enforced. Idempotent,
-# backs the settings file up first. The hook no-ops unless codex + jq are present
-# in a Web XP project, so registering it on a machine without codex is harmless.
+# backs the settings file up first, and only registers when the hook script is
+# actually present — so a registration can never point at a missing file and
+# error on every turn.
 CLAUDE_SETTINGS="${HOME}/.claude/settings.json"
-STOP_HOOK_CMD="bash ${HOME}/.web-xp/tools/review-stop-hook.sh"
+STOP_HOOK_SCRIPT="${HOME}/.web-xp/tools/review-stop-hook.sh"
+STOP_HOOK_CMD="bash ${STOP_HOOK_SCRIPT}"
 
 register_stop_hook() {
   local settings="$CLAUDE_SETTINGS" cmd="$STOP_HOOK_CMD" tmp
+  if [ ! -f "$STOP_HOOK_SCRIPT" ]; then
+    echo "note: ${STOP_HOOK_SCRIPT} not found — skipping hook registration (clone Web XP to ~/.web-xp)."
+    return 0
+  fi
   if ! command -v jq >/dev/null 2>&1; then
     echo "note: jq not found — add the review Stop hook to ${settings} by hand (see tools/review-loop.md)."
     return 0
@@ -194,3 +200,13 @@ register_stop_hook() {
 }
 
 register_stop_hook
+
+# Report whether the loop can actually run, so a fresh install is not a mystery.
+if command -v codex >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  echo "Review Workflow Loop: active (codex and jq found)."
+else
+  loop_missing=""
+  command -v codex >/dev/null 2>&1 || loop_missing="codex"
+  command -v jq >/dev/null 2>&1 || loop_missing="${loop_missing:+$loop_missing, }jq"
+  echo "Review Workflow Loop: dormant until you install: ${loop_missing}. The Stop hook stays a silent no-op until then."
+fi
