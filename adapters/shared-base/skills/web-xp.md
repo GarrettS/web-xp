@@ -68,4 +68,6 @@ For full pattern definitions, read `code-guidelines.md`. For reasoning and examp
   3. Re-run; repeat the per-finding handling until Codex returns none.
   4. Exit when Codex is clean and you are confident (present it), or when your confidence is not high enough (stop and ask the user).
 
+  Converge with Codex, not the user. Codex is your interim reviewer each round; the user is the final reviewer, who arbitrates only the findings that turn on the use-case or product intent. Do not present intermediate edits to the user for review or narrate each change to them — run the loop to a clean result, then present.
+
   A Stop hook enforces this when installed. See `~/.web-xp/tools/code-loop.md`.
