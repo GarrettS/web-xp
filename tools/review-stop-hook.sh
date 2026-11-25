@@ -1,53 +1,66 @@
 #!/usr/bin/env bash
 #
-# review-stop-hook.sh — Claude Code Stop hook for the Web XP Review Workflow Loop.
+# review-stop-hook.sh — Claude Code Stop hook for the Web XP code-loop.
 #
-# This hook does NOT run Codex. It is a gate. When Claude tries to finish a turn
-# with uncommitted code changes — tracked or new — it checks whether Codex has
-# given those exact changes a clean review (recorded by code-loop.sh in the
-# git dir). If not, it blocks the stop and tells Claude to run the review loop
-# itself and summarize the result — so the handoff, Codex's response, and
-# Claude's fixes all happen visibly in the conversation instead of silently
-# inside this hook.
+# It is a gate, not a reviewer. When Claude tries to finish a turn, it checks
+# whether the worktree THIS session is editing has uncommitted code that Codex
+# has not cleanly reviewed. If so, it blocks and tells Claude to run the loop on
+# that worktree. It never runs Codex itself.
 #
-# Fail-safe: on any error it cannot resolve — missing tools, an unbuildable
-# change, state it cannot persist — it stays silent and ALLOWS the stop rather
-# than trapping the turn.
+# Which worktree: the one this session last edited, recorded per session id by
+# the PostToolUse hook (review-touch-hook.sh). The hook reviews THAT worktree,
+# not the directory the session was launched in — so a session launched on main
+# that works in a feature worktree is reviewed on the feature worktree. Two
+# agents editing two worktrees at once each have their own record and do not
+# cross.
 #
-# Claude can leave the loop three ways:
-#   - a clean Codex review of the current changes (the hook allows the stop);
-#   - stopping to ask the user about a finding whose answer depends on the
-#     use-case (Claude creates the ask-user marker and the hook lets it pause);
-#   - a block cap, so an unfixable or contested finding cannot trap it.
+# Fail-safe: on any missing field, missing record, or error it stays silent and
+# ALLOWS the stop rather than trap the turn.
+#
+# Claude leaves the loop three ways: a clean Codex review of the current change;
+# the ask-user marker (a use-case finding deferred to the user); or a block cap.
 #
 set -uo pipefail
 
 # Sibling scripts, located by this script's own directory (pure bash, no external
 # `dirname`): the change-set builder (review-diff.sh) and the scope filter
-# (review-scope.sh). code-loop.sh uses the same two, so the hash here matches
-# the one it recorded and the two agree on which files are in scope.
+# (review-scope.sh). code-loop.sh uses the same two, so the hash here matches the
+# one it recorded and the two agree on which files are in scope.
 script_dir="$(cd "${0%/*}" 2>/dev/null && pwd)"
 diff_builder="${script_dir}/review-diff.sh"
 scope_filter="${script_dir}/review-scope.sh"
 
-# Stop-hook input arrives as JSON on stdin; we need the project cwd.
+# Input arrives as JSON on stdin. The session id names whose worktree record to
+# read.
 input="$(cat 2>/dev/null || true)"
-cwd="$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null || true)"
-[ -n "$cwd" ] || cwd="$PWD"
-cd "$cwd" 2>/dev/null || exit 0
+command -v jq >/dev/null 2>&1 || exit 0
+session="$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null || true)"
+[ -n "$session" ] || exit 0
 
-# --- gates: stay silent (allow the stop) unless everything lines up ---
+# The worktree this session is editing, recorded by the PostToolUse hook. No
+# record means this session has edited nothing through Edit/Write, so there is
+# nothing to gate.
+state_dir="${WEB_XP_STATE_DIR:-$HOME/.web-xp/state}"
+wt="$(cat "${state_dir}/${session}.wt" 2>/dev/null || true)"
+[ -n "$wt" ] || exit 0
+
+# Enter that worktree and run every check there. A stale record (worktree
+# removed) fails this and allows the stop.
+git -C "$wt" rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+cd "$wt" 2>/dev/null || exit 0
+
+# --- gates: stay silent (allow the stop) unless everything lines up, all checked
+# in the worktree, not the launch directory ---
 [ -f AGENTS.md ] || [ -f CLAUDE.md ] || [ -f CODEX.md ] || exit 0
-command -v codex >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || exit 0
+command -v codex >/dev/null 2>&1 || exit 0
 [ -f "$HOME/.web-xp/code-guidelines.md" ] || exit 0
 [ -f "$diff_builder" ] || exit 0
 [ -f "$scope_filter" ] || exit 0
 if [ -f prd/project.md ] && grep -iqE 'review-loop:[[:space:]]*off' prd/project.md; then exit 0; fi
 
-# Any in-scope app-code change to review — tracked or new, test code excluded by
-# the shared scope filter? Build the list through it (the same filter the loop
-# uses) into a temp file so a git failure is not read as "no changes". If the
-# list is empty there is nothing to gate on.
+# Any in-scope app-code change in this worktree — tracked or new, test code
+# excluded by the shared scope filter? Build the list through it into a temp file
+# so a git failure is not read as "no changes". Empty list, nothing to gate on.
 changes_tmp="$(mktemp 2>/dev/null)" || exit 0
 { git diff --name-only -z HEAD 2>/dev/null; git ls-files --others --exclude-standard -z 2>/dev/null; } \
   | bash "$scope_filter" > "$changes_tmp" 2>/dev/null
@@ -56,6 +69,8 @@ have_code=0
 rm -f "$changes_tmp" 2>/dev/null
 [ "$have_code" -eq 1 ] || exit 0
 
+# State lives in THIS worktree's git dir — the same place code-loop.sh wrote it
+# when run on this worktree — so the hook and the loop agree per worktree.
 gitdir="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
 round_file="${gitdir}/.web-xp-review-round"
 hash_file="${gitdir}/.web-xp-review-hash"
@@ -86,7 +101,7 @@ blocks="$(cat "$blocks_file" 2>/dev/null || echo 0)"
 # Hard safety: never trap Claude past a few rounds.
 if [ "$blocks" -ge 6 ]; then clear_state; exit 0; fi
 
-# A clean Codex review of the current changes → let Claude finish.
+# A clean Codex review of the current change → let Claude finish.
 if [ "$reviewed_hash" = "$current_hash" ] && [ "$findings" = "0" ]; then
   clear_state
   exit 0
@@ -97,15 +112,16 @@ fi
 blocks=$((blocks + 1))
 echo "$blocks" > "$blocks_file" 2>/dev/null || exit 0
 
-cmd="bash ~/.web-xp/tools/code-loop.sh"
+# The loop must run on THIS worktree, so pass it explicitly.
+cmd="bash ~/.web-xp/tools/code-loop.sh \"${wt}\""
 how="Options for a finding you do not simply fix: to dispute it or ask how it is triggered, write your reasoning to ${resp_file} and re-run the loop (Codex reconsiders). For a finding whose answer depends on the use-case or product intent, do not fix or dismiss it yourself — describe how it could happen by accident, then create ${ask_marker} and stop to ask the user, and record their decision in prd/review-exclusions.md."
 
 if [ "$reviewed_hash" != "$current_hash" ]; then
-  reason="Your code has uncommitted changes Codex has not reviewed in their current form. Hand them to Codex now: run ${cmd}. State the round number and Codex's findings. ${how}"
+  reason="The worktree ${wt} has uncommitted changes Codex has not reviewed in their current form. Hand them to Codex now: run ${cmd}. State the round number and Codex's findings. ${how}"
 elif [ "$round" -ge 3 ]; then
-  reason="Codex has reviewed these exact changes ${round} times and still reports ${findings} finding(s). Do not present this as done. Summarize the unresolved findings and ask the user how to proceed."
+  reason="Codex has reviewed the changes in ${wt} ${round} times and still reports ${findings} finding(s). Do not present this as done. Summarize the unresolved findings and ask the user how to proceed."
 else
-  reason="Codex round ${round} reported ${findings} finding(s) on these changes that are not yet resolved. Fix the ones you agree with and run ${cmd} again. ${how}"
+  reason="Codex round ${round} reported ${findings} finding(s) on the changes in ${wt} that are not yet resolved. Fix the ones you agree with and run ${cmd} again. ${how}"
 fi
 
 jq -n --arg r "$reason" '{decision:"block", reason:$r}'

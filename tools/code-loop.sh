@@ -27,7 +27,8 @@
 #   tools/code-loop.sh
 #
 # Reviews your uncommitted change — `git diff HEAD` plus untracked new code
-# files — relative to the current commit. Any arguments are ignored.
+# files — relative to the current commit. An optional first argument names the
+# worktree to review; it defaults to the current directory.
 #
 # Output: prints the findings, and writes them as a JSON array to
 # $REVIEW_LOOP_OUT (default ./review-findings.json) for Claude to read.
@@ -48,6 +49,18 @@ shopt -s nocasematch
 script_dir="$(cd "${0%/*}" 2>/dev/null && pwd)"
 diff_builder="${script_dir}/review-diff.sh"
 scope_filter="${script_dir}/review-scope.sh"
+
+# Optional first argument: the worktree to review. Default is the current
+# directory. Everything below runs relative to it, so the review targets this
+# worktree and its branch, not wherever the script was launched from. The
+# sibling scripts above are located by this script's own path, so this cd does
+# not affect them.
+wt="${1:-}"
+if [ -n "$wt" ]; then
+  git -C "$wt" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
+    || { echo "not a git worktree: $wt"; exit 2; }
+  cd "$wt" || { echo "cannot enter worktree: $wt"; exit 2; }
+fi
 
 standard="${WEB_XP_CG:-$HOME/.web-xp/code-guidelines.md}"
 out="${REVIEW_LOOP_OUT:-review-findings.json}"
