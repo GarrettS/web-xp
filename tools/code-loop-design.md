@@ -7,9 +7,14 @@ work may be presented. `code-loop.md` is the usage and reference doc.
 ## Purpose
 
 Code the user's agent (Claude) writes gets an independent review from a second
-agent (Codex) before Claude presents the result. Claude authors; Codex reviews
-against the Web XP standard; the two iterate; the user decides the questions
-that depend on the product, not the standard.
+agent (Codex) before Claude presents the result.
+
+Three roles. Claude authors. Codex is the interim reviewer — it judges each
+round, and Claude fixes the findings it accepts and re-runs until Codex is
+clean. The user is the final reviewer — they arbitrate the findings that depend
+on the use-case or product intent, and give final approval. Claude does not
+present intermediate edits to the user for review; convergence runs
+Claude-to-Codex, and the user sees the result.
 
 What the loop is for:
 
