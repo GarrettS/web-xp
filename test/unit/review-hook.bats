@@ -75,7 +75,7 @@ EOF
   for t in bash cat jq git grep rm mktemp sed; do
     p="$(command -v "$t" 2>/dev/null)" && ln -sf "$p" "$BIN/$t"
   done
-  # a Web XP project with an uncommitted code change
+  # the session's recorded worktree: a Web XP project with an uncommitted change
   proj="$TMP_HOME/proj"; mkdir -p "$proj"
   (
     cd "$proj"
@@ -87,7 +87,10 @@ EOF
     git -c user.email=t@t -c user.name=t commit -qm base
     printf 'const b = 2;\n' >> a.js
   )
-  run env -i HOME="$TMP_HOME" PATH="$BIN" bash "$REPO_ROOT/tools/review-stop-hook.sh" <<< "{\"cwd\":\"$proj\"}"
+  state="$TMP_HOME/state"; mkdir -p "$state"
+  echo "$proj" > "$state/s1.wt"
+  run env -i HOME="$TMP_HOME" PATH="$BIN" WEB_XP_STATE_DIR="$state" \
+    bash "$REPO_ROOT/tools/review-stop-hook.sh" <<< '{"session_id":"s1","cwd":"'"$proj"'"}'
   [ "$status" -eq 0 ]
   [ -z "$output" ]
 }

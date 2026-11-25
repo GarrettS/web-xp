@@ -201,6 +201,44 @@ register_stop_hook() {
 
 register_stop_hook
 
+# --- PostToolUse hook: record which worktree each session edits ---
+# The Stop hook reviews the worktree THIS session is editing. That worktree is
+# recorded per session id by review-touch-hook.sh after each edit. Register it
+# with a matcher so it fires only on the file-editing tools, not every tool.
+TOUCH_HOOK_SCRIPT="${HOME}/.web-xp/tools/review-touch-hook.sh"
+TOUCH_HOOK_CMD="bash ${TOUCH_HOOK_SCRIPT}"
+TOUCH_HOOK_MATCHER="Edit|Write|MultiEdit|NotebookEdit"
+
+register_touch_hook() {
+  local settings="$CLAUDE_SETTINGS" cmd="$TOUCH_HOOK_CMD" matcher="$TOUCH_HOOK_MATCHER" tmp
+  if [ ! -f "$TOUCH_HOOK_SCRIPT" ]; then
+    echo "note: ${TOUCH_HOOK_SCRIPT} not found — skipping PostToolUse hook registration (clone Web XP to ~/.web-xp)."
+    return 0
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "note: jq not found — add the review PostToolUse hook to ${settings} by hand (see tools/code-loop.md)."
+    return 0
+  fi
+  mkdir -p "$(dirname "$settings")"
+  [ -f "$settings" ] || printf '{}\n' > "$settings"
+  if jq -e --arg c "$cmd" '[.hooks.PostToolUse[]?.hooks[]?.command] | index($c) != null' "$settings" >/dev/null 2>&1; then
+    echo "Review PostToolUse hook already registered in ${settings}"
+    return 0
+  fi
+  tmp="$(mktemp)"
+  if jq --arg c "$cmd" --arg m "$matcher" '.hooks.PostToolUse = ((.hooks.PostToolUse // []) + [{matcher: $m, hooks: [{type: "command", command: $c}]}])' "$settings" > "$tmp"; then
+    cp "$settings" "${settings}.web-xp-backup"
+    mv "$tmp" "$settings"
+    echo "Registered the Web XP review PostToolUse hook in ${settings} (backup: ${settings}.web-xp-backup)"
+  else
+    rm -f "$tmp"
+    echo "warning: could not register the review PostToolUse hook in ${settings}; add it by hand (see tools/code-loop.md)." >&2
+  fi
+  return 0
+}
+
+register_touch_hook
+
 # Report whether the loop can actually run, so a fresh install is not a mystery.
 if command -v codex >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
   echo "Review Workflow Loop: active (codex and jq found)."

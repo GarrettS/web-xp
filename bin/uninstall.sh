@@ -129,6 +129,31 @@ unregister_stop_hook() {
 
 unregister_stop_hook
 
+# Remove the PostToolUse hook too. Its per-session worktree records live under
+# $WEB_XP_DIR/state and go when the directory below is removed.
+TOUCH_HOOK_CMD="bash ${HOME}/.web-xp/tools/review-touch-hook.sh"
+
+unregister_touch_hook() {
+  local settings="$CLAUDE_SETTINGS" cmd="$TOUCH_HOOK_CMD" tmp
+  command -v jq >/dev/null 2>&1 || return 0
+  [ -f "$settings" ] || return 0
+  tmp="$(mktemp)"
+  if jq --arg c "$cmd" '
+      if (.hooks.PostToolUse | type) == "array" then
+        .hooks.PostToolUse |= ( map(.hooks |= map(select(.command != $c))) | map(select((.hooks | length) > 0)) )
+        | (if (.hooks.PostToolUse | length) == 0 then del(.hooks.PostToolUse) else . end)
+        | (if (.hooks | length) == 0 then del(.hooks) else . end)
+      else . end
+    ' "$settings" > "$tmp"; then
+    mv "$tmp" "$settings"
+  else
+    rm -f "$tmp"
+  fi
+  return 0
+}
+
+unregister_touch_hook
+
 rm -rf "$WEB_XP_DIR"
 
 echo "Web XP was removed from this machine."
