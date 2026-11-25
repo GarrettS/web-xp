@@ -175,6 +175,18 @@ Register it in `~/.claude/settings.json`:
 It stays silent (allows the stop) outside a Web XP project, when `codex`/`jq`
 are missing, or when `review-loop: off` is set in the project overlay.
 
+### Session root
+
+The hook gates only the directory the session is launched in — the `cwd` it is
+handed. Launch each editing session rooted in the checkout or worktree it edits.
+Do not create a worktree mid-session and keep working from a session rooted
+elsewhere: the edits move to the worktree, but the hook keeps watching the launch
+root, finds it clean, and allows the stop with no review. Needing isolation
+mid-task means relaunching rooted in the worktree, not `cd`-ing into one. A
+session rooted in a worktree also gets its own loop state — `git rev-parse
+--git-dir` returns that worktree's git dir — so it never collides with the
+primary checkout or another agent.
+
 ## Output
 
 A JSON array of findings. Each:
