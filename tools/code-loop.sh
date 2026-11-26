@@ -31,7 +31,9 @@
 # worktree to review; it defaults to the current directory.
 #
 # Output: prints the findings, and writes them as a JSON array to
-# $REVIEW_LOOP_OUT (default ./review-findings.json) for Claude to read.
+# $REVIEW_LOOP_OUT (default ./review-findings.json) for Claude to read. Codex's
+# own reasoning streams to the screen as it reviews, so each round is visible;
+# set REVIEW_LOOP_VERBOSE=0 to hide it (it still goes to the per-worktree log).
 #
 # Needs on PATH: git, jq, the `codex` CLI.
 # Needs the standard installed at ~/.web-xp/code-guidelines.md (run install.sh).
@@ -128,9 +130,9 @@ run_naming_pass() {
   local naming_rc=0
   # VERIFY: --skip-git-repo-check -s workspace-write let codex write the file in
   # testing; confirm on your install that it emits only JSON into that file.
-  # Codex streams its whole reasoning to stdout; this script never reads that —
-  # it reads only the JSON file Codex writes — so send the stream to the hidden
-  # log instead of the user's screen.
+  # Codex streams its whole reasoning to stdout; this script reads only the JSON
+  # file Codex writes. show_codex puts the stream in the log and on the screen.
+  [ "$verbose" = "1" ] && echo "  ── Codex · naming pass ──"
   codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. Below are class names added in one diff, one per \
 line. Judge EACH name on its own against that standard's rule on semantic class \
 and id selectors: flag names that describe appearance, a layout box, a visual \
@@ -139,7 +141,7 @@ name must carry the domain concept; state and modifier names such as editing, \
 invalid, or busy are acceptable. Write ONLY a JSON array to ${naming_raw}; each \
 element {\"name\":\"\",\"verdict\":\"flag\" or \"keep\",\"reason\":\"\"}. Put \
 nothing else in that file. Names:
-${names}" < /dev/null >> "$codex_log" 2>&1 || naming_rc=$?
+${names}" < /dev/null 2>&1 | show_codex || naming_rc=$?
   if [ "$naming_rc" -ne 0 ]; then
     echo "  naming pass: reviewer did not complete (exit ${naming_rc}) — handing back to you (see ${codex_log})"
     exit 3
@@ -169,10 +171,25 @@ findings_file="${gitdir}/.web-xp-review-findings"
 resp_file="${gitdir}/.web-xp-review-responses.md"
 ask_marker="${gitdir}/.web-xp-review-ask-user"
 
-# Codex's streamed reasoning goes here, not to the user's screen. Overwritten
-# each run; only consulted when a pass returns invalid JSON.
+# Codex's streamed reasoning goes to this log, and to the screen too unless
+# REVIEW_LOOP_VERBOSE=0, so the rounds are visible as they run. The log is
+# overwritten each run and is also consulted when a pass returns invalid JSON.
 codex_log="${gitdir}/.web-xp-codex-last.log"
 : > "$codex_log" 2>/dev/null || codex_log=/dev/null
+
+# Send Codex's merged stdout+stderr to the log, and to the screen too when
+# verbose (the default). Use as:  codex exec ... 2>&1 | show_codex
+# pipefail is set, so the pipeline's exit status is Codex's own and callers read
+# the exit code exactly as before. REVIEW_LOOP_VERBOSE=0 hides the stream (it
+# still reaches the log) to keep an agent's context smaller.
+verbose="${REVIEW_LOOP_VERBOSE:-1}"
+show_codex() {
+  if [ "$verbose" = "1" ]; then
+    tee -a "$codex_log"
+  else
+    cat >> "$codex_log"
+  fi
+}
 
 prev_round="$(cat "$round_file" 2>/dev/null || echo 0)"
 [ "$prev_round" -ge 0 ] 2>/dev/null || prev_round=0
@@ -224,11 +241,12 @@ fi
 # a false "clean".
 : > "$general"
 general_rc=0
+[ "$verbose" = "1" ] && echo "── Codex · reviewing the change ──"
 codex exec --skip-git-repo-check -s workspace-write "Read ${standard}. The change under review is the unified diff in ${diff_file}. It touches these code files:
 ${touched_files}
 Read each of those files in full from the working tree, then review the change against that standard. Apply Touched-Construct Ownership: for every construct the diff touches — a function, a component, a selector block — judge the WHOLE construct against the standard, not only the lines that changed, so a changed line left inside a nonconforming construct is caught. Do NOT flag constructs the diff does not touch, or the rest of a file; a construct touched only to update a reference (a renamed symbol's call sites, an import path) needs only that reference correct, not a whole-construct audit. Keep each fix proportionate and local — a rename, an extraction, a dead branch; if bringing a touched construct into conformance would require changing other constructs or a larger refactor, say so in the finding's \"fix\" so it can be deferred to a separate issue rather than forced now.
 ${context}
-Write ONLY a JSON array to ${general}. Each element: {\"file\":\"\",\"line\":0,\"rule\":\"\",\"problem\":\"\",\"fix\":\"\",\"trigger\":\"\"}. In \"trigger\", when a finding's seriousness depends on how it is reached, describe how it could happen in normal use, especially by accident; use \"\" for a clear-cut rule violation. Use [] when there are no violations. Put nothing else in that file." < /dev/null >> "$codex_log" 2>&1 || general_rc=$?
+Write ONLY a JSON array to ${general}. Each element: {\"file\":\"\",\"line\":0,\"rule\":\"\",\"problem\":\"\",\"fix\":\"\",\"trigger\":\"\"}. In \"trigger\", when a finding's seriousness depends on how it is reached, describe how it could happen in normal use, especially by accident; use \"\" for a clear-cut rule violation. Use [] when there are no violations. Put nothing else in that file." < /dev/null 2>&1 | show_codex || general_rc=$?
 if [ "$general_rc" -ne 0 ]; then
   echo "general reviewer did not complete (exit ${general_rc}) — handing back to you (see ${codex_log})"
   exit 3
