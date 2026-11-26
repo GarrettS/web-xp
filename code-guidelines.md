@@ -840,7 +840,7 @@ A class or id that only restates an element (`tr.row`, `button.btn`) or its layo
   ```
 - **Form submission.** No form submission on Enter unless that is the intended UX. Prevent default on `keydown` where needed.
 - **Strict equality.** `===` always. Do not use Boolean coercion on values that may be acceptably falsy (e.g., `if (e.pageX)`). Use `typeof`: `if (typeof e.pageX === 'number')`.
-- **Concise native syntax.** Use the concise native form instead of its verbose equivalent where it does not reduce clarity.
+- **Concise native syntax.** Use the concise native form — optional chaining, nullish coalescing, nullish assignment, concise arrow bodies, object property shorthand, and direct boolean returns — instead of its verbose equivalent where it does not reduce clarity.
 
   ❌ Verbose:
   ```javascript
