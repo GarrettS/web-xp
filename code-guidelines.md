@@ -213,6 +213,10 @@ Each CSS file owns one concept — a feature domain (`client-record.css`, `worko
 
 When modifying a construct — a function, a component, a selector block — bring that construct into conformance with this standard, not only the lines you changed. Editing a construct makes you responsible for it, so a changed line left inside a nonconforming function is a half-corrected function. Scope this to the construct you touched: a one-line edit does not oblige you to rework the rest of the file, and constructs you did not touch remain out of scope for the change. Keep the cleanup safe and proportionate — a rename, an extraction, a dead branch; when a construct needs more than that, file a separate issue and keep the diff focused instead of enlarging it.
 
+For constructs that share a base with others — shared CSS classes, a common helper — extract the shared base into the module or file that owns it (create one only if none owns it). Apply it to the constructs in the current change, and leave the rest to move onto it later.
+
+Record that deferred work in the separate issue. It clears when you next touch those constructs, or in a refactor pass. Refactor passes find only what the issues record; unrecorded deferrals are indistinguishable from finished code.
+
 ### Minimize Traversal Scope
 
 Do not search a broader part of the DOM than the task requires. When the element, ancestor, or key is already known, address it directly instead of scanning. When search is necessary, constrain it to the smallest subtree or event path that can contain the answer.
