@@ -203,7 +203,11 @@ Identification happens in reasoning, before naming or explanation, and stays int
 
 ### Module Cohesion
 
-Each module owns one domain concept. Name the module after what it does: `quiz.js`, `flashcards.js`, `navigation.js`. If the name describes a role instead of a domain concept, it is a junk drawer — `utils.js`, `helpers.js`, `tools.js`, `misc.js`, `common.js` are common examples, but any name that could apply to any project instead of *this* project violates the principle. If a function does not belong in an existing module, create a new module with a specific name. When a module grows to cover multiple concerns, split it.
+Each module owns one concept. Name the module after what it does: `quiz.js`, `flashcards.js`, `navigation.js`. If the name could apply to any project instead of this one, it is a junk drawer — `utils.js`, `helpers.js`, `tools.js`, `misc.js`, `common.js` are common examples. For any function that fits into no existing module, create a new module with a specific name. When a module grows to cover multiple concerns, split it.
+
+### Stylesheet Cohesion
+
+Each CSS file owns one concept — a feature domain (`client-record.css`, `workout-program.css`), a structural concern (`layout.css`, `nav.css`), or a reusable widget (`lightbox.css`) — and holds only that concept. If the name could apply to any project — `styles.css`, `common.css`, `main.css` — it is the CSS junk drawer, the same as `utils.js`. For any selector block that fits no existing stylesheet, create a new one with a specific name; when a stylesheet covers more than its one concept, split it. Each selector block belongs in the file that owns its concept, not in whatever stylesheet is already loaded: rules placed in a file that does not own them are misplaced even when they render correctly, and the next rule for that concept gets dropped in beside them until the file becomes a catch-all.
 
 ### Touched-Construct Ownership
 
