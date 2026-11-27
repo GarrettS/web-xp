@@ -650,6 +650,10 @@ Use CSS for visual state changes wherever possible. Prefer `:hover`, `:focus`, `
 
 When two or more code blocks follow the same structure but differ in specific values or operations, extract the shared structure into a function parameterized by the varying parts. Pass data for values that differ; pass a function for operations that differ. This applies to DOM construction, string building, iteration — any structural duplication. The extracted function encapsulates *structure*; the caller supplies *what varies*.
 
+Extract only when it makes the call site read better. When the same structure appears in several places, extracting makes each call site a clear call. Extracting one use on the chance it is reused does not: it adds an options object and indirection to the call site and removes no duplication. Extracting too early is a finding, the same as duplication.
+
+Reuse the existing code, not a reimplementation of it. Before writing a helper, renderer, or data-access path, check whether one already exists and call it. Reimplementing what a vendored library or an existing module already does is duplication, even when the new code reads differently.
+
 ### Dispatch Table
 
 When a chain of conditionals maps a value to an action, replace it with a keyed object. The table makes the mapping visible at a glance, is trivial to extend, and separates routing from logic.
